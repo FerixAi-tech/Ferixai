@@ -28,6 +28,10 @@ export const metadata: Metadata = {
   alternates: {
     canonical: APP_URL,
   },
+  icons: {
+    icon: [{ url: "/logo.jpeg", type: "image/jpeg" }],
+    apple: [{ url: "/logo.jpeg", type: "image/jpeg" }],
+  },
   openGraph: {
     type: "website",
     locale: "en_GB",
@@ -36,6 +40,18 @@ export const metadata: Metadata = {
     title: "FerixAI — Visibility for UK businesses",
     description:
       "Tell us about your business. We’ll prepare and publish clear local content designed to help people find you.",
+    images: [
+      {
+        url: "/logo.jpeg",
+        width: 1024,
+        height: 1024,
+        alt: "FerixAI",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary",
+    images: ["/logo.jpeg"],
   },
   robots: {
     index: true,

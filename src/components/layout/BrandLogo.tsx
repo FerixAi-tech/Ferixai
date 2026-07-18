@@ -1,4 +1,12 @@
+import Image from "next/image";
 import Link from "next/link";
+
+const SIZE_PX = {
+  sm: 36,
+  md: 44,
+  lg: 64,
+  "2xl": 112,
+} as const;
 
 export default function BrandLogo({
   href = "/",
@@ -11,30 +19,23 @@ export default function BrandLogo({
   priority?: boolean;
   centered?: boolean;
 }) {
-  const sizeClass =
-    size === "2xl"
-      ? "text-3xl sm:text-4xl"
-      : size === "lg"
-        ? "text-2xl"
-        : size === "sm"
-          ? "text-lg"
-          : "text-xl";
+  const px = SIZE_PX[size];
 
   return (
     <Link
       href={href}
-      className={`inline-flex items-center gap-2 font-bold tracking-tight text-white ${sizeClass} ${
-        centered ? "justify-center" : ""
-      }`}
+      className={`inline-flex items-center ${centered ? "justify-center" : ""}`}
       aria-label="FerixAI home"
-      data-priority={priority ? "true" : undefined}
     >
-      <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500 to-indigo-500 text-sm font-black text-white shadow-[0_0_20px_rgba(14,165,164,0.35)]">
-        F
-      </span>
-      <span className="lf-orbitron">
-        Ferix<span className="text-fuchsia-300">AI</span>
-      </span>
+      <Image
+        src="/logo.jpeg"
+        alt="FerixAI"
+        width={px}
+        height={px}
+        priority={priority}
+        className="h-auto w-auto object-contain"
+        style={{ width: px, height: px }}
+      />
     </Link>
   );
 }

@@ -6,6 +6,7 @@ const organizationSchema = {
   "@type": "Organization",
   name: "FerixAI",
   url: APP_URL,
+  logo: `${APP_URL}/logo.jpeg`,
   description:
     "FerixAI helps UK local businesses become easier to find when people ask AI assistants for recommendations.",
 };
