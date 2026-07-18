@@ -1,0 +1,395 @@
+.landing-futuristic {
+  --void: #05070c;
+  --violet: #8b5cf6;
+  --pink: #ec4899;
+  --violet-glow: rgba(139, 92, 246, 0.4);
+  --pink-glow: rgba(236, 72, 153, 0.35);
+  --lf-text: #e2e8f0;
+  --lf-muted: #94a3b8;
+  font-family: var(--font-geist-sans), "Inter", system-ui, sans-serif;
+  color: var(--lf-text);
+  color-scheme: dark;
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+.landing-futuristic .lf-grid-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(139, 92, 246, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(236, 72, 153, 0.03) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 80% 70% at 70% 45%, black 20%, transparent 72%);
+}
+
+.landing-futuristic .lf-vignette {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 28% 45%, transparent 0%, var(--void) 78%);
+}
+
+.landing-futuristic .lf-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.landing-futuristic .lf-page {
+  position: relative;
+  z-index: 10;
+}
+
+.landing-futuristic .lf-orbitron {
+  font-family: var(--font-orbitron), "Orbitron", sans-serif;
+}
+
+@keyframes lf-fade-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@property --lf-neon-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes lf-btn-shimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes lf-btn-glow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 14px rgba(167, 139, 250, 0.35),
+      0 0 28px rgba(192, 132, 252, 0.2),
+      0 0 48px rgba(232, 121, 249, 0.12),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+  50% {
+    box-shadow:
+      0 0 22px rgba(196, 181, 253, 0.55),
+      0 0 44px rgba(232, 121, 249, 0.38),
+      0 0 72px rgba(168, 85, 247, 0.22),
+      inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  }
+}
+
+@keyframes lf-btn-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.035);
+  }
+}
+
+@keyframes lf-card-border-flow {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes lf-neon-angle {
+  to {
+    --lf-neon-angle: 360deg;
+  }
+}
+
+.lf-animate-in {
+  opacity: 0;
+  animation: lf-fade-slide-up 0.45s ease forwards;
+}
+
+.lf-animate-in-1 { animation-delay: 0.08s; }
+.lf-animate-in-2 { animation-delay: 0.16s; }
+.lf-animate-in-3 { animation-delay: 0.24s; }
+.lf-animate-in-4 { animation-delay: 0.32s; }
+.lf-animate-in-5 { animation-delay: 0.4s; }
+
+.lf-btn-primary {
+  --lf-neon-angle: 0deg;
+  position: relative;
+  isolation: isolate;
+  color: #ffffff;
+  font-weight: 700;
+  border: 3px solid transparent;
+  background:
+    linear-gradient(135deg, #7c3aed 0%, #9333ea 35%, #c026d3 70%, #db2777 100%)
+      padding-box,
+    conic-gradient(
+      from var(--lf-neon-angle),
+      transparent 0deg,
+      transparent 210deg,
+      rgba(196, 181, 253, 0.35) 240deg,
+      #ddd6fe 265deg,
+      #f0abfc 290deg,
+      #e879f9 310deg,
+      #c084fc 330deg,
+      rgba(167, 139, 250, 0.45) 345deg,
+      transparent 360deg
+    )
+    border-box;
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  animation:
+    lf-neon-angle 2.6s linear infinite,
+    lf-btn-glow 2.4s ease-in-out infinite,
+    lf-btn-breathe 3.2s ease-in-out infinite;
+  transition: filter 0.3s ease, box-shadow 0.3s ease;
+}
+
+.lf-btn-primary:hover {
+  filter: brightness(1.1);
+  color: #ffffff;
+  box-shadow:
+    0 0 28px rgba(221, 214, 254, 0.55),
+    0 0 56px rgba(232, 121, 249, 0.4),
+    0 0 80px rgba(168, 85, 247, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  animation:
+    lf-neon-angle 1.6s linear infinite,
+    lf-btn-glow 1.5s ease-in-out infinite,
+    lf-btn-breathe 2.2s ease-in-out infinite;
+  background:
+    linear-gradient(135deg, #8b5cf6 0%, #a855f7 35%, #d946ef 70%, #ec4899 100%)
+      padding-box,
+    conic-gradient(
+      from var(--lf-neon-angle),
+      transparent 0deg,
+      transparent 200deg,
+      rgba(221, 214, 254, 0.45) 230deg,
+      #f5f3ff 255deg,
+      #f0abfc 280deg,
+      #e879f9 305deg,
+      #d8b4fe 328deg,
+      rgba(192, 132, 252, 0.55) 345deg,
+      transparent 360deg
+    )
+    border-box;
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+}
+
+.lf-btn-primary:active {
+  filter: brightness(0.96);
+  animation:
+    lf-neon-angle 2.6s linear infinite,
+    lf-btn-glow 2.4s ease-in-out infinite;
+  transform: scale(0.985);
+}
+
+.lf-card-border {
+  background: linear-gradient(
+    135deg,
+    rgba(139, 92, 246, 0.7),
+    rgba(236, 72, 153, 0.45),
+    rgba(168, 85, 247, 0.35),
+    rgba(255, 255, 255, 0.1)
+  );
+  background-size: 220% 220%;
+  animation: lf-card-border-flow 7s ease infinite;
+}
+
+.lf-card-surface,
+.lf-panel {
+  border: 1px solid rgba(139, 92, 246, 0.22);
+  background:
+    linear-gradient(160deg, rgba(139, 92, 246, 0.1), rgba(236, 72, 153, 0.05) 45%, rgba(10, 14, 22, 0.92)),
+    rgba(12, 10, 20, 0.9);
+  border-radius: 18px;
+  backdrop-filter: blur(14px);
+  box-shadow:
+    0 0 0 1px rgba(236, 72, 153, 0.06) inset,
+    0 12px 40px rgba(0, 0, 0, 0.28);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.lf-card-surface:hover {
+  border-color: rgba(236, 72, 153, 0.35);
+  box-shadow:
+    0 0 0 1px rgba(139, 92, 246, 0.12) inset,
+    0 0 28px rgba(139, 92, 246, 0.18),
+    0 16px 44px rgba(0, 0, 0, 0.35);
+  transform: translateY(-2px);
+}
+
+.lf-input {
+  width: 100%;
+  min-height: 48px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(18, 12, 30, 0.92);
+  padding: 0.75rem 1rem;
+  color: white;
+  outline: none;
+  color-scheme: dark;
+}
+
+.lf-input:focus {
+  border-color: rgba(236, 72, 153, 0.55);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.18);
+}
+
+select.lf-input,
+.lf-input option {
+  background-color: #120c1e;
+  color: #f8fafc;
+}
+
+.lf-input option:checked,
+.lf-input option:hover,
+.lf-input option:focus {
+  background-color: #5b21b6;
+  color: #ffffff;
+}
+
+.lf-title-gradient {
+  background: linear-gradient(120deg, #c4b5fd, #f472b6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.lf-compact-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0.55;
+}
+
+.lf-accent-chip {
+  border: 1px solid rgba(236, 72, 153, 0.25);
+  background: rgba(139, 92, 246, 0.1);
+  color: #f5d0fe;
+}
+
+@keyframes lf-neon-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.lf-neon-card {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: 18px;
+  background: #090610;
+  border: 1px solid rgba(46, 16, 101, 0.55);
+  box-shadow:
+    0 0 18px rgba(76, 29, 149, 0.16),
+    0 0 40px rgba(24, 10, 45, 0.25);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.lf-neon-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(91, 33, 182, 0.45);
+  box-shadow:
+    0 0 26px rgba(109, 40, 217, 0.28),
+    0 0 56px rgba(46, 16, 101, 0.3);
+}
+
+.lf-neon-spin {
+  position: absolute;
+  inset: -55%;
+  z-index: 0;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    transparent 250deg,
+    rgba(167, 139, 250, 0.15) 275deg,
+    #c084fc 300deg,
+    #e879f9 318deg,
+    #a855f7 335deg,
+    rgba(139, 92, 246, 0.2) 348deg,
+    transparent 360deg
+  );
+  animation: lf-neon-rotate 3.2s linear infinite;
+  filter: blur(0.4px);
+}
+
+.lf-neon-spin::after {
+  content: "";
+  position: absolute;
+  inset: 32%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(232, 121, 249, 0.35) 0%,
+    transparent 55%
+  );
+  filter: blur(18px);
+  opacity: 0.55;
+}
+
+.lf-neon-inner {
+  position: relative;
+  z-index: 1;
+  margin: 2px;
+  height: calc(100% - 4px);
+  border-radius: 16px;
+  background: linear-gradient(165deg, #120c1e 0%, #0e0a18 45%, #090610 100%);
+  box-shadow: inset 0 0 0 1px rgba(46, 16, 101, 0.45);
+}
+
+.lf-neon-card:nth-child(2) .lf-neon-spin {
+  animation-delay: -1.05s;
+}
+
+.lf-neon-card:nth-child(3) .lf-neon-spin {
+  animation-delay: -2.1s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lf-animate-in,
+  .lf-btn-primary,
+  .lf-card-border,
+  .lf-neon-spin {
+    opacity: 1;
+    animation: none;
+  }
+
+  .lf-btn-primary {
+    background: linear-gradient(135deg, #7c3aed 0%, #9333ea 40%, #db2777 100%);
+    border-color: rgba(196, 181, 253, 0.55);
+    transform: none;
+  }
+
+  .lf-btn-primary:hover,
+  .lf-btn-primary:active,
+  .lf-card-surface:hover,
+  .lf-neon-card:hover {
+    transform: none;
+  }
+}
