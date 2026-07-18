@@ -29,8 +29,9 @@ export const metadata: Metadata = {
     canonical: APP_URL,
   },
   icons: {
-    icon: [{ url: "/logo.jpeg", type: "image/jpeg" }],
-    apple: [{ url: "/logo.jpeg", type: "image/jpeg" }],
+    icon: [{ url: "/favicon.png", type: "image/png" }],
+    shortcut: "/favicon.png",
+    apple: [{ url: "/favicon.png", type: "image/png" }],
   },
   openGraph: {
     type: "website",
