@@ -2,10 +2,10 @@ import Image from "next/image";
 import Link from "next/link";
 
 const SIZE_PX = {
-  sm: 36,
-  md: 44,
-  lg: 64,
-  "2xl": 112,
+  sm: 48,
+  md: 64,
+  lg: 96,
+  "2xl": 180,
 } as const;
 
 export default function BrandLogo({
