@@ -265,8 +265,8 @@ export default function SignupCard({
 
                 <div className="mt-3 mb-4 flex justify-between gap-1.5 text-[12px] leading-snug text-[#9CA3AF] sm:gap-2 sm:text-[13px]">
                   <span className="inline-flex items-center gap-1">
-                    <span aria-hidden>📩</span>
-                    Code Sent to Email
+                    <span aria-hidden>⚡</span>
+                    Instant Access
                   </span>
                   <span className="inline-flex items-center gap-1">
                     <span aria-hidden>🎁</span>
