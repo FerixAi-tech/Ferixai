@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 const PLATFORMS = [
   {
     name: "ChatGPT",
@@ -15,6 +17,27 @@ const PLATFORMS = [
     name: "Claude",
     query: "Looking for a quiet cafe to work in Soho.",
     note: "We optimise your unique features so Claude gives detailed, style-based recommendations about your business.",
+  },
+] as const;
+
+const SUPPORTED_AIS = [
+  {
+    name: "ChatGPT",
+    by: "OpenAI",
+    blurb: "Conversational search & local recommendations",
+    logo: "/chatgpt.png",
+  },
+  {
+    name: "Gemini",
+    by: "Google",
+    blurb: "Maps-aware answers across Google’s AI stack",
+    logo: "/gemini.png",
+  },
+  {
+    name: "Claude",
+    by: "Anthropic",
+    blurb: "Detailed, preference-aware local advice",
+    logo: "/claude.png",
   },
 ] as const;
 
@@ -50,6 +73,49 @@ export default function SupportedAIPlatforms() {
             </p>
           </article>
         ))}
+      </div>
+
+      <div className="mt-10 rounded-[22px] border border-teal-500/20 bg-[linear-gradient(165deg,rgba(14,165,164,0.08),#0a0712_45%,#05070c_100%)] px-5 py-8 sm:px-8">
+        <div className="mx-auto max-w-2xl text-center">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-teal-300/90">
+            Supported AI platforms
+          </p>
+          <h3 className="lf-orbitron mt-2 text-xl font-bold text-white sm:text-2xl">
+            Built for the assistants your customers already use
+          </h3>
+          <p className="mt-2 text-sm leading-relaxed text-[#94a3b8]">
+            FerixAI prepares your local business presence for the major AI
+            recommendation engines — so you stay visible wherever people ask.
+          </p>
+        </div>
+
+        <div className="mt-7 grid gap-3 sm:grid-cols-3">
+          {SUPPORTED_AIS.map((ai) => (
+            <div
+              key={ai.name}
+              className="flex flex-col items-center rounded-[18px] border border-white/10 bg-white/[0.03] px-4 py-5 text-center"
+            >
+              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-black/30 p-2 shadow-[0_0_24px_rgba(45,212,191,0.12)] sm:h-20 sm:w-20">
+                <Image
+                  src={ai.logo}
+                  alt={`${ai.name} logo`}
+                  width={72}
+                  height={72}
+                  className="h-full w-full object-contain"
+                />
+              </div>
+              <p className="lf-orbitron text-lg font-bold text-white">
+                {ai.name}
+              </p>
+              <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-teal-300/80">
+                {ai.by}
+              </p>
+              <p className="mt-2 text-xs leading-relaxed text-[#94a3b8]">
+                {ai.blurb}
+              </p>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );

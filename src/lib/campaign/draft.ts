@@ -1,13 +1,19 @@
+import type { PricingPlanSlug } from "@/lib/constants/pricing-plans";
+import { DEFAULT_PLAN_SLUG } from "@/lib/constants/pricing-plans";
+
 export interface CampaignDraft {
   businessName: string;
   category: string;
   productDescription: string;
   city: string;
-  dailyBudget: number;
-  days: number;
+  planSlug: PricingPlanSlug;
   step: 1 | 2 | 3;
   updatedAt: number;
   promoCode?: string;
+  /** @deprecated legacy drafts only */
+  dailyBudget?: number;
+  /** @deprecated legacy drafts only */
+  days?: number;
 }
 
 const STORAGE_KEY = "ferixai_campaign_draft_v1";
@@ -18,7 +24,11 @@ export function loadCampaignDraft(): CampaignDraft | null {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
-    return JSON.parse(raw) as CampaignDraft;
+    const parsed = JSON.parse(raw) as CampaignDraft;
+    if (!parsed.planSlug) {
+      parsed.planSlug = DEFAULT_PLAN_SLUG;
+    }
+    return parsed;
   } catch {
     return null;
   }

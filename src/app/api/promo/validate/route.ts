@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
+import { PROMO_DISCOUNT_GBP } from "@/lib/constants/pricing-plans";
 
 /**
- * Promo validation for welcome FX30 codes (£30 / 3-day free campaign).
+ * Promo validation for welcome FX30 codes (£30 off first month).
  * Accepts FX30 and common variants; extend later with DB-backed codes.
  */
 export async function POST(request: Request) {
@@ -16,7 +17,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Simulate network latency for a realistic Apply UX
     await new Promise((resolve) => setTimeout(resolve, 450));
 
     const valid =
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           valid: false,
-          error: "That code is not valid. Check your email for FX30.",
+          error: "That code is not valid. Check your FX30 code.",
         },
         { status: 400 },
       );
@@ -37,10 +37,8 @@ export async function POST(request: Request) {
     return NextResponse.json({
       valid: true,
       code: raw,
-      discountGbp: 30,
-      campaignDays: 3,
-      dailyBudgetGbp: 10,
-      message: "3-Day Free Campaign Activated (£30 Value)",
+      discountGbp: PROMO_DISCOUNT_GBP,
+      message: `£${PROMO_DISCOUNT_GBP} off your first month`,
     });
   } catch {
     return NextResponse.json(

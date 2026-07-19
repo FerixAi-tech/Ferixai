@@ -1,12 +1,27 @@
-import { BUDGET_MAX, BUDGET_MIN, DAYS_MAX, DAYS_MIN } from "@/lib/constants/metrics";
+import {
+  applyPromoDiscount,
+  BILLING_CYCLE_DAYS,
+  DEFAULT_BILLING_CYCLE,
+  getPricingPlan,
+  isPricingPlanSlug,
+  PROMO_DISCOUNT_GBP,
+  type BillingCycle,
+  type PricingPlanSlug,
+} from "@/lib/constants/pricing-plans";
 import { isManufacturerCategory } from "@/lib/constants/categories";
 
 export interface CampaignInput {
   businessName: string;
   category: string;
   city: string;
-  dailyBudget: number;
-  days: number;
+  planSlug: PricingPlanSlug;
+  billingCycle: BillingCycle;
+  /** List monthly price (GBP) */
+  listPriceGbp: number;
+  /** Payable first-period amount after promo */
+  totalCostGbp: number;
+  promoApplied: boolean;
+  discountGbp: number;
   productDescription?: string | null;
 }
 
@@ -15,29 +30,30 @@ export function validateCampaignInput(body: unknown): CampaignInput {
     throw new Error("Invalid request");
   }
 
-  const { businessName, category, city, dailyBudget, days, productDescription } =
-    body as Record<string, unknown>;
+  const {
+    businessName,
+    category,
+    city,
+    planSlug,
+    promoApplied,
+    productDescription,
+  } = body as Record<string, unknown>;
 
-  if (
-    !businessName ||
-    !category ||
-    !city ||
-    dailyBudget === undefined ||
-    days === undefined
-  ) {
+  if (!businessName || !category || !city || !planSlug) {
     throw new Error("All fields are required");
   }
 
-  const budget = Number(dailyBudget);
-  const dayCount = Number(days);
-
-  if (!Number.isFinite(budget) || budget < BUDGET_MIN || budget > BUDGET_MAX) {
-    throw new Error(`Daily plan must be between £${BUDGET_MIN} and £${BUDGET_MAX}`);
+  if (!isPricingPlanSlug(planSlug)) {
+    throw new Error("Please select a valid pricing plan");
   }
 
-  if (!Number.isFinite(dayCount) || dayCount < DAYS_MIN || dayCount > DAYS_MAX) {
-    throw new Error(`Campaign length must be between ${DAYS_MIN} and ${DAYS_MAX} days`);
-  }
+  const plan = getPricingPlan(planSlug);
+  const applied = promoApplied === true;
+  const discountGbp = applied ? PROMO_DISCOUNT_GBP : 0;
+  const { listPrice, payable } = applyPromoDiscount(
+    plan.priceMonthlyGbp,
+    discountGbp,
+  );
 
   const name = String(businessName).trim();
   if (name.length < 2) {
@@ -63,8 +79,12 @@ export function validateCampaignInput(body: unknown): CampaignInput {
     businessName: name,
     category: categoryName,
     city: String(city),
-    dailyBudget: budget,
-    days: dayCount,
+    planSlug,
+    billingCycle: DEFAULT_BILLING_CYCLE,
+    listPriceGbp: listPrice,
+    totalCostGbp: payable,
+    promoApplied: applied,
+    discountGbp,
     productDescription: isManufacturerCategory(categoryName) ? product : null,
   };
 }
@@ -73,3 +93,5 @@ export function validateCampaignInput(body: unknown): CampaignInput {
 export function isPaymentBypassEnabled(): boolean {
   return process.env.FERIXAI_PAYMENT_REQUIRED !== "true";
 }
+
+export { BILLING_CYCLE_DAYS };

@@ -10,9 +10,10 @@ import {
 import type { CampaignInput } from "@/lib/campaign/validate-input";
 import { isManufacturerCategory } from "@/lib/constants/categories";
 import {
-  calculateVisibilityMetrics,
-  getCampaignContentPlan,
+  calculateVisibilityMetricsForPlan,
+  getCampaignContentPlanForPlan,
 } from "@/lib/constants/metrics";
+import { getPricingPlan, BILLING_CYCLE_DAYS } from "@/lib/constants/pricing-plans";
 import { publishToDevTo } from "@/lib/devto/publish-article";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { publishToWordPress } from "@/lib/wordpress/publish-post";
@@ -52,14 +53,22 @@ export async function createCampaignForUser(
     }) => Promise<void>;
   },
 ): Promise<CreateCampaignResult> {
-  const { businessName, category, city, dailyBudget, days, productDescription } =
-    input;
+  const {
+    businessName,
+    category,
+    city,
+    planSlug,
+    billingCycle,
+    totalCostGbp,
+    productDescription,
+  } = input;
   const admin = createAdminClient();
-  const metrics = calculateVisibilityMetrics(dailyBudget, days);
-  const contentPlan = getCampaignContentPlan(dailyBudget, days);
+  const pricingPlan = getPricingPlan(planSlug);
+  const metrics = calculateVisibilityMetricsForPlan(pricingPlan, totalCostGbp);
+  const contentPlan = getCampaignContentPlanForPlan(pricingPlan, totalCostGbp);
   const now = new Date();
   const endsAt = new Date(now);
-  endsAt.setDate(endsAt.getDate() + days);
+  endsAt.setDate(endsAt.getDate() + BILLING_CYCLE_DAYS);
 
   const { data: categoryData } = await admin
     .from("categories")
@@ -111,9 +120,11 @@ export async function createCampaignForUser(
       category,
       city,
       product_description: productDescription,
-      daily_budget: dailyBudget,
-      days,
-      total_cost: metrics.totalCost,
+      plan_slug: planSlug,
+      billing_cycle: billingCycle,
+      daily_budget: null,
+      days: null,
+      total_cost: totalCostGbp,
       visibility_increase: metrics.visibilityIncrease,
       status: "active",
       content_slug: slug,

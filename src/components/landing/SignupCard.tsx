@@ -4,7 +4,7 @@ import { useEffect, useId, useState } from "react";
 import Link from "next/link";
 import { Loader2, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { BUDGET_MIN, DAYS_MIN } from "@/lib/constants/metrics";
+import { DEFAULT_PLAN_SLUG } from "@/lib/constants/pricing-plans";
 import {
   clearWizardSessionState,
   generateUniquePromoCode,
@@ -153,8 +153,7 @@ export default function SignupCard({
         category: "",
         productDescription: "",
         city: "",
-        dailyBudget: BUDGET_MIN,
-        days: DAYS_MIN,
+        planSlug: DEFAULT_PLAN_SLUG,
         step: 1,
         promoCode: uniquePromoCode,
         updatedAt: Date.now(),
@@ -211,9 +210,9 @@ export default function SignupCard({
                   ✨ Account Created Successfully!
                 </h2>
                 <p className="mt-3 text-sm leading-relaxed text-[#94a3b8]">
-                  Your £30 welcome ad budget is ready. Please copy the exclusive
-                  promo code below. You must use this code on the budget
-                  selection page to activate your 3-day free campaign.
+                  Your £30 welcome credit is ready. Copy the exclusive promo
+                  code below and apply it on the plan selection page for £30 off
+                  your first month.
                 </p>
 
                 <div className="mt-6 flex flex-col gap-3 rounded-2xl border border-violet-400/35 bg-[linear-gradient(135deg,rgba(139,92,246,0.16),rgba(236,72,153,0.1),rgba(18,12,30,0.95))] p-3 shadow-[0_0_32px_rgba(139,92,246,0.22)] sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:p-4">
@@ -236,15 +235,15 @@ export default function SignupCard({
                   }
                   className="mt-6 flex w-full min-h-[48px] items-center justify-center gap-2 rounded-xl border border-fuchsia-400/35 bg-fuchsia-500/10 px-4 py-3.5 text-sm font-bold tracking-wide text-fuchsia-100 transition hover:border-fuchsia-300/50 hover:bg-fuchsia-500/20 sm:text-base"
                 >
-                  <span>Go to Budget Selection</span>
+                  <span>Go to Plan Selection</span>
                   <span aria-hidden className="tracking-normal">
                     →
                   </span>
                 </button>
 
                 <p className="mt-4 text-center text-[11px] leading-relaxed tracking-wide text-[#64748b]">
-                  Keep this code handy — you&apos;ll enter it at checkout to
-                  unlock £0.00 for your 3-day campaign.
+                  Keep this code handy — apply it on plan selection for £30 off
+                  your first month.
                 </p>
               </div>
             ) : (

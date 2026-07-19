@@ -1,18 +1,20 @@
 "use client";
 
 import {
-  BUDGET_MAX,
-  BUDGET_MIN,
-  DAYS_MAX,
-  DAYS_MIN,
+  applyPromoDiscount,
+  BILLING_CYCLE_DAYS,
+  getPricingPlan,
+  PROMO_DISCOUNT_GBP,
+  type PricingPlanSlug,
+} from "@/lib/constants/pricing-plans";
+import {
   formatCurrency,
-  getCampaignContentPlan,
+  getCampaignContentPlanForPlan,
 } from "@/lib/constants/metrics";
 import { Calendar, Eye, Search, TrendingUp } from "lucide-react";
 
 interface MetricsPreviewProps {
-  dailyBudget: number;
-  days: number;
+  planSlug: PricingPlanSlug;
   promoApplied?: boolean;
 }
 
@@ -20,31 +22,31 @@ function formatCompactNumber(value: number): string {
   return new Intl.NumberFormat("en-GB").format(value);
 }
 
-/** Outcome-focused planning estimates that scale with budget × days. */
-function getOutcomeMetrics(dailyBudget: number, days: number) {
+function getOutcomeMetrics(intensityScore: number, listPrice: number) {
   const estimatedReach = Math.max(
     1_200,
-    Math.round((dailyBudget * days * 5000) / 30),
+    Math.round(listPrice * 90 + intensityScore * 2200),
   );
   const visibilityBoost = Math.min(
     480,
-    Math.max(120, Math.round(100 + dailyBudget * 5 + days * 2)),
+    Math.max(120, Math.round(110 + intensityScore * 55)),
   );
-  const keywordCount = Math.max(
-    10,
-    Math.round(8 + dailyBudget / 5 + days * 0.5),
-  );
+  const keywordCount = Math.max(10, Math.round(10 + intensityScore * 8));
 
   return { estimatedReach, visibilityBoost, keywordCount };
 }
 
 export default function MetricsPreview({
-  dailyBudget,
-  days,
+  planSlug,
   promoApplied = false,
 }: MetricsPreviewProps) {
-  const plan = getCampaignContentPlan(dailyBudget, days);
-  const outcomes = getOutcomeMetrics(dailyBudget, days);
+  const pricing = getPricingPlan(planSlug);
+  const { listPrice, payable } = applyPromoDiscount(
+    pricing.priceMonthlyGbp,
+    promoApplied ? PROMO_DISCOUNT_GBP : 0,
+  );
+  const contentPlan = getCampaignContentPlanForPlan(pricing, payable);
+  const outcomes = getOutcomeMetrics(pricing.intensityScore, listPrice);
 
   const items = [
     {
@@ -52,31 +54,28 @@ export default function MetricsPreview({
       heading: "Estimated AI Reach",
       highlight: `Est. ${formatCompactNumber(outcomes.estimatedReach)}+`,
       description:
-        "targeted local views. The volume of monthly local AI assistant searches we index your business for under this budget.",
+        "targeted local views. The volume of monthly local AI assistant searches we index your business for under this plan.",
     },
     {
       icon: TrendingUp,
       heading: "AI Visibility Boost",
       highlight: `Up to +${outcomes.visibilityBoost}%`,
       description:
-        "faster indexing. Higher budget signals our system to inject deeper semantic structured data into ChatGPT and Gemini pipelines.",
+        "faster indexing. Higher plans signal our system to inject deeper semantic structured data into ChatGPT and Gemini pipelines.",
     },
     {
       icon: Search,
       heading: "AI Discovery Keywords",
       highlight: `${outcomes.keywordCount}+`,
       description:
-        "High-intent search phrases optimized (e.g., 'best clinic near me', 'top-rated cafe'). More budget unlocks hyper-targeted local long-tail keywords.",
+        "High-intent search phrases optimized (e.g., 'best clinic near me', 'top-rated cafe'). Higher plans unlock more local long-tail keywords.",
     },
     {
       icon: Calendar,
-      heading: "Campaign Length",
-      highlight: promoApplied
-        ? `${days} Days (Free Promo Active)`
-        : `${days} Day${days === 1 ? "" : "s"}`,
-      description: promoApplied
-        ? "Your optimized business matrix is actively pushed and validated across modern answer engines for the full free promo window."
-        : `Your optimized business matrix is actively pushed and validated across modern answer engines for ${days} full day${days === 1 ? "" : "s"}.`,
+      heading: "Billing cycle",
+      highlight: `${BILLING_CYCLE_DAYS}-day month`,
+      description:
+        "Your optimized business matrix is actively pushed and validated across modern answer engines for the full monthly cycle.",
     },
   ];
 
@@ -89,25 +88,41 @@ export default function MetricsPreview({
             : "border-violet-950/70 bg-[linear-gradient(165deg,#120c1e_0%,#0e0a18_45%,#090610_100%)]"
         }`}
       >
-        <p className="text-sm text-[#94a3b8]">Plan total (not charged)</p>
-        <p
-          className={`lf-orbitron mt-1 text-3xl font-bold ${
-            promoApplied ? "text-emerald-300" : "text-white"
-          }`}
-        >
-          {promoApplied ? "£0" : formatCurrency(plan.totalCost)}
-        </p>
-        <p className="mt-1 text-sm text-[#64748b]">
-          {formatCurrency(dailyBudget)} × {days} days
-        </p>
+        <p className="text-sm text-[#94a3b8]">{pricing.name}</p>
         {promoApplied ? (
-          <p className="mt-3 text-xs font-semibold leading-relaxed text-emerald-200/90">
-            ✨ Promo applied — 3-day free campaign (£30 value) at £0 payable.
-          </p>
+          <>
+            <p className="mt-1 flex flex-wrap items-baseline gap-2">
+              <span className="text-lg text-[#64748b] line-through">
+                {formatCurrency(listPrice)}
+              </span>
+              <span className="lf-orbitron text-3xl font-bold text-emerald-300">
+                {formatCurrency(payable)}
+              </span>
+            </p>
+            <p className="mt-1 text-sm text-[#64748b]">
+              first month · then {formatCurrency(listPrice)}/month
+            </p>
+            <p className="mt-3 text-xs font-semibold leading-relaxed text-emerald-200/90">
+              £30 promo applied — strike-through shows list price vs first-month
+              total.
+            </p>
+          </>
         ) : (
-          <p className="mt-3 text-xs leading-relaxed text-[#94a3b8]">
-            Shown for planning clarity. Apply your FX30 code to unlock £0.
-          </p>
+          <>
+            <p className="lf-orbitron mt-1 text-3xl font-bold text-white">
+              {formatCurrency(listPrice)}
+              <span className="ml-1 text-base font-semibold text-[#94a3b8]">
+                /month
+              </span>
+            </p>
+            <p className="mt-1 text-sm text-[#64748b]">
+              {contentPlan.aggressiveness} intensity ·{" "}
+              {contentPlan.estimatedContentPieces} content pieces
+            </p>
+            <p className="mt-3 text-xs leading-relaxed text-[#94a3b8]">
+              Apply your FX30 code for £30 off the first month.
+            </p>
+          </>
         )}
       </div>
 
@@ -135,77 +150,9 @@ export default function MetricsPreview({
 
       <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4">
         <p className="text-center text-sm text-emerald-100/90">
-          These estimates update live as you change budget or days — so you can
-          see what your business acquires before you launch.
+          These estimates update as you switch plans — so you can see what your
+          business acquires before you launch.
         </p>
-      </div>
-    </div>
-  );
-}
-
-export function BudgetSlider({
-  value,
-  onChange,
-}: {
-  value: number;
-  onChange: (v: number) => void;
-}) {
-  return (
-    <div>
-      <div className="mb-2 flex items-center justify-between">
-        <label className="text-sm font-medium text-[#94a3b8]">
-          Daily plan intensity
-        </label>
-        <span className="lf-orbitron text-lg font-bold text-emerald-300">
-          {formatCurrency(value)}
-        </span>
-      </div>
-      <input
-        type="range"
-        min={BUDGET_MIN}
-        max={BUDGET_MAX}
-        step={10}
-        value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
-        className="h-2 w-full cursor-pointer appearance-none rounded-full bg-white/10 accent-emerald-500"
-      />
-      <div className="mt-1 flex justify-between text-xs text-[#64748b]">
-        <span>{formatCurrency(BUDGET_MIN)}</span>
-        <span>{formatCurrency(BUDGET_MAX)}</span>
-      </div>
-    </div>
-  );
-}
-
-export function DaysSlider({
-  value,
-  onChange,
-}: {
-  value: number;
-  onChange: (v: number) => void;
-}) {
-  return (
-    <div>
-      <div className="mb-2 flex items-center justify-between">
-        <label className="text-sm font-medium text-[#94a3b8]">
-          Campaign length
-        </label>
-        <span className="lf-orbitron text-lg font-bold text-fuchsia-300">
-          {value} days
-        </span>
-      </div>
-      <input
-        type="range"
-        min={DAYS_MIN}
-        max={DAYS_MAX}
-        step={1}
-        value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
-        className="h-2 w-full cursor-pointer appearance-none rounded-full bg-white/10 accent-fuchsia-500"
-      />
-      <div className="mt-1 flex justify-between text-xs text-[#64748b]">
-        <span>{DAYS_MIN} days</span>
-        <span>{DAYS_MAX} days</span>
       </div>
     </div>
   );

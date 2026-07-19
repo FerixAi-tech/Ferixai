@@ -26,8 +26,12 @@ export interface Campaign {
   category: string;
   city: string;
   product_description?: string | null;
-  daily_budget: number;
-  days: number;
+  plan_slug?: string | null;
+  billing_cycle?: string | null;
+  /** @deprecated Unused for new monthly plans */
+  daily_budget?: number | null;
+  /** @deprecated Unused for new monthly plans */
+  days?: number | null;
   total_cost: number;
   visibility_increase: number;
   status: "draft" | "active" | "completed" | "cancelled" | "generating";
@@ -54,8 +58,7 @@ export interface CampaignFormData {
   businessName: string;
   category: string;
   city: string;
-  dailyBudget: number;
-  days: number;
+  planSlug: string;
 }
 
 export interface VisibilityMetrics {

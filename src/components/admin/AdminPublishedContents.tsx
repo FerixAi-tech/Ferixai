@@ -1,5 +1,9 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { formatCurrency } from "@/lib/constants/metrics";
+import {
+  getPricingPlan,
+  isPricingPlanSlug,
+} from "@/lib/constants/pricing-plans";
 import AdminPanelLogoutButton from "@/components/admin/AdminPanelLogoutButton";
 import Link from "next/link";
 
@@ -9,7 +13,7 @@ export default async function AdminPublishedContents() {
   const { data: campaigns } = await admin
     .from("campaigns")
     .select(
-      "id, business_name, category, city, daily_budget, days, total_cost, status, content_slug, created_at, user_id, published_contents(title, slug, wordpress_url, devto_url)",
+      "id, business_name, category, city, plan_slug, daily_budget, days, total_cost, status, content_slug, created_at, user_id, published_contents(title, slug, wordpress_url, devto_url)",
     )
     .order("created_at", { ascending: false })
     .limit(100);
@@ -64,8 +68,11 @@ export default async function AdminPublishedContents() {
                   </p>
                 </div>
                 <div className="text-sm text-[#94a3b8]">
-                  {formatCurrency(Number(campaign.total_cost))} ·{" "}
-                  {campaign.days} days · {campaign.status}
+                  {isPricingPlanSlug(campaign.plan_slug)
+                    ? getPricingPlan(campaign.plan_slug).name
+                    : "Legacy"}{" "}
+                  · {formatCurrency(Number(campaign.total_cost))} payable ·{" "}
+                  {campaign.status}
                 </div>
               </div>
 

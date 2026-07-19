@@ -4,7 +4,8 @@ import {
   isPaymentBypassEnabled,
   validateCampaignInput,
 } from "@/lib/campaign/validate-input";
-import { getCampaignContentPlan } from "@/lib/constants/metrics";
+import { getCampaignContentPlanForPlan } from "@/lib/constants/metrics";
+import { getPricingPlan } from "@/lib/constants/pricing-plans";
 import { NextResponse } from "next/server";
 
 export const maxDuration = 120;
@@ -29,7 +30,11 @@ export async function POST(request: Request) {
 
     const body = await request.json();
     const input = validateCampaignInput(body);
-    const contentPlan = getCampaignContentPlan(input.dailyBudget, input.days);
+    const pricingPlan = getPricingPlan(input.planSlug);
+    const contentPlan = getCampaignContentPlanForPlan(
+      pricingPlan,
+      input.totalCostGbp,
+    );
     const result = await createCampaignForUser(user.id, input);
 
     return NextResponse.json({

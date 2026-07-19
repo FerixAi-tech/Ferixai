@@ -21,6 +21,7 @@ function getAggressivenessLevel(dailyTier: number): AggressivenessLevel {
   return "Maximum";
 }
 
+/** @deprecated Prefer getCampaignContentPlanForPlan for new monthly tiers. */
 export function getCampaignContentPlan(
   dailyBudget: number,
   days: number,
@@ -49,6 +50,36 @@ export function getCampaignContentPlan(
     blogArticleCount,
     devToArticleCount,
     boneQuestionDepth,
+    estimatedContentPieces,
+  };
+}
+
+export function getCampaignContentPlanForPlan(
+  plan: {
+    priceMonthlyGbp: number;
+    aggressiveness: AggressivenessLevel;
+    intensityScore: number;
+    siteArticleCount: number;
+    blogArticleCount: number;
+    devToArticleCount: number;
+    boneQuestionDepth: number;
+  },
+  payableTotal: number,
+): CampaignContentPlan {
+  const dailyTier = Math.max(1, plan.intensityScore * 4);
+  const totalTier = Math.max(1, plan.intensityScore * 8);
+  const estimatedContentPieces =
+    plan.siteArticleCount + plan.blogArticleCount + plan.devToArticleCount;
+
+  return {
+    dailyTier,
+    totalTier,
+    totalCost: payableTotal,
+    aggressiveness: plan.aggressiveness,
+    siteArticleCount: plan.siteArticleCount,
+    blogArticleCount: plan.blogArticleCount,
+    devToArticleCount: plan.devToArticleCount,
+    boneQuestionDepth: plan.boneQuestionDepth,
     estimatedContentPieces,
   };
 }

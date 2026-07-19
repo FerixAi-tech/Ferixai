@@ -1,7 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { Plus, Calendar, FileText } from "lucide-react";
-import { formatCurrency, getCampaignContentPlan } from "@/lib/constants/metrics";
+import { formatCurrency, getCampaignContentPlanForPlan } from "@/lib/constants/metrics";
+import {
+  getPricingPlan,
+  isPricingPlanSlug,
+} from "@/lib/constants/pricing-plans";
 import DashboardActions from "@/components/dashboard/DashboardActions";
 import ClearCampaignDraftOnSuccess from "@/components/campaign/ClearCampaignDraftOnSuccess";
 import AppNav from "@/components/layout/AppNav";
@@ -100,10 +104,16 @@ export default async function DashboardPage({
         {campaigns && campaigns.length > 0 ? (
           <div className="grid gap-4">
             {campaigns.map((campaign) => {
-              const plan = getCampaignContentPlan(
-                Number(campaign.daily_budget),
-                campaign.days,
-              );
+              const planSlug = isPricingPlanSlug(campaign.plan_slug)
+                ? campaign.plan_slug
+                : null;
+              const pricingPlan = planSlug ? getPricingPlan(planSlug) : null;
+              const contentPlan = pricingPlan
+                ? getCampaignContentPlanForPlan(
+                    pricingPlan,
+                    Number(campaign.total_cost),
+                  )
+                : null;
 
               return (
                 <div key={campaign.id} className="lf-card-surface p-6">
@@ -129,12 +139,12 @@ export default async function DashboardPage({
 
                   <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
                     <div className="rounded-xl border border-white/5 bg-white/[0.02] p-3">
-                      <p className="text-xs text-[#64748b]">Plan total</p>
+                      <p className="text-xs text-[#64748b]">Payable</p>
                       <p className="lf-orbitron mt-1 font-semibold text-white">
                         {formatCurrency(Number(campaign.total_cost))}
                       </p>
                       <p className="mt-1 text-[10px] text-[#64748b]">
-                        Planning figure
+                        First period
                       </p>
                     </div>
                     <div className="rounded-xl border border-white/5 bg-white/[0.02] p-3">
@@ -143,22 +153,27 @@ export default async function DashboardPage({
                         Content pieces
                       </p>
                       <p className="lf-orbitron mt-1 font-semibold text-teal-300">
-                        {plan.estimatedContentPieces}
+                        {contentPlan?.estimatedContentPieces ?? "—"}
                       </p>
                     </div>
                     <div className="rounded-xl border border-white/5 bg-white/[0.02] p-3">
-                      <p className="text-xs text-[#64748b]">Daily intensity</p>
+                      <p className="text-xs text-[#64748b]">Plan</p>
                       <p className="lf-orbitron mt-1 font-semibold text-white">
-                        {formatCurrency(Number(campaign.daily_budget))}
+                        {pricingPlan?.name ?? "Legacy"}
                       </p>
+                      {pricingPlan && (
+                        <p className="mt-1 text-[10px] text-[#64748b]">
+                          {formatCurrency(pricingPlan.priceMonthlyGbp)}/month
+                        </p>
+                      )}
                     </div>
                     <div className="rounded-xl border border-white/5 bg-white/[0.02] p-3">
                       <p className="flex items-center gap-1 text-xs text-[#64748b]">
                         <Calendar className="h-3 w-3" />
-                        Duration
+                        Billing
                       </p>
-                      <p className="lf-orbitron mt-1 font-semibold text-white">
-                        {campaign.days} days
+                      <p className="lf-orbitron mt-1 font-semibold capitalize text-white">
+                        {campaign.billing_cycle || "monthly"}
                       </p>
                     </div>
                   </div>

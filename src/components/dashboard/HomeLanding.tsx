@@ -10,6 +10,7 @@ import FuturisticScene3D from "@/components/landing/FuturisticScene3D";
 import LandingAppFeatures from "@/components/landing/LandingAppFeatures";
 import SupportedAIPlatforms from "@/components/landing/SupportedAIPlatforms";
 import LandingCorporateSections from "@/components/landing/LandingCorporateSections";
+import GlobalAiNetwork from "@/components/campaign/GlobalAiNetwork";
 import "@/components/landing/landing-futuristic.css";
 
 const orbitron = Orbitron({
@@ -42,10 +43,10 @@ const STEPS = [
 ] as const;
 
 const TRUST = [
-  "No payment required in this version",
-  "Clear deliverables before you launch",
-  "Coverage across major UK towns and cities",
-  "Zero Risk. Cancel Anytime With One Click.",
+  "Join 500+ UK local businesses automating their local SEO.",
+  "Dominate local searches on Google, Google Maps, and ChatGPT.",
+  "Active across all major UK cities: London, Manchester, Bristol & more.",
+  "100% Risk-Free. 14-Day Money-Back Guarantee. Cancel anytime with one click.",
 ] as const;
 
 export default function HomeLanding({
@@ -112,7 +113,7 @@ export default function HomeLanding({
               <span className="bg-gradient-to-r from-emerald-300 to-green-400 bg-clip-text text-transparent">
                 AI to recommend
               </span>{" "}
-              your business for FREE?
+              your business with a £30 welcome budget?
             </h1>
 
             <div className="lf-animate-in lf-animate-in-3 mt-5 space-y-4 text-base leading-relaxed text-[#94a3b8] sm:text-lg">
@@ -125,11 +126,10 @@ export default function HomeLanding({
               </p>
               <p>
                 <strong className="font-semibold text-white">
-                  Claim your £30 welcome ad budget today.
+                  Claim your £30 welcome credit today.
                 </strong>{" "}
-                Sign up below, check your email for your exclusive promo code,
-                and launch a 3-day automated AI visibility campaign for absolute
-                free.
+                Sign up below, get your exclusive promo code instantly, and
+                launch with £30 off your first month.
               </p>
             </div>
 
@@ -237,6 +237,10 @@ export default function HomeLanding({
         <LandingCorporateSections />
         <LandingAppFeatures />
 
+        <section className="pb-10">
+          <GlobalAiNetwork />
+        </section>
+
         <section className="pb-16">
           <div className="lf-card-border rounded-3xl p-[1px]">
             <div className="rounded-[23px] bg-[rgba(8,12,18,0.96)] px-6 py-10 text-center sm:px-12">
@@ -244,8 +248,8 @@ export default function HomeLanding({
                 Ready to show up when people ask AI?
               </h2>
               <p className="mx-auto mt-3 max-w-xl text-sm text-[#94a3b8]">
-                Sign up, get your £30 promo code by email, and launch a 3-day
-                free AI visibility campaign — no credit card needed to explore.
+                Sign up, get your £30 promo code instantly, and launch with £30
+                off your first month — no credit card needed to explore.
               </p>
               <button
                 type="button"
