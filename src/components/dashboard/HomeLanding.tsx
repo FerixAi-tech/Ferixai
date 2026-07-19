@@ -11,6 +11,7 @@ import LandingAppFeatures from "@/components/landing/LandingAppFeatures";
 import SupportedAIPlatforms from "@/components/landing/SupportedAIPlatforms";
 import LandingCorporateSections from "@/components/landing/LandingCorporateSections";
 import GlobalAiNetwork from "@/components/campaign/GlobalAiNetwork";
+import LiveAiCampaignsCard from "@/components/landing/LiveAiCampaignsCard";
 import "@/components/landing/landing-futuristic.css";
 
 const orbitron = Orbitron({
@@ -131,6 +132,10 @@ export default function HomeLanding({
                 Sign up below, get your exclusive promo code instantly, and
                 launch with £30 off your first month.
               </p>
+            </div>
+
+            <div className="mt-6">
+              <LiveAiCampaignsCard />
             </div>
 
             <div className="lf-animate-in lf-animate-in-4 mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
