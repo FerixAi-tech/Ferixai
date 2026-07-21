@@ -28,7 +28,7 @@ export default function BrandLogo({
       aria-label="FerixAI home"
     >
       <Image
-        src="/logo.jpeg"
+        src="/logo.png"
         alt="FerixAI"
         width={px}
         height={px}

@@ -43,7 +43,7 @@ export const metadata: Metadata = {
       "Tell us about your business. We’ll prepare and publish clear local content designed to help people find you.",
     images: [
       {
-        url: "/logo.jpeg",
+        url: "/logo.png",
         width: 1024,
         height: 1024,
         alt: "FerixAI",
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary",
-    images: ["/logo.jpeg"],
+    images: ["/logo.png"],
   },
   robots: {
     index: true,
