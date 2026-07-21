@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { Orbitron } from "next/font/google";
 import BrandLogo from "@/components/layout/BrandLogo";
@@ -278,7 +279,32 @@ export default function HomeLanding({
         </section>
 
         <footer className="border-t border-white/5 py-8 text-center text-xs text-[#94a3b8]">
-          © {new Date().getFullYear()} FerixAI · Visibility for UK businesses
+          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+            <Link
+              href="/privacy-policy"
+              className="transition hover:text-white"
+            >
+              Privacy Policy
+            </Link>
+            <Link
+              href="/refund-policy"
+              className="transition hover:text-white"
+            >
+              Cancellation &amp; Refund Policy
+            </Link>
+          </div>
+          <div className="mt-6 flex justify-center">
+            <Image
+              src="/iyzico.png"
+              alt="Secure payments by iyzico"
+              width={643}
+              height={48}
+              className="h-8 w-auto opacity-80 sm:h-10"
+            />
+          </div>
+          <p className="mt-4">
+            © {new Date().getFullYear()} FerixAI · Visibility for UK businesses
+          </p>
         </footer>
       </div>
     </div>
