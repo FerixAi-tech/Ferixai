@@ -283,10 +283,18 @@ export default function CampaignWizard({
         );
       }
 
-      const paymentPageUrl = (data as { paymentPageUrl?: string }).paymentPageUrl;
+      const paymentPageUrl = (data as { paymentPageUrl?: string })
+        .paymentPageUrl;
       if (paymentPageUrl) {
         window.location.assign(paymentPageUrl);
         return;
+      }
+
+      // Free / bypass path only — never treat a paid plan as launched without checkout
+      if (pricing.payable > 0) {
+        throw new Error(
+          "Payment page was not returned. Please try again or contact support.",
+        );
       }
 
       const slug = (data as { slug?: string }).slug;

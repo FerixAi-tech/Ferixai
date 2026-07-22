@@ -5,6 +5,8 @@ import { iyzicoRetrieveCheckoutForm } from "@/lib/iyzico/client";
 import { getAppBaseUrl } from "@/lib/constants/urls";
 import { NextResponse } from "next/server";
 
+export const runtime = "nodejs";
+
 export async function POST(request: Request) {
   const baseUrl = getAppBaseUrl();
 
@@ -39,7 +41,9 @@ export async function POST(request: Request) {
     const paymentStatus = String(result.paymentStatus || "").toUpperCase();
     const ok =
       result.status === "success" &&
-      (paymentStatus === "SUCCESS" || paymentStatus === "SUCCESSFUL");
+      (paymentStatus === "SUCCESS" ||
+        paymentStatus === "SUCCESSFUL" ||
+        Boolean(result.paymentId));
 
     if (!ok) {
       await admin

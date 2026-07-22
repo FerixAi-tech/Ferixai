@@ -89,9 +89,21 @@ export function validateCampaignInput(body: unknown): CampaignInput {
   };
 }
 
-/** Payment bypass when FERIXAI_PAYMENT_REQUIRED is not "true". */
+/** True only when explicitly disabled for local/dev testing. */
 export function isPaymentBypassEnabled(): boolean {
-  return process.env.FERIXAI_PAYMENT_REQUIRED !== "true";
+  return process.env.FERIXAI_PAYMENT_REQUIRED === "false";
+}
+
+/** Payment must run when amount > 0 and bypass is not explicitly enabled. */
+export function isPaymentRequired(amountGbp: number): boolean {
+  if (amountGbp <= 0) return false;
+  return !isPaymentBypassEnabled();
+}
+
+export function isIyzicoConfigured(): boolean {
+  return Boolean(
+    process.env.IYZICO_API_KEY?.trim() && process.env.IYZICO_SECRET_KEY?.trim(),
+  );
 }
 
 export { BILLING_CYCLE_DAYS };

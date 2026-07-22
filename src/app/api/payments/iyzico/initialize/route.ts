@@ -1,13 +1,16 @@
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import {
-  isPaymentBypassEnabled,
+  isIyzicoConfigured,
+  isPaymentRequired,
   validateCampaignInput,
 } from "@/lib/campaign/validate-input";
 import { createCampaignForUser } from "@/lib/campaign/create-campaign";
 import { initializeIyzicoCheckout } from "@/lib/iyzico/checkout";
 import { NextResponse } from "next/server";
 import { randomUUID } from "crypto";
+
+export const runtime = "nodejs";
 
 export async function POST(request: Request) {
   try {
@@ -23,15 +26,26 @@ export async function POST(request: Request) {
     const body = await request.json();
     const input = validateCampaignInput(body);
 
-    // Free first month (fully covered by promo) — skip payment
-    if (input.totalCostGbp <= 0 || isPaymentBypassEnabled()) {
+    // Only fully free first-month (or explicit FERIXAI_PAYMENT_REQUIRED=false) skips checkout
+    if (!isPaymentRequired(input.totalCostGbp)) {
       const result = await createCampaignForUser(user.id, input);
       return NextResponse.json({
         success: true,
         paid: false,
+        requiresPayment: false,
         campaignId: result.campaignId,
         slug: result.slug,
       });
+    }
+
+    if (!isIyzicoConfigured()) {
+      return NextResponse.json(
+        {
+          error:
+            "Payment is required but iyzico is not configured. Set IYZICO_API_KEY and IYZICO_SECRET_KEY.",
+        },
+        { status: 503 },
+      );
     }
 
     const conversationId = `fx-${randomUUID()}`;
@@ -42,6 +56,14 @@ export async function POST(request: Request) {
       .select("full_name, email")
       .eq("id", user.id)
       .maybeSingle();
+
+    const email = profile?.email || user.email || "";
+    if (!email) {
+      return NextResponse.json(
+        { error: "Account email is required for payment." },
+        { status: 400 },
+      );
+    }
 
     const { error: insertError } = await admin.from("payment_orders").insert({
       user_id: user.id,
@@ -63,14 +85,30 @@ export async function POST(request: Request) {
       request.headers.get("x-real-ip") ||
       undefined;
 
-    const checkout = await initializeIyzicoCheckout({
-      userId: user.id,
-      email: profile?.email || user.email || "",
-      fullName: profile?.full_name,
-      input,
-      conversationId,
-      clientIp: clientIp || undefined,
-    });
+    let checkout: { token: string; paymentPageUrl: string };
+    try {
+      checkout = await initializeIyzicoCheckout({
+        userId: user.id,
+        email,
+        fullName: profile?.full_name,
+        input,
+        conversationId,
+        clientIp: clientIp || undefined,
+      });
+    } catch (checkoutErr) {
+      await admin
+        .from("payment_orders")
+        .update({
+          status: "failed",
+          error_message:
+            checkoutErr instanceof Error
+              ? checkoutErr.message
+              : "Checkout init failed",
+          updated_at: new Date().toISOString(),
+        })
+        .eq("conversation_id", conversationId);
+      throw checkoutErr;
+    }
 
     await admin
       .from("payment_orders")
@@ -85,6 +123,7 @@ export async function POST(request: Request) {
       requiresPayment: true,
       paymentPageUrl: checkout.paymentPageUrl,
       token: checkout.token,
+      amountGbp: input.totalCostGbp,
     });
   } catch (err) {
     console.error("iyzico initialize error:", err);
