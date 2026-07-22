@@ -15,6 +15,7 @@ import {
 } from "@/lib/constants/metrics";
 import { getPricingPlan, BILLING_CYCLE_DAYS } from "@/lib/constants/pricing-plans";
 import { publishToDevTo } from "@/lib/devto/publish-article";
+import { redeemPromoCode } from "@/lib/promo/codes";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { publishToWordPress } from "@/lib/wordpress/publish-post";
 import { after } from "next/server";
@@ -60,6 +61,8 @@ export async function createCampaignForUser(
     planSlug,
     billingCycle,
     totalCostGbp,
+    promoApplied,
+    promoCode,
     productDescription,
   } = input;
   const admin = createAdminClient();
@@ -136,6 +139,19 @@ export async function createCampaignForUser(
 
   if (campaignError || !campaign) {
     throw new Error(campaignError?.message || "Could not save campaign");
+  }
+
+  if (promoApplied && promoCode) {
+    try {
+      await redeemPromoCode({
+        code: promoCode,
+        userId,
+        campaignId: campaign.id,
+      });
+    } catch (promoError) {
+      await admin.from("campaigns").delete().eq("id", campaign.id);
+      throw promoError;
+    }
   }
 
   if (options?.onCampaignReady) {

@@ -270,6 +270,7 @@ export default function CampaignWizard({
           city,
           planSlug,
           promoApplied: isApplied,
+          promoCode: isApplied ? promoCode.trim() : undefined,
           productDescription: isManufacturer
             ? productDescription.trim()
             : undefined,

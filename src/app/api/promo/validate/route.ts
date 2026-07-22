@@ -1,14 +1,18 @@
 import { NextResponse } from "next/server";
 import { PROMO_DISCOUNT_GBP } from "@/lib/constants/pricing-plans";
+import {
+  assertPromoCodeAvailable,
+  normalizePromoCode,
+} from "@/lib/promo/codes";
 
 /**
- * Promo validation for welcome FX30 codes (£30 off first month).
- * Accepts FX30 and common variants; extend later with DB-backed codes.
+ * Promo validation for unique FX30-XXXXX welcome codes (£30 off first month).
+ * Each code can only be redeemed once.
  */
 export async function POST(request: Request) {
   try {
     const body = (await request.json()) as { code?: string };
-    const raw = (body.code || "").trim().toUpperCase();
+    const raw = normalizePromoCode(body.code || "");
 
     if (!raw) {
       return NextResponse.json(
@@ -17,29 +21,24 @@ export async function POST(request: Request) {
       );
     }
 
-    await new Promise((resolve) => setTimeout(resolve, 450));
-
-    const valid =
-      raw === "FX30" ||
-      raw.startsWith("FX30-") ||
-      /^FX30[A-Z0-9]{0,8}$/.test(raw);
-
-    if (!valid) {
+    try {
+      const code = await assertPromoCodeAvailable(raw);
+      return NextResponse.json({
+        valid: true,
+        code,
+        discountGbp: PROMO_DISCOUNT_GBP,
+        message: `£${PROMO_DISCOUNT_GBP} off your first month`,
+      });
+    } catch (err) {
       return NextResponse.json(
         {
           valid: false,
-          error: "That code is not valid. Check your FX30 code.",
+          error:
+            err instanceof Error ? err.message : "That code is not valid.",
         },
         { status: 400 },
       );
     }
-
-    return NextResponse.json({
-      valid: true,
-      code: raw,
-      discountGbp: PROMO_DISCOUNT_GBP,
-      message: `£${PROMO_DISCOUNT_GBP} off your first month`,
-    });
   } catch {
     return NextResponse.json(
       { valid: false, error: "Could not validate promo code." },

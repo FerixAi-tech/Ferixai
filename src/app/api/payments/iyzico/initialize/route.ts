@@ -6,6 +6,7 @@ import {
   validateCampaignInput,
 } from "@/lib/campaign/validate-input";
 import { createCampaignForUser } from "@/lib/campaign/create-campaign";
+import { assertPromoCodeAvailable } from "@/lib/promo/codes";
 import { initializeIyzicoCheckout } from "@/lib/iyzico/checkout";
 import { NextResponse } from "next/server";
 import { randomUUID } from "crypto";
@@ -25,6 +26,10 @@ export async function POST(request: Request) {
 
     const body = await request.json();
     const input = validateCampaignInput(body);
+
+    if (input.promoApplied && input.promoCode) {
+      await assertPromoCodeAvailable(input.promoCode);
+    }
 
     // Only fully free first-month (or explicit FERIXAI_PAYMENT_REQUIRED=false) skips checkout
     if (!isPaymentRequired(input.totalCostGbp)) {

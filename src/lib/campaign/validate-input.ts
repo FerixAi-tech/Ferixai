@@ -22,6 +22,8 @@ export interface CampaignInput {
   totalCostGbp: number;
   promoApplied: boolean;
   discountGbp: number;
+  /** Unique FX30-XXXXX code when promoApplied */
+  promoCode?: string | null;
   productDescription?: string | null;
 }
 
@@ -36,6 +38,7 @@ export function validateCampaignInput(body: unknown): CampaignInput {
     city,
     planSlug,
     promoApplied,
+    promoCode,
     productDescription,
   } = body as Record<string, unknown>;
 
@@ -49,6 +52,13 @@ export function validateCampaignInput(body: unknown): CampaignInput {
 
   const plan = getPricingPlan(planSlug);
   const applied = promoApplied === true;
+  const normalizedPromo =
+    typeof promoCode === "string" ? promoCode.trim().toUpperCase() : "";
+
+  if (applied && !normalizedPromo) {
+    throw new Error("Promo code is required when applying a discount.");
+  }
+
   const discountGbp = applied ? PROMO_DISCOUNT_GBP : 0;
   const { listPrice, payable } = applyPromoDiscount(
     plan.priceMonthlyGbp,
@@ -85,6 +95,7 @@ export function validateCampaignInput(body: unknown): CampaignInput {
     totalCostGbp: payable,
     promoApplied: applied,
     discountGbp,
+    promoCode: applied ? normalizedPromo : null,
     productDescription: isManufacturerCategory(categoryName) ? product : null,
   };
 }
