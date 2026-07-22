@@ -27,7 +27,7 @@ export const PRICING_PLANS: readonly PricingPlan[] = [
   {
     slug: "starter",
     name: "Starter Plan",
-    priceMonthlyGbp: 39,
+    priceMonthlyGbp: 49,
     description: "Perfect for 1 local business starting with AI automation.",
     aggressiveness: "Steady",
     intensityScore: 1,
@@ -39,7 +39,7 @@ export const PRICING_PLANS: readonly PricingPlan[] = [
   {
     slug: "growth",
     name: "Growth Plan",
-    priceMonthlyGbp: 59,
+    priceMonthlyGbp: 69,
     description:
       "Get noticed by 3x more local customers on Google and ChatGPT.",
     badge: "Most Popular",
