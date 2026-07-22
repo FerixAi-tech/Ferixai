@@ -8,6 +8,7 @@ import {
 } from "@/lib/constants/pricing-plans";
 import DashboardActions from "@/components/dashboard/DashboardActions";
 import ClearCampaignDraftOnSuccess from "@/components/campaign/ClearCampaignDraftOnSuccess";
+import CampaignLaunchStatus from "@/components/dashboard/CampaignLaunchStatus";
 import MetaPaymentSuccessTracker from "@/components/meta/MetaPaymentSuccessTracker";
 import AppNav from "@/components/layout/AppNav";
 import SupportContact from "@/components/layout/SupportContact";
@@ -37,6 +38,17 @@ export default async function DashboardPage({
     : null;
 
   const paymentOk = params.payment === "ok";
+
+  const { data: publishedRow } =
+    createdCampaign?.content_slug && user
+      ? await supabase
+          .from("published_contents")
+          .select("slug")
+          .eq("slug", createdCampaign.content_slug)
+          .maybeSingle()
+      : { data: null };
+
+  const contentReady = Boolean(publishedRow?.slug);
 
   const { data: profile } = user
     ? await supabase
@@ -70,25 +82,27 @@ export default async function DashboardPage({
       />
 
       <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-        {createdCampaign && (
-          <div className="lf-animate-in lf-animate-in-1 mb-8 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4">
-            <p className="text-sm text-emerald-200">
-              Campaign created. We&apos;re preparing your content for
-              publication.
-              {createdCampaign.content_slug && (
-                <>
-                  {" "}
-                  <Link
-                    href={`/content/${createdCampaign.content_slug}`}
-                    className="font-semibold underline"
-                  >
-                    View your article
-                  </Link>
-                </>
-              )}
+        {createdCampaign?.content_slug ? (
+          <CampaignLaunchStatus
+            businessName={createdCampaign.business_name}
+            slug={createdCampaign.content_slug}
+            paymentOk={paymentOk}
+            initiallyReady={contentReady}
+          />
+        ) : paymentOk ? (
+          <div className="lf-animate-in lf-animate-in-1 mb-8 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-5">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-300">
+              Payment confirmed
+            </p>
+            <h2 className="lf-orbitron mt-2 text-lg font-bold text-white">
+              Your business is being featured…
+            </h2>
+            <p className="mt-2 text-sm text-emerald-100/90">
+              Payment received. We&apos;re setting up your campaign and
+              preparing content for publication.
             </p>
           </div>
-        )}
+        ) : null}
 
         <div className="lf-animate-in lf-animate-in-2 mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
@@ -125,6 +139,20 @@ export default async function DashboardPage({
                   )
                 : null;
 
+              const statusLabel =
+                campaign.status === "active"
+                  ? "Live"
+                  : campaign.status === "generating"
+                    ? "Featuring…"
+                    : campaign.status;
+
+              const statusClass =
+                campaign.status === "active"
+                  ? "border border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                  : campaign.status === "generating"
+                    ? "border border-amber-500/30 bg-amber-500/10 text-amber-300"
+                    : "border border-white/10 bg-white/5 text-[#94a3b8]";
+
               return (
                 <div key={campaign.id} className="lf-card-surface p-6">
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -137,13 +165,9 @@ export default async function DashboardPage({
                       </p>
                     </div>
                     <span
-                      className={`inline-flex w-fit rounded-full px-3 py-1 text-xs font-semibold ${
-                        campaign.status === "active"
-                          ? "border border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
-                          : "border border-white/10 bg-white/5 text-[#94a3b8]"
-                      }`}
+                      className={`inline-flex w-fit rounded-full px-3 py-1 text-xs font-semibold ${statusClass}`}
                     >
-                      {campaign.status === "active" ? "Live" : campaign.status}
+                      {statusLabel}
                     </span>
                   </div>
 
@@ -188,7 +212,7 @@ export default async function DashboardPage({
                     </div>
                   </div>
 
-                  {campaign.content_slug && (
+                  {campaign.content_slug && campaign.status === "active" && (
                     <div className="mt-4">
                       <Link
                         href={`/content/${campaign.content_slug}`}
@@ -198,6 +222,13 @@ export default async function DashboardPage({
                       </Link>
                     </div>
                   )}
+                  {campaign.content_slug &&
+                    campaign.status === "generating" && (
+                      <p className="mt-4 text-sm text-amber-200/90">
+                        Your business is being featured — content will appear
+                        here shortly.
+                      </p>
+                    )}
                 </div>
               );
             })}
