@@ -8,13 +8,14 @@ import {
 } from "@/lib/constants/pricing-plans";
 import DashboardActions from "@/components/dashboard/DashboardActions";
 import ClearCampaignDraftOnSuccess from "@/components/campaign/ClearCampaignDraftOnSuccess";
+import MetaPaymentSuccessTracker from "@/components/meta/MetaPaymentSuccessTracker";
 import AppNav from "@/components/layout/AppNav";
 import SupportContact from "@/components/layout/SupportContact";
 
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ created?: string }>;
+  searchParams: Promise<{ created?: string; payment?: string }>;
 }) {
   const params = await searchParams;
   const supabase = await createClient();
@@ -35,6 +36,8 @@ export default async function DashboardPage({
     ? campaigns?.find((c) => c.content_slug === params.created)
     : null;
 
+  const paymentOk = params.payment === "ok";
+
   const { data: profile } = user
     ? await supabase
         .from("profiles")
@@ -46,6 +49,13 @@ export default async function DashboardPage({
   return (
     <>
       <ClearCampaignDraftOnSuccess active={Boolean(createdCampaign)} />
+      <MetaPaymentSuccessTracker
+        active={paymentOk}
+        dedupeKey={params.created || "payment-ok"}
+        payableGbp={
+          createdCampaign ? Number(createdCampaign.total_cost) || 0 : 0
+        }
+      />
       <AppNav
         logoHref="/dashboard"
         userLabel={

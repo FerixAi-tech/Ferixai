@@ -7,6 +7,7 @@ import { Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { getSafeInternalPath } from "@/lib/auth/safe-redirect";
 import BrandLogo from "@/components/layout/BrandLogo";
+import { trackCompleteRegistration } from "@/lib/meta/pixel";
 
 export default function AuthForm() {
   const searchParams = useSearchParams();
@@ -61,6 +62,10 @@ export default function AuthForm() {
       });
 
       if (signInError) throw signInError;
+
+      if (mode === "register") {
+        trackCompleteRegistration();
+      }
 
       window.location.assign(redirect);
     } catch (err) {

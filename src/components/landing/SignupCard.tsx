@@ -11,6 +11,7 @@ import {
   saveCampaignDraft,
 } from "@/lib/campaign/draft";
 import FuturisticScene3D from "@/components/landing/FuturisticScene3D";
+import { trackCompleteRegistration } from "@/lib/meta/pixel";
 
 interface SignupCardProps {
   open: boolean;
@@ -164,6 +165,7 @@ export default function SignupCard({
       setPromoCodeValue(uniquePromoCode);
       setCopied(false);
       setIsSubmitted(true);
+      trackCompleteRegistration();
       setLoading(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not create account");
