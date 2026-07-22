@@ -49,6 +49,21 @@ export function trackCompleteRegistration(): void {
   trackMetaEvent("CompleteRegistration");
 }
 
+export function trackInitiateCheckout(options?: {
+  value?: number;
+  currency?: string;
+  content_name?: string;
+}): void {
+  const params: Record<string, unknown> = {};
+  if (options?.value != null) params.value = options.value;
+  if (options?.currency) params.currency = options.currency;
+  if (options?.content_name) params.content_name = options.content_name;
+  trackMetaEvent(
+    "InitiateCheckout",
+    Object.keys(params).length > 0 ? params : undefined,
+  );
+}
+
 export function trackPurchase(options: {
   value: number;
   currency: string;

@@ -15,6 +15,7 @@ import {
   formatCheckoutCharge,
   getIyzicoCheckoutCharge,
 } from "@/lib/constants/checkout";
+import { trackInitiateCheckout } from "@/lib/meta/pixel";
 import {
   applyPromoDiscount,
   DEFAULT_PLAN_SLUG,
@@ -299,6 +300,11 @@ export default function CampaignWizard({
       }
 
       if (data.paymentPageUrl) {
+        trackInitiateCheckout({
+          value: checkoutCharge.amount,
+          currency: checkoutCharge.currency,
+          content_name: pricingPlan.name,
+        });
         window.location.assign(data.paymentPageUrl);
         return;
       }
