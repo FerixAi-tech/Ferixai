@@ -71,10 +71,6 @@ export default function CampaignWizard({
   const [isApplied, setIsApplied] = useState(false);
   const [promoLoading, setPromoLoading] = useState(false);
   const [promoError, setPromoError] = useState("");
-  const [cardName, setCardName] = useState("");
-  const [cardNumber, setCardNumber] = useState("");
-  const [cardExpiry, setCardExpiry] = useState("");
-  const [cardCvc, setCardCvc] = useState("");
 
   useEffect(() => {
     async function loadCategories() {
@@ -240,10 +236,6 @@ export default function CampaignWizard({
       }
 
       setIsApplied(true);
-      setCardName("");
-      setCardNumber("");
-      setCardExpiry("");
-      setCardCvc("");
     } catch {
       setIsApplied(false);
       setPromoError("Could not validate promo code. Please try again.");
@@ -269,7 +261,7 @@ export default function CampaignWizard({
     }
 
     try {
-      const res = await fetch("/api/campaigns", {
+      const res = await fetch("/api/payments/iyzico/initialize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -287,8 +279,14 @@ export default function CampaignWizard({
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         throw new Error(
-          (data as { error?: string }).error || "Could not launch campaign",
+          (data as { error?: string }).error || "Could not start checkout",
         );
+      }
+
+      const paymentPageUrl = (data as { paymentPageUrl?: string }).paymentPageUrl;
+      if (paymentPageUrl) {
+        window.location.assign(paymentPageUrl);
+        return;
       }
 
       const slug = (data as { slug?: string }).slug;
@@ -540,73 +538,18 @@ export default function CampaignWizard({
               <div className="mt-4 rounded-xl border border-emerald-400/40 bg-emerald-500/10 px-4 py-3 text-sm font-semibold text-emerald-100 shadow-[0_0_28px_rgba(16,185,129,0.28)]">
                 £30 promo applied to your first month
               </div>
-            ) : (
-              <div className="mt-6 space-y-4">
-                <p className="text-sm text-[#94a3b8]">
-                  No promo applied. Go back to Step 2 to enter your FX30 code,
-                  or continue with card details (coming soon).
-                </p>
-                <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#64748b]">
-                  Card details
-                </p>
-                <div>
-                  <label className="mb-1.5 block text-sm text-[#94a3b8]">
-                    Name on card
-                  </label>
-                  <input
-                    type="text"
-                    value={cardName}
-                    onChange={(e) => setCardName(e.target.value)}
-                    placeholder="Jane Smith"
-                    className="lf-input"
-                    autoComplete="cc-name"
-                  />
-                </div>
-                <div>
-                  <label className="mb-1.5 block text-sm text-[#94a3b8]">
-                    Card number
-                  </label>
-                  <input
-                    type="text"
-                    value={cardNumber}
-                    onChange={(e) => setCardNumber(e.target.value)}
-                    placeholder="•••• •••• •••• ••••"
-                    className="lf-input"
-                    autoComplete="cc-number"
-                    inputMode="numeric"
-                  />
-                </div>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div>
-                    <label className="mb-1.5 block text-sm text-[#94a3b8]">
-                      Expiry
-                    </label>
-                    <input
-                      type="text"
-                      value={cardExpiry}
-                      onChange={(e) => setCardExpiry(e.target.value)}
-                      placeholder="MM/YY"
-                      className="lf-input"
-                      autoComplete="cc-exp"
-                    />
-                  </div>
-                  <div>
-                    <label className="mb-1.5 block text-sm text-[#94a3b8]">
-                      CVC
-                    </label>
-                    <input
-                      type="text"
-                      value={cardCvc}
-                      onChange={(e) => setCardCvc(e.target.value)}
-                      placeholder="123"
-                      className="lf-input"
-                      autoComplete="cc-csc"
-                      inputMode="numeric"
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
+            ) : null}
+            <div className="mt-4 rounded-xl border border-teal-400/25 bg-teal-500/5 px-4 py-3 text-sm text-[#cbd5e1]">
+              Secure payment is handled by{" "}
+              <span className="font-semibold text-teal-200">iyzico</span>. When
+              you launch, you&apos;ll be redirected to the iyzico checkout page
+              to pay{" "}
+              <span className="font-semibold text-white">
+                {formatCurrency(pricing.payable)}
+              </span>
+              {isApplied ? " for your first month" : " / month"}
+              .
+            </div>
 
             <div className="mt-6 flex items-end justify-between gap-4 border-t border-white/10 pt-5">
               <div>
@@ -655,7 +598,9 @@ export default function CampaignWizard({
               className="lf-btn-primary inline-flex min-h-[48px] items-center gap-2 rounded-xl px-6 py-3 font-bold text-white disabled:opacity-60"
             >
               {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-              Launch campaign
+              {pricing.payable > 0
+                ? `Pay ${formatCurrency(pricing.payable)} & launch`
+                : "Launch campaign"}
             </button>
           </div>
         </div>

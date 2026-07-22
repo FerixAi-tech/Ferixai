@@ -25,6 +25,7 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Product notes
 
-- Payment is disabled during development (`FERIXAI_PAYMENT_REQUIRED=false`).
-- Campaigns launch free for now; Stripe can be added later.
+- Payments use **iyzico Checkout Form** when `FERIXAI_PAYMENT_REQUIRED=true`.
+- Set `IYZICO_API_KEY`, `IYZICO_SECRET_KEY`, and optionally `IYZICO_BASE_URL` in `.env.local` (never commit secrets).
+- Production callback URL must be HTTPS (`/api/payments/iyzico/callback`).
 - There is no community forum in this product.

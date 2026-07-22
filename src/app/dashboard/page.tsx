@@ -200,7 +200,7 @@ export default async function DashboardPage({
               </h3>
               <p className="mx-auto mt-2 max-w-sm text-sm text-[#94a3b8]">
                 You haven&apos;t launched a campaign yet. Set up your business
-                in a few steps — no payment needed in this version.
+                in a few steps — pay securely with iyzico to launch.
               </p>
               <Link
                 href="/dashboard/new"

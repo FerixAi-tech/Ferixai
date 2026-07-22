@@ -89,7 +89,7 @@ export function validateCampaignInput(body: unknown): CampaignInput {
   };
 }
 
-/** Payment is off unless FERIXAI_PAYMENT_REQUIRED=true (Stripe later). */
+/** Payment bypass when FERIXAI_PAYMENT_REQUIRED is not "true". */
 export function isPaymentBypassEnabled(): boolean {
   return process.env.FERIXAI_PAYMENT_REQUIRED !== "true";
 }

@@ -7,7 +7,7 @@ import Link from "next/link";
 export default async function NewCampaignPage({
   searchParams,
 }: {
-  searchParams: Promise<{ business?: string }>;
+  searchParams: Promise<{ business?: string; payment?: string }>;
 }) {
   const params = await searchParams;
   const supabase = await createClient();
@@ -24,6 +24,14 @@ export default async function NewCampaignPage({
 
   const campaignCount = totalCampaignCount ?? 0;
   const initialBusinessName = params.business?.trim() || "";
+  const payment = params.payment;
+
+  const paymentMessage =
+    payment === "failed"
+      ? "Payment was not completed. You can try again when you are ready."
+      : payment === "error" || payment === "missing_token" || payment === "order_not_found"
+        ? "Something went wrong while confirming payment. Please try again or contact support."
+        : null;
 
   return (
     <>
@@ -34,6 +42,15 @@ export default async function NewCampaignPage({
       />
 
       <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        {paymentMessage && (
+          <div
+            role="alert"
+            className="mb-8 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-200"
+          >
+            {paymentMessage}
+          </div>
+        )}
+
         {user && campaignCount > 0 && (
           <div className="mb-8 rounded-xl border border-teal-500/30 bg-teal-500/10 p-4 text-sm text-teal-100">
             You already have {campaignCount} campaign
@@ -52,8 +69,8 @@ export default async function NewCampaignPage({
             New campaign
           </h1>
           <p className="mt-2 max-w-xl text-sm text-[#94a3b8]">
-            Enter your business details, choose a plan intensity, and launch.
-            Payment can be added later.
+            Enter your business details, choose a monthly plan, and complete
+            secure checkout with iyzico to launch.
           </p>
         </div>
 
