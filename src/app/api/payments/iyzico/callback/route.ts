@@ -2,13 +2,13 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { createCampaignForUser } from "@/lib/campaign/create-campaign";
 import type { CampaignInput } from "@/lib/campaign/validate-input";
 import { iyzicoRetrieveCheckoutForm } from "@/lib/iyzico/client";
-import { getAppBaseUrl } from "@/lib/constants/urls";
+import { getRequestBaseUrl } from "@/lib/constants/urls";
 import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 
 export async function POST(request: Request) {
-  const baseUrl = getAppBaseUrl();
+  const baseUrl = getRequestBaseUrl(request);
 
   try {
     const form = await request.formData();
