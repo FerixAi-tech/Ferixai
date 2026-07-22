@@ -12,6 +12,10 @@ import {
   getCampaignContentPlanForPlan,
 } from "@/lib/constants/metrics";
 import {
+  formatCheckoutCharge,
+  getIyzicoCheckoutCharge,
+} from "@/lib/constants/checkout";
+import {
   applyPromoDiscount,
   DEFAULT_PLAN_SLUG,
   getPricingPlan,
@@ -121,6 +125,11 @@ export default function CampaignWizard({
   const pricing = applyPromoDiscount(
     pricingPlan.priceMonthlyGbp,
     isApplied ? PROMO_DISCOUNT_GBP : 0,
+  );
+  const checkoutCharge = getIyzicoCheckoutCharge(pricing.payable);
+  const checkoutLabel = formatCheckoutCharge(
+    checkoutCharge.amount,
+    checkoutCharge.currency,
   );
   const contentPlan = getCampaignContentPlanForPlan(
     pricingPlan,
@@ -558,6 +567,12 @@ export default function CampaignWizard({
 
           <div className="rounded-[18px] border border-violet-950/70 bg-[linear-gradient(165deg,#120c1e_0%,#0e0a18_45%,#090610_100%)] p-6">
             <h3 className="text-lg font-bold text-white">Checkout</h3>
+            {checkoutCharge.isTemporaryTryTest ? (
+              <div className="mt-4 rounded-xl border border-amber-400/40 bg-amber-500/10 px-4 py-3 text-sm font-semibold text-amber-100">
+                Temporary test checkout: you will be charged {checkoutLabel}{" "}
+                (TRY). Plan list prices remain in GBP.
+              </div>
+            ) : null}
             {isApplied ? (
               <div className="mt-4 rounded-xl border border-emerald-400/40 bg-emerald-500/10 px-4 py-3 text-sm font-semibold text-emerald-100 shadow-[0_0_28px_rgba(16,185,129,0.28)]">
                 £30 promo applied to your first month
@@ -568,17 +583,28 @@ export default function CampaignWizard({
               <span className="font-semibold text-teal-200">iyzico</span>. When
               you launch, you&apos;ll be redirected to the iyzico checkout page
               to pay{" "}
-              <span className="font-semibold text-white">
-                {formatCurrency(pricing.payable)}
-              </span>
-              {isApplied ? " for your first month" : " / month"}
-              .
+              <span className="font-semibold text-white">{checkoutLabel}</span>
+              {checkoutCharge.isTemporaryTryTest
+                ? "."
+                : isApplied
+                  ? " for your first month."
+                  : " / month."}
             </div>
 
             <div className="mt-6 flex items-end justify-between gap-4 border-t border-white/10 pt-5">
               <div>
                 <p className="text-sm text-[#94a3b8]">Total payable</p>
-                {isApplied ? (
+                {checkoutCharge.isTemporaryTryTest ? (
+                  <>
+                    <p className="lf-orbitron mt-1 text-3xl font-bold text-emerald-300">
+                      {checkoutLabel}
+                    </p>
+                    <p className="mt-1 text-xs text-[#64748b]">
+                      test charge · plan list {formatCurrency(pricing.listPrice)}
+                      /month GBP
+                    </p>
+                  </>
+                ) : isApplied ? (
                   <>
                     <p className="mt-1 flex flex-wrap items-baseline gap-2">
                       <span className="text-lg text-[#64748b] line-through">
@@ -623,7 +649,7 @@ export default function CampaignWizard({
             >
               {loading && <Loader2 className="h-4 w-4 animate-spin" />}
               {pricing.payable > 0
-                ? `Pay ${formatCurrency(pricing.payable)} & launch`
+                ? `Pay ${checkoutLabel} & launch`
                 : "Launch campaign"}
             </button>
           </div>

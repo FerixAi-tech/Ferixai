@@ -7,6 +7,7 @@ import {
 } from "@/lib/campaign/validate-input";
 import { createCampaignForUser } from "@/lib/campaign/create-campaign";
 import { assertPromoCodeAvailable } from "@/lib/promo/codes";
+import { getIyzicoCheckoutCharge } from "@/lib/constants/checkout";
 import { initializeIyzicoCheckout } from "@/lib/iyzico/checkout";
 import { NextResponse } from "next/server";
 import { randomUUID } from "crypto";
@@ -55,6 +56,7 @@ export async function POST(request: Request) {
 
     const conversationId = `fx-${randomUUID()}`;
     const admin = createAdminClient();
+    const charge = getIyzicoCheckoutCharge(input.totalCostGbp);
 
     const { data: profile } = await admin
       .from("profiles")
@@ -74,8 +76,8 @@ export async function POST(request: Request) {
       user_id: user.id,
       conversation_id: conversationId,
       plan_slug: input.planSlug,
-      amount_gbp: input.totalCostGbp,
-      currency: "GBP",
+      amount_gbp: charge.amount,
+      currency: charge.currency,
       status: "pending",
       campaign_payload: input,
     });
@@ -129,6 +131,8 @@ export async function POST(request: Request) {
       paymentPageUrl: checkout.paymentPageUrl,
       token: checkout.token,
       amountGbp: input.totalCostGbp,
+      chargedAmount: charge.amount,
+      chargedCurrency: charge.currency,
     });
   } catch (err) {
     console.error("iyzico initialize error:", err);

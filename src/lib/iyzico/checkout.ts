@@ -1,5 +1,6 @@
 import { getAppBaseUrl } from "@/lib/constants/urls";
 import type { CampaignInput } from "@/lib/campaign/validate-input";
+import { getIyzicoCheckoutCharge } from "@/lib/constants/checkout";
 import { getPricingPlan } from "@/lib/constants/pricing-plans";
 import { iyzicoCreateCheckoutForm } from "@/lib/iyzico/client";
 
@@ -37,17 +38,18 @@ export async function initializeIyzicoCheckout(options: {
 }): Promise<{ token: string; paymentPageUrl: string }> {
   const { userId, email, fullName, input, conversationId, clientIp } = options;
   const plan = getPricingPlan(input.planSlug);
-  const amount = input.totalCostGbp.toFixed(2);
+  const charge = getIyzicoCheckoutCharge(input.totalCostGbp);
+  const amount = charge.amount.toFixed(2);
   const { name, surname } = splitName(fullName, email);
   const baseUrl = getAppBaseUrl();
   const city = input.city || "London";
 
   const result = await iyzicoCreateCheckoutForm({
-    locale: "en",
+    locale: charge.currency === "TRY" ? "tr" : "en",
     conversationId,
     price: amount,
     paidPrice: amount,
-    currency: "GBP",
+    currency: charge.currency,
     basketId: conversationId,
     paymentGroup: "PRODUCT",
     callbackUrl: `${baseUrl}/api/payments/iyzico/callback`,
