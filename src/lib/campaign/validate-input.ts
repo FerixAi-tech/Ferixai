@@ -89,14 +89,20 @@ export function validateCampaignInput(body: unknown): CampaignInput {
   };
 }
 
-/** True only when explicitly disabled for local/dev testing. */
+/**
+ * Bypass is only allowed in local development when explicitly set.
+ * Production/preview hosts never skip paid checkout.
+ */
 export function isPaymentBypassEnabled(): boolean {
-  return process.env.FERIXAI_PAYMENT_REQUIRED === "false";
+  return (
+    process.env.NODE_ENV === "development" &&
+    process.env.FERIXAI_PAYMENT_REQUIRED === "false"
+  );
 }
 
-/** Payment must run when amount > 0 and bypass is not explicitly enabled. */
+/** Payment must run when amount > 0 and bypass is not enabled. */
 export function isPaymentRequired(amountGbp: number): boolean {
-  if (amountGbp <= 0) return false;
+  if (!(amountGbp > 0)) return false;
   return !isPaymentBypassEnabled();
 }
 

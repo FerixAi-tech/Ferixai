@@ -25,8 +25,8 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Product notes
 
-- Payments use **iyzico Checkout Form** by default for any payable amount.
-- Set `IYZICO_API_KEY`, `IYZICO_SECRET_KEY`, and `IYZICO_BASE_URL` in the host env (Vercel).
-- To skip payment in local/dev only, set `FERIXAI_PAYMENT_REQUIRED=false`.
-- Production callback URL must be HTTPS (`/api/payments/iyzico/callback`).
+- Paid plans always require **iyzico Checkout Form** in production.
+- Set `IYZICO_API_KEY`, `IYZICO_SECRET_KEY`, and `IYZICO_BASE_URL` in Vercel env.
+- Set `NEXT_PUBLIC_APP_URL=https://www.ferixai.com` so the payment callback URL is correct.
+- Local-only bypass: `FERIXAI_PAYMENT_REQUIRED=false` (ignored outside development).
 - There is no community forum in this product.

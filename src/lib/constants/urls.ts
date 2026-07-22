@@ -11,11 +11,21 @@ export const APP_HOSTS = [
 ];
 
 export function getAppBaseUrl(): string {
+  const fromEnv = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "");
+  if (fromEnv) return fromEnv;
+
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+    return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL.replace(/\/$/, "")}`;
+  }
+
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL.replace(/\/$/, "")}`;
+  }
+
   if (process.env.NODE_ENV === "development") {
-    const local = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "");
-    if (local) return local;
     return "http://localhost:3000";
   }
+
   return APP_URL;
 }
 

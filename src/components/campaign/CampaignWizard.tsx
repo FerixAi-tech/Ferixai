@@ -276,30 +276,45 @@ export default function CampaignWizard({
         }),
       });
 
-      const data = await res.json().catch(() => ({}));
+      const data = (await res.json().catch(() => ({}))) as {
+        error?: string;
+        paymentPageUrl?: string;
+        requiresPayment?: boolean;
+        slug?: string;
+        paid?: boolean;
+      };
+
       if (!res.ok) {
-        throw new Error(
-          (data as { error?: string }).error || "Could not start checkout",
-        );
+        throw new Error(data.error || `Checkout failed (${res.status})`);
       }
 
-      const paymentPageUrl = (data as { paymentPageUrl?: string })
-        .paymentPageUrl;
-      if (paymentPageUrl) {
-        window.location.assign(paymentPageUrl);
+      if (data.paymentPageUrl) {
+        window.location.assign(data.paymentPageUrl);
         return;
       }
 
-      // Free / bypass path only — never treat a paid plan as launched without checkout
-      if (pricing.payable > 0) {
+      if (data.requiresPayment) {
         throw new Error(
-          "Payment page was not returned. Please try again or contact support.",
+          data.error ||
+            "iyzico payment page URL was missing. Check API keys and currency settings.",
         );
       }
 
-      const slug = (data as { slug?: string }).slug;
-      router.push(slug ? `/dashboard?created=${slug}` : "/dashboard");
-      router.refresh();
+      // Free / local bypass only
+      if (pricing.payable > 0) {
+        throw new Error(
+          data.error ||
+            "Payment is required for this plan, but checkout did not start. Set IYZICO_API_KEY / IYZICO_SECRET_KEY on Vercel and remove FERIXAI_PAYMENT_REQUIRED=false.",
+        );
+      }
+
+      if (data.slug) {
+        router.push(`/dashboard?created=${data.slug}`);
+        router.refresh();
+        return;
+      }
+
+      throw new Error(data.error || "Could not launch campaign");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not launch campaign");
       setLoading(false);

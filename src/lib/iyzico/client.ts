@@ -2,9 +2,11 @@ import { createHmac, randomBytes } from "crypto";
 
 export type IyzicoResult = {
   status?: string;
+  errorCode?: string;
   errorMessage?: string;
   token?: string;
   paymentPageUrl?: string;
+  checkoutFormContent?: string;
   paymentStatus?: string;
   paymentId?: string | number;
   conversationId?: string;

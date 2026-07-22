@@ -17,6 +17,16 @@ function splitName(fullName: string | null | undefined, email: string) {
   };
 }
 
+function checkoutPortalBase(): string {
+  const apiBase = (
+    process.env.IYZICO_BASE_URL?.trim() || "https://api.iyzipay.com"
+  ).toLowerCase();
+  if (apiBase.includes("sandbox")) {
+    return "https://sandbox-cpp.iyzipay.com";
+  }
+  return "https://cpp.iyzipay.com";
+}
+
 export async function initializeIyzicoCheckout(options: {
   userId: string;
   email: string;
@@ -39,7 +49,7 @@ export async function initializeIyzicoCheckout(options: {
     paidPrice: amount,
     currency: "GBP",
     basketId: conversationId,
-    paymentGroup: "SUBSCRIPTION",
+    paymentGroup: "PRODUCT",
     callbackUrl: `${baseUrl}/api/payments/iyzico/callback`,
     enabledInstallments: [1],
     buyer: {
@@ -49,7 +59,7 @@ export async function initializeIyzicoCheckout(options: {
       gsmNumber: "+905350000000",
       email,
       identityNumber: "11111111111",
-      registrationAddress: city,
+      registrationAddress: `${city}, United Kingdom`,
       city,
       country: "United Kingdom",
       ip: clientIp || "85.34.78.112",
@@ -58,13 +68,13 @@ export async function initializeIyzicoCheckout(options: {
       contactName: `${name} ${surname}`,
       city,
       country: "United Kingdom",
-      address: city,
+      address: `${city}, United Kingdom`,
     },
     shippingAddress: {
       contactName: `${name} ${surname}`,
       city,
       country: "United Kingdom",
-      address: city,
+      address: `${city}, United Kingdom`,
     },
     basketItems: [
       {
@@ -78,14 +88,23 @@ export async function initializeIyzicoCheckout(options: {
     ],
   });
 
-  if (result.status !== "success" || !result.token || !result.paymentPageUrl) {
-    throw new Error(
-      String(result.errorMessage || "Could not start iyzico checkout"),
-    );
+  if (result.status !== "success") {
+    const detail = [result.errorCode, result.errorMessage]
+      .filter(Boolean)
+      .join(": ");
+    throw new Error(detail || "iyzico checkout failed");
   }
+
+  if (!result.token) {
+    throw new Error("iyzico did not return a checkout token");
+  }
+
+  const paymentPageUrl =
+    (result.paymentPageUrl && String(result.paymentPageUrl)) ||
+    `${checkoutPortalBase()}/?token=${encodeURIComponent(String(result.token))}`;
 
   return {
     token: String(result.token),
-    paymentPageUrl: String(result.paymentPageUrl),
+    paymentPageUrl,
   };
 }
