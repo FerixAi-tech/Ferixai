@@ -75,7 +75,7 @@ export default function CampaignLaunchStatus({
               {paymentOk ? "Payment confirmed" : "Campaign launched"}
             </p>
             <h2 className="lf-orbitron mt-2 text-lg font-bold text-white sm:text-xl">
-              Your business is being featured…
+              Your business is being featured🚀
             </h2>
             <p className="mt-2 text-sm leading-relaxed text-emerald-100/90">
               We&apos;re preparing and publishing local AI visibility content

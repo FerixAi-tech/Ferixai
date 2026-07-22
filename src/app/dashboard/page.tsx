@@ -95,7 +95,7 @@ export default async function DashboardPage({
               Payment confirmed
             </p>
             <h2 className="lf-orbitron mt-2 text-lg font-bold text-white">
-              Your business is being featured…
+              Your business is being featured🚀
             </h2>
             <p className="mt-2 text-sm text-emerald-100/90">
               Payment received. We&apos;re setting up your campaign and
