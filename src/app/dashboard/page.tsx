@@ -9,6 +9,7 @@ import {
 import DashboardActions from "@/components/dashboard/DashboardActions";
 import ClearCampaignDraftOnSuccess from "@/components/campaign/ClearCampaignDraftOnSuccess";
 import CampaignLaunchStatus from "@/components/dashboard/CampaignLaunchStatus";
+import PaymentSuccessModal from "@/components/dashboard/PaymentSuccessModal";
 import MetaPaymentSuccessTracker from "@/components/meta/MetaPaymentSuccessTracker";
 import AppNav from "@/components/layout/AppNav";
 import SupportContact from "@/components/layout/SupportContact";
@@ -60,7 +61,9 @@ export default async function DashboardPage({
 
   return (
     <>
-      <ClearCampaignDraftOnSuccess active={Boolean(createdCampaign)} />
+      <ClearCampaignDraftOnSuccess
+        active={Boolean(createdCampaign) || paymentOk}
+      />
       <MetaPaymentSuccessTracker
         active={paymentOk}
         dedupeKey={params.created || "payment-ok"}
@@ -68,6 +71,12 @@ export default async function DashboardPage({
           createdCampaign ? Number(createdCampaign.total_cost) || 0 : 0
         }
       />
+      {paymentOk ? (
+        <PaymentSuccessModal
+          businessName={createdCampaign?.business_name}
+          slug={createdCampaign?.content_slug || params.created}
+        />
+      ) : null}
       <AppNav
         logoHref="/dashboard"
         userLabel={
@@ -82,26 +91,13 @@ export default async function DashboardPage({
       />
 
       <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-        {createdCampaign?.content_slug ? (
+        {!paymentOk && createdCampaign?.content_slug ? (
           <CampaignLaunchStatus
             businessName={createdCampaign.business_name}
             slug={createdCampaign.content_slug}
-            paymentOk={paymentOk}
+            paymentOk={false}
             initiallyReady={contentReady}
           />
-        ) : paymentOk ? (
-          <div className="lf-animate-in lf-animate-in-1 mb-8 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-5">
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-300">
-              Payment confirmed
-            </p>
-            <h2 className="lf-orbitron mt-2 text-lg font-bold text-white">
-              Your business is being featured🚀
-            </h2>
-            <p className="mt-2 text-sm text-emerald-100/90">
-              Payment received. We&apos;re setting up your campaign and
-              preparing content for publication.
-            </p>
-          </div>
         ) : null}
 
         <div className="lf-animate-in lf-animate-in-2 mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
