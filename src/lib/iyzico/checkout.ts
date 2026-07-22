@@ -1,11 +1,7 @@
 import { getAppBaseUrl } from "@/lib/constants/urls";
 import type { CampaignInput } from "@/lib/campaign/validate-input";
 import { getPricingPlan } from "@/lib/constants/pricing-plans";
-import {
-  getIyzicoClient,
-  iyzicoCreateCheckoutForm,
-  Iyzipay,
-} from "@/lib/iyzico/client";
+import { iyzicoCreateCheckoutForm } from "@/lib/iyzico/client";
 
 function splitName(fullName: string | null | undefined, email: string) {
   const cleaned = (fullName || "").trim();
@@ -36,16 +32,14 @@ export async function initializeIyzicoCheckout(options: {
   const baseUrl = getAppBaseUrl();
   const city = input.city || "London";
 
-  const iyzipay = getIyzicoClient();
-
-  const result = await iyzicoCreateCheckoutForm(iyzipay, {
-    locale: Iyzipay.LOCALE.EN,
+  const result = await iyzicoCreateCheckoutForm({
+    locale: "en",
     conversationId,
     price: amount,
     paidPrice: amount,
-    currency: Iyzipay.CURRENCY.GBP,
+    currency: "GBP",
     basketId: conversationId,
-    paymentGroup: Iyzipay.PAYMENT_GROUP.SUBSCRIPTION,
+    paymentGroup: "SUBSCRIPTION",
     callbackUrl: `${baseUrl}/api/payments/iyzico/callback`,
     enabledInstallments: [1],
     buyer: {
@@ -78,7 +72,7 @@ export async function initializeIyzicoCheckout(options: {
         name: `${plan.name} — first month`,
         category1: "Subscription",
         category2: "AI Visibility",
-        itemType: Iyzipay.BASKET_ITEM_TYPE.VIRTUAL,
+        itemType: "VIRTUAL",
         price: amount,
       },
     ],

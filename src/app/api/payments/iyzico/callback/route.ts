@@ -1,11 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createCampaignForUser } from "@/lib/campaign/create-campaign";
 import type { CampaignInput } from "@/lib/campaign/validate-input";
-import {
-  getIyzicoClient,
-  iyzicoRetrieveCheckoutForm,
-  Iyzipay,
-} from "@/lib/iyzico/client";
+import { iyzicoRetrieveCheckoutForm } from "@/lib/iyzico/client";
 import { getAppBaseUrl } from "@/lib/constants/urls";
 import { NextResponse } from "next/server";
 
@@ -22,9 +18,8 @@ export async function POST(request: Request) {
       );
     }
 
-    const iyzipay = getIyzicoClient();
-    const result = await iyzicoRetrieveCheckoutForm(iyzipay, {
-      locale: Iyzipay.LOCALE.EN,
+    const result = await iyzicoRetrieveCheckoutForm({
+      locale: "en",
       token,
     });
 
@@ -63,8 +58,7 @@ export async function POST(request: Request) {
       );
     }
 
-    if (order.status === "paid" && order.campaign_payload) {
-      // Idempotent: already processed
+    if (order.status === "paid") {
       return NextResponse.redirect(`${baseUrl}/dashboard?payment=ok`);
     }
 
