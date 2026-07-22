@@ -66,10 +66,9 @@ export async function POST(request: Request) {
       return NextResponse.redirect(`${baseUrl}/dashboard?payment=ok`);
     }
 
-    const input = order.campaign_payload as CampaignInput;
-    const campaign = await createCampaignForUser(order.user_id, input);
-
-    await admin
+    // Claim this pending order immediately so iyzico retries cannot
+    // create a second campaign / second Meta funnel while OpenAI runs.
+    const { data: claimed } = await admin
       .from("payment_orders")
       .update({
         status: "paid",
@@ -79,7 +78,19 @@ export async function POST(request: Request) {
         error_message: null,
         updated_at: new Date().toISOString(),
       })
-      .eq("id", order.id);
+      .eq("id", order.id)
+      .eq("status", "pending")
+      .select("id")
+      .maybeSingle();
+
+    if (!claimed) {
+      return NextResponse.redirect(`${baseUrl}/dashboard?payment=ok`);
+    }
+
+    const input = order.campaign_payload as CampaignInput;
+    const campaign = await createCampaignForUser(order.user_id, input, {
+      deferContent: true,
+    });
 
     return NextResponse.redirect(
       `${baseUrl}/dashboard?created=${campaign.slug}&payment=ok`,

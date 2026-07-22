@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { UK_CITIES } from "@/lib/constants/cities";
 import {
   isManufacturerCategory,
@@ -76,6 +76,7 @@ export default function CampaignWizard({
   const [isApplied, setIsApplied] = useState(false);
   const [promoLoading, setPromoLoading] = useState(false);
   const [promoError, setPromoError] = useState("");
+  const launchLockRef = useRef(false);
 
   useEffect(() => {
     async function loadCategories() {
@@ -255,6 +256,9 @@ export default function CampaignWizard({
   }
 
   async function launchCampaign() {
+    if (launchLockRef.current || loading) return;
+    launchLockRef.current = true;
+
     persistDraft(3);
     setLoading(true);
     setError("");
@@ -264,6 +268,7 @@ export default function CampaignWizard({
     } = await supabase.auth.getUser();
 
     if (!user) {
+      launchLockRef.current = false;
       setPendingAfterSignup("launch");
       setSignupOpen(true);
       setLoading(false);
@@ -293,6 +298,7 @@ export default function CampaignWizard({
         requiresPayment?: boolean;
         slug?: string;
         paid?: boolean;
+        token?: string;
       };
 
       if (!res.ok) {
@@ -304,6 +310,9 @@ export default function CampaignWizard({
           value: checkoutCharge.amount,
           currency: checkoutCharge.currency,
           content_name: pricingPlan.name,
+          dedupeKey: data.token
+            ? `ferixai_meta_initiate_checkout:${data.token}`
+            : `ferixai_meta_initiate_checkout:${planSlug}:${checkoutCharge.amount}`,
         });
         window.location.assign(data.paymentPageUrl);
         return;
@@ -332,6 +341,7 @@ export default function CampaignWizard({
 
       throw new Error(data.error || "Could not launch campaign");
     } catch (err) {
+      launchLockRef.current = false;
       setError(err instanceof Error ? err.message : "Could not launch campaign");
       setLoading(false);
     }
