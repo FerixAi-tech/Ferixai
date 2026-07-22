@@ -9,7 +9,7 @@
  * To restore production GBP checkout: set `enabled` to `false`.
  */
 export const TEMPORARY_TRY_ONE_LIRA_CHECKOUT = {
-  enabled: true,
+  enabled: false,
   amount: 1,
   currency: "TRY",
 } as const;
