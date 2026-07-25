@@ -153,6 +153,7 @@ export default function SignupCard({
         businessName: trimmedName,
         category: "",
         productDescription: "",
+        keyFeatures: ["", "", ""],
         city: "",
         planSlug: DEFAULT_PLAN_SLUG,
         step: 1,

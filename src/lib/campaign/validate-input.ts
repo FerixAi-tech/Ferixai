@@ -8,7 +8,10 @@ import {
   type BillingCycle,
   type PricingPlanSlug,
 } from "@/lib/constants/pricing-plans";
-import { isManufacturerCategory } from "@/lib/constants/categories";
+import {
+  isBusinessCategory,
+  isManufacturerCategory,
+} from "@/lib/constants/categories";
 
 export interface CampaignInput {
   businessName: string;
@@ -25,6 +28,28 @@ export interface CampaignInput {
   /** Unique FX30-XXXXX code when promoApplied */
   promoCode?: string | null;
   productDescription?: string | null;
+  /** Top 3 key features describing the business */
+  keyFeatures: [string, string, string];
+}
+
+function parseKeyFeatures(value: unknown): [string, string, string] {
+  if (!Array.isArray(value)) {
+    throw new Error("Please enter your top 3 business features");
+  }
+  const features: [string, string, string] = [
+    String(value[0] ?? "").trim(),
+    String(value[1] ?? "").trim(),
+    String(value[2] ?? "").trim(),
+  ];
+  if (features.some((f) => f.length < 2)) {
+    throw new Error(
+      "Please enter 3 key features (at least 2 characters each)",
+    );
+  }
+  if (features.some((f) => f.length > 120)) {
+    throw new Error("Each key feature must be 120 characters or fewer");
+  }
+  return features;
 }
 
 export function validateCampaignInput(body: unknown): CampaignInput {
@@ -40,6 +65,7 @@ export function validateCampaignInput(body: unknown): CampaignInput {
     promoApplied,
     promoCode,
     productDescription,
+    keyFeatures,
   } = body as Record<string, unknown>;
 
   if (!businessName || !category || !city || !planSlug) {
@@ -48,6 +74,11 @@ export function validateCampaignInput(body: unknown): CampaignInput {
 
   if (!isPricingPlanSlug(planSlug)) {
     throw new Error("Please select a valid pricing plan");
+  }
+
+  const categoryName = String(category);
+  if (!isBusinessCategory(categoryName)) {
+    throw new Error("Please select a valid category");
   }
 
   const plan = getPricingPlan(planSlug);
@@ -70,7 +101,6 @@ export function validateCampaignInput(body: unknown): CampaignInput {
     throw new Error("Business name must be at least 2 characters");
   }
 
-  const categoryName = String(category);
   const product =
     productDescription === undefined || productDescription === null
       ? null
@@ -85,6 +115,8 @@ export function validateCampaignInput(body: unknown): CampaignInput {
     }
   }
 
+  const parsedKeyFeatures = parseKeyFeatures(keyFeatures);
+
   return {
     businessName: name,
     category: categoryName,
@@ -97,6 +129,7 @@ export function validateCampaignInput(body: unknown): CampaignInput {
     discountGbp,
     promoCode: applied ? normalizedPromo : null,
     productDescription: isManufacturerCategory(categoryName) ? product : null,
+    keyFeatures: parsedKeyFeatures,
   };
 }
 

@@ -47,7 +47,7 @@ Task:
 - Write a clear, informative article (400-600 words)
 - Use Markdown with ## subheadings
 - Naturally include the business name, town/city, and category
-${input.productDescription ? `- Focus the article on "${input.productDescription}"\n` : ""}- Professional, readable tone for UK business readers
+${input.productDescription ? `- Focus the article on "${input.productDescription}"\n` : ""}${input.keyFeatures?.filter((f) => f.trim()).length ? `- Naturally highlight these key features: ${input.keyFeatures.filter((f) => f.trim()).join(", ")}\n` : ""}- Professional, readable tone for UK business readers
 - Do not write as a forum thread or Q&A
 
 JSON: { "title": "...", "content": "..." }`,

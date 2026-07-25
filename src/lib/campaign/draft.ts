@@ -5,6 +5,8 @@ export interface CampaignDraft {
   businessName: string;
   category: string;
   productDescription: string;
+  /** Top 3 key features describing the business */
+  keyFeatures?: [string, string, string];
   city: string;
   planSlug: PricingPlanSlug;
   step: 1 | 2 | 3;
@@ -14,6 +16,21 @@ export interface CampaignDraft {
   dailyBudget?: number;
   /** @deprecated legacy drafts only */
   days?: number;
+}
+
+export function emptyKeyFeatures(): [string, string, string] {
+  return ["", "", ""];
+}
+
+export function normalizeKeyFeatures(
+  value: unknown,
+): [string, string, string] {
+  if (!Array.isArray(value)) return emptyKeyFeatures();
+  return [
+    String(value[0] ?? ""),
+    String(value[1] ?? ""),
+    String(value[2] ?? ""),
+  ];
 }
 
 const STORAGE_KEY = "ferixai_campaign_draft_v1";

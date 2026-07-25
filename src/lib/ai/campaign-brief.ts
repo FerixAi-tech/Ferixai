@@ -4,6 +4,7 @@ export interface CampaignBrief {
   city: string;
   boneQuestions: string[];
   productDescription?: string | null;
+  keyFeatures?: string[] | null;
 }
 
 export function formatBoneQuestions(questions: string[]): string {
@@ -11,10 +12,17 @@ export function formatBoneQuestions(questions: string[]): string {
 }
 
 export function formatCategoryContext(brief: CampaignBrief): string {
+  const lines = [`Category: ${brief.category}`];
   if (brief.productDescription?.trim()) {
-    return `Category: ${brief.category}\nProduct or service: ${brief.productDescription.trim()}`;
+    lines.push(`Product or service: ${brief.productDescription.trim()}`);
   }
-  return `Category: ${brief.category}`;
+  const features = (brief.keyFeatures || [])
+    .map((f) => f.trim())
+    .filter(Boolean);
+  if (features.length > 0) {
+    lines.push(`Key features: ${features.join(", ")}`);
+  }
+  return lines.join("\n");
 }
 
 export function buildManufacturerBoneQuestions(

@@ -70,6 +70,7 @@ export async function createCampaignForUser(
     promoApplied,
     promoCode,
     productDescription,
+    keyFeatures,
   } = input;
   const admin = createAdminClient();
   const pricingPlan = getPricingPlan(planSlug);
@@ -117,9 +118,19 @@ export async function createCampaignForUser(
     city,
     boneQuestions: boneQuestions.slice(0, contentPlan.boneQuestionDepth),
     productDescription,
+    keyFeatures,
   };
 
   const slug = buildSlug(businessName, city, category);
+
+  const persistedDescription = isManufacturerCategory(category)
+    ? [
+        productDescription?.trim(),
+        keyFeatures.length ? `Key features: ${keyFeatures.join(", ")}` : null,
+      ]
+        .filter(Boolean)
+        .join("\n\n") || null
+    : `Key features: ${keyFeatures.join(", ")}`;
 
   const { data: campaign, error: campaignError } = await admin
     .from("campaigns")
@@ -128,7 +139,7 @@ export async function createCampaignForUser(
       business_name: businessName,
       category,
       city,
-      product_description: productDescription,
+      product_description: persistedDescription,
       plan_slug: planSlug,
       billing_cycle: billingCycle,
       daily_budget: null,

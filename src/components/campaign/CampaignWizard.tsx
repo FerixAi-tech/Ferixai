@@ -3,9 +3,10 @@
 import { useState, useEffect, useRef } from "react";
 import { UK_CITIES } from "@/lib/constants/cities";
 import {
+  isBusinessCategory,
   isManufacturerCategory,
+  listBusinessCategoryOptions,
   MANUFACTURER_CATEGORY,
-  sortCategories,
 } from "@/lib/constants/categories";
 import {
   formatCurrency,
@@ -28,10 +29,11 @@ import MetricsPreview from "@/components/campaign/MetricsPreview";
 import PricingPlanCards from "@/components/campaign/PricingPlanCards";
 import { createClient } from "@/lib/supabase/client";
 import {
+  emptyKeyFeatures,
   loadCampaignDraft,
+  normalizeKeyFeatures,
   saveCampaignDraft,
 } from "@/lib/campaign/draft";
-import type { Category } from "@/lib/types";
 import SignupCard from "@/components/landing/SignupCard";
 import {
   ArrowLeft,
@@ -41,11 +43,14 @@ import {
   MapPin,
   Tag,
   Package,
+  Sparkles,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import DarkSelect from "@/components/ui/DarkSelect";
 
 type Step = 1 | 2 | 3;
+
+const CATEGORY_OPTIONS = listBusinessCategoryOptions();
 
 export default function CampaignWizard({
   initialBusinessName = "",
@@ -59,7 +64,6 @@ export default function CampaignWizard({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState<string[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
   const [draftRestored, setDraftRestored] = useState(false);
   const [signupOpen, setSignupOpen] = useState(false);
   const [pendingAfterSignup, setPendingAfterSignup] = useState<
@@ -69,6 +73,8 @@ export default function CampaignWizard({
   const [businessName, setBusinessName] = useState(initialBusinessName);
   const [category, setCategory] = useState("");
   const [productDescription, setProductDescription] = useState("");
+  const [keyFeatures, setKeyFeatures] =
+    useState<[string, string, string]>(() => emptyKeyFeatures());
   const [city, setCity] = useState("");
   const [planSlug, setPlanSlug] =
     useState<PricingPlanSlug>(DEFAULT_PLAN_SLUG);
@@ -79,23 +85,13 @@ export default function CampaignWizard({
   const launchLockRef = useRef(false);
 
   useEffect(() => {
-    async function loadCategories() {
-      const { data } = await supabase
-        .from("categories")
-        .select("*")
-        .order("name");
-      if (data) setCategories(sortCategories(data));
-    }
-    loadCategories();
-  }, [supabase]);
-
-  useEffect(() => {
     if (draftRestored) return;
     const draft = loadCampaignDraft();
     if (!draft) {
       setStep(1);
       setCategory("");
       setProductDescription("");
+      setKeyFeatures(emptyKeyFeatures());
       setCity("");
       setPlanSlug(DEFAULT_PLAN_SLUG);
       setPromoCode("");
@@ -111,8 +107,9 @@ export default function CampaignWizard({
     }
 
     setBusinessName(draft.businessName || initialBusinessName);
-    setCategory(draft.category);
+    setCategory(isBusinessCategory(draft.category) ? draft.category : "");
     setProductDescription(draft.productDescription || "");
+    setKeyFeatures(normalizeKeyFeatures(draft.keyFeatures));
     setCity(draft.city);
     setPlanSlug(
       isPricingPlanSlug(draft.planSlug) ? draft.planSlug : DEFAULT_PLAN_SLUG,
@@ -139,6 +136,14 @@ export default function CampaignWizard({
   );
   const isManufacturer = isManufacturerCategory(category);
 
+  function updateKeyFeature(index: 0 | 1 | 2, value: string) {
+    setKeyFeatures((prev) => {
+      const next: [string, string, string] = [...prev];
+      next[index] = value;
+      return next;
+    });
+  }
+
   function persistDraft(nextStep: Step = step) {
     const name = businessName.trim();
     if (!name && !category && !city) return;
@@ -146,6 +151,7 @@ export default function CampaignWizard({
       businessName: name,
       category,
       productDescription: isManufacturer ? productDescription.trim() : "",
+      keyFeatures,
       city,
       planSlug,
       step: nextStep,
@@ -163,6 +169,7 @@ export default function CampaignWizard({
     businessName,
     category,
     productDescription,
+    keyFeatures,
     city,
     planSlug,
     step,
@@ -179,6 +186,14 @@ export default function CampaignWizard({
       errors.push(
         "Please describe what you manufacture (at least 3 characters).",
       );
+    }
+    if (category) {
+      const trimmed = keyFeatures.map((f) => f.trim());
+      if (trimmed.some((f) => f.length < 2)) {
+        errors.push(
+          "Please enter your top 3 key features (at least 2 characters each).",
+        );
+      }
     }
     return errors;
   }
@@ -289,6 +304,7 @@ export default function CampaignWizard({
           productDescription: isManufacturer
             ? productDescription.trim()
             : undefined,
+          keyFeatures: keyFeatures.map((f) => f.trim()),
         }),
       });
 
@@ -408,12 +424,35 @@ export default function CampaignWizard({
               value={category}
               onChange={setCategory}
               placeholder="Select a category"
-              options={categories.map((c) => ({
+              options={CATEGORY_OPTIONS.map((c) => ({
                 value: c.name,
                 label: c.name,
               }))}
             />
           </div>
+          {category ? (
+            <div>
+              <label className="mb-1.5 flex items-center gap-2 text-sm text-[#94a3b8]">
+                <Sparkles className="h-4 w-4" /> What are the top 3 features that
+                best describe your business?
+              </label>
+              <p className="mb-3 text-xs text-[#64748b]">
+                e.g., 24/7 Emergency Service, Free Inspection, Family Owned
+              </p>
+              <div className="space-y-3">
+                {([0, 1, 2] as const).map((index) => (
+                  <input
+                    key={index}
+                    className="lf-input"
+                    value={keyFeatures[index]}
+                    onChange={(e) => updateKeyFeature(index, e.target.value)}
+                    placeholder={`Key feature ${index + 1}`}
+                    maxLength={120}
+                  />
+                ))}
+              </div>
+            </div>
+          ) : null}
           {isManufacturer && (
             <div>
               <label className="mb-1.5 flex items-center gap-2 text-sm text-[#94a3b8]">
@@ -559,6 +598,17 @@ export default function CampaignWizard({
                 <dt className="text-[#64748b]">Category</dt>
                 <dd className="text-white">{category || MANUFACTURER_CATEGORY}</dd>
               </div>
+              {keyFeatures.some((f) => f.trim()) ? (
+                <div className="sm:col-span-2">
+                  <dt className="text-[#64748b]">Key features</dt>
+                  <dd className="text-white">
+                    {keyFeatures
+                      .map((f) => f.trim())
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </dd>
+                </div>
+              ) : null}
               <div>
                 <dt className="text-[#64748b]">Town / city</dt>
                 <dd className="text-white">{city}</dd>
