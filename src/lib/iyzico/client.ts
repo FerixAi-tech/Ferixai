@@ -10,7 +10,29 @@ export type IyzicoResult = {
   paymentStatus?: string;
   paymentId?: string | number;
   conversationId?: string;
+  price?: string | number;
+  paidPrice?: string | number;
+  currency?: string;
 };
+
+/** True only when iyzico reports the checkout payment was actually collected. */
+export function isIyzicoPaymentCollected(result: IyzicoResult): boolean {
+  if (String(result.status || "").toLowerCase() !== "success") {
+    return false;
+  }
+
+  const paymentStatus = String(result.paymentStatus || "").toUpperCase();
+  if (paymentStatus !== "SUCCESS" && paymentStatus !== "SUCCESSFUL") {
+    return false;
+  }
+
+  // A real collection always returns a payment id from iyzico.
+  if (!result.paymentId && result.paymentId !== 0) {
+    return false;
+  }
+
+  return true;
+}
 
 function getConfig() {
   const apiKey = process.env.IYZICO_API_KEY?.trim();
