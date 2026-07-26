@@ -26,6 +26,14 @@ function amountsMatch(
   return Math.abs(paid - expectedAmount) < 0.011;
 }
 
+function paymentOkUrl(baseUrl: string, slug: string): string {
+  return `${baseUrl}/dashboard?created=${encodeURIComponent(slug)}&payment=ok`;
+}
+
+function paymentProcessingUrl(baseUrl: string): string {
+  return `${baseUrl}/dashboard?payment=processing`;
+}
+
 export async function POST(request: Request) {
   const baseUrl = getRequestBaseUrl(request);
 
@@ -67,7 +75,9 @@ export async function POST(request: Request) {
           .update({
             status: "failed",
             error_message: String(
-              result.errorMessage || result.paymentStatus || "Payment not completed",
+              result.errorMessage ||
+                result.paymentStatus ||
+                "Payment not completed",
             ),
             updated_at: new Date().toISOString(),
           })
@@ -89,13 +99,18 @@ export async function POST(request: Request) {
       return NextResponse.redirect(`${baseUrl}/dashboard/new?payment=failed`);
     }
 
+    // Already fulfilled — only report success when we have a campaign slug.
     if (order.status === "paid") {
-      return NextResponse.redirect(`${baseUrl}/dashboard?payment=ok`);
+      const slug = String(order.campaign_slug || "").trim();
+      if (slug) {
+        return NextResponse.redirect(paymentOkUrl(baseUrl, slug));
+      }
+      return NextResponse.redirect(paymentProcessingUrl(baseUrl));
     }
 
-    // Another callback is already creating the campaign after iyzico confirmed.
+    // Another callback is creating the campaign — not success yet.
     if (order.status === "processing") {
-      return NextResponse.redirect(`${baseUrl}/dashboard?payment=ok`);
+      return NextResponse.redirect(paymentProcessingUrl(baseUrl));
     }
 
     // Lock the order only after iyzico confirmed collection — not before.
@@ -113,8 +128,8 @@ export async function POST(request: Request) {
       .maybeSingle();
 
     if (!claimed) {
-      // Race: another worker claimed processing/paid meanwhile.
-      return NextResponse.redirect(`${baseUrl}/dashboard?payment=ok`);
+      // Race: another worker claimed processing/paid — wait, don't claim success.
+      return NextResponse.redirect(paymentProcessingUrl(baseUrl));
     }
 
     try {
@@ -128,11 +143,12 @@ export async function POST(request: Request) {
         deferContent: true,
       });
 
-      // Only now is the order "paid" in our system: money confirmed + campaign started.
+      // Only now: money confirmed + campaign started → paid + payment=ok.
       await admin
         .from("payment_orders")
         .update({
           status: "paid",
+          campaign_slug: campaign.slug,
           iyzico_payment_id: String(result.paymentId),
           error_message: null,
           updated_at: new Date().toISOString(),
@@ -140,14 +156,14 @@ export async function POST(request: Request) {
         .eq("id", order.id)
         .eq("status", "processing");
 
-      return NextResponse.redirect(
-        `${baseUrl}/dashboard?created=${campaign.slug}&payment=ok`,
-      );
+      return NextResponse.redirect(paymentOkUrl(baseUrl, campaign.slug));
     } catch (fulfillmentError) {
-      console.error("Campaign fulfillment after iyzico payment failed:", fulfillmentError);
+      console.error(
+        "Campaign fulfillment after iyzico payment failed:",
+        fulfillmentError,
+      );
 
       // Release the lock so a later iyzico retry / support retry can fulfill.
-      // Money was taken at iyzico; we still must not report "paid" until campaign exists.
       await admin
         .from("payment_orders")
         .update({

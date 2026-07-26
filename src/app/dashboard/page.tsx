@@ -10,6 +10,7 @@ import DashboardActions from "@/components/dashboard/DashboardActions";
 import ClearCampaignDraftOnSuccess from "@/components/campaign/ClearCampaignDraftOnSuccess";
 import CampaignLaunchStatus from "@/components/dashboard/CampaignLaunchStatus";
 import PaymentSuccessModal from "@/components/dashboard/PaymentSuccessModal";
+import PaymentProcessingBanner from "@/components/dashboard/PaymentProcessingBanner";
 import MetaPaymentSuccessTracker from "@/components/meta/MetaPaymentSuccessTracker";
 import AppNav from "@/components/layout/AppNav";
 import SupportContact from "@/components/layout/SupportContact";
@@ -38,7 +39,42 @@ export default async function DashboardPage({
     ? campaigns?.find((c) => c.content_slug === params.created)
     : null;
 
-  const paymentOk = params.payment === "ok";
+  const paymentOkRequested = params.payment === "ok";
+  const paymentProcessing = params.payment === "processing";
+
+  // Meta + success UI only when a real paid order matches this campaign slug.
+  let verifiedPaidOrder: {
+    id: string;
+    amount_gbp: number;
+    campaign_slug: string | null;
+  } | null = null;
+
+  if (paymentOkRequested && createdCampaign?.content_slug && user) {
+    const { data: paidOrder } = await supabase
+      .from("payment_orders")
+      .select("id, amount_gbp, campaign_slug, status")
+      .eq("user_id", user.id)
+      .eq("status", "paid")
+      .eq("campaign_slug", createdCampaign.content_slug)
+      .order("updated_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (paidOrder?.id) {
+      verifiedPaidOrder = {
+        id: paidOrder.id,
+        amount_gbp: Number(paidOrder.amount_gbp) || 0,
+        campaign_slug: paidOrder.campaign_slug,
+      };
+    }
+  }
+
+  const paymentConfirmed = Boolean(
+    paymentOkRequested &&
+      createdCampaign &&
+      verifiedPaidOrder &&
+      verifiedPaidOrder.amount_gbp > 0,
+  );
 
   const { data: publishedRow } =
     createdCampaign?.content_slug && user
@@ -62,16 +98,18 @@ export default async function DashboardPage({
   return (
     <>
       <ClearCampaignDraftOnSuccess
-        active={Boolean(createdCampaign) || paymentOk}
+        active={paymentConfirmed || Boolean(createdCampaign)}
       />
       <MetaPaymentSuccessTracker
-        active={paymentOk}
-        dedupeKey={params.created || "payment-ok"}
-        payableGbp={
-          createdCampaign ? Number(createdCampaign.total_cost) || 0 : 0
+        active={paymentConfirmed}
+        dedupeKey={
+          paymentConfirmed && createdCampaign?.content_slug && verifiedPaidOrder
+            ? `${createdCampaign.content_slug}:${verifiedPaidOrder.id}`
+            : undefined
         }
+        payableGbp={verifiedPaidOrder?.amount_gbp ?? 0}
       />
-      {paymentOk ? (
+      {paymentConfirmed ? (
         <PaymentSuccessModal
           businessName={createdCampaign?.business_name}
           slug={createdCampaign?.content_slug || params.created}
@@ -91,7 +129,11 @@ export default async function DashboardPage({
       />
 
       <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-        {!paymentOk && createdCampaign?.content_slug ? (
+        {paymentProcessing && !paymentConfirmed ? (
+          <PaymentProcessingBanner />
+        ) : null}
+
+        {!paymentConfirmed && createdCampaign?.content_slug ? (
           <CampaignLaunchStatus
             businessName={createdCampaign.business_name}
             slug={createdCampaign.content_slug}
