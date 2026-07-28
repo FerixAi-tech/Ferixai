@@ -105,6 +105,7 @@ export default function HomeLanding({
                 →
               </span>
             </button>
+            <LandingPromoCountdown align="center" />
             <p className="text-sm text-[#94a3b8]">
               Already have an account?{" "}
               <Link
@@ -288,6 +289,7 @@ export default function HomeLanding({
                   →
                 </span>
               </button>
+              <LandingPromoCountdown align="center" className="mt-4" />
               <p className="mx-auto mt-4 max-w-lg text-center text-[11px] leading-relaxed tracking-wide text-[#64748b]">
                 One-time promo code valid for new verified business names only
                 to prevent abuse. No credit card required to explore.

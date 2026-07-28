@@ -6,6 +6,7 @@ import {
   PROMO_DISCOUNT_GBP,
 } from "@/lib/constants/pricing-plans";
 import { formatCurrency } from "@/lib/constants/metrics";
+import LandingPromoCountdown from "@/components/landing/LandingPromoCountdown";
 
 export default function LandingPricingPlans({
   onClaim,
@@ -84,7 +85,7 @@ export default function LandingPricingPlans({
       </div>
 
       {onClaim ? (
-        <div className="mt-8 flex justify-center">
+        <div className="mt-8 flex flex-col items-center">
           <button
             type="button"
             onClick={onClaim}
@@ -93,6 +94,7 @@ export default function LandingPricingPlans({
             <span>Claim My £{PROMO_DISCOUNT_GBP} Code &amp; Start Free</span>
             <span aria-hidden>→</span>
           </button>
+          <LandingPromoCountdown align="center" />
         </div>
       ) : null}
     </section>

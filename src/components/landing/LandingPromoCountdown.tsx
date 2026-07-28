@@ -58,7 +58,13 @@ function Unit({
   );
 }
 
-export default function LandingPromoCountdown() {
+export default function LandingPromoCountdown({
+  className = "",
+  align = "left",
+}: {
+  className?: string;
+  align?: "left" | "center";
+}) {
   const [remaining, setRemaining] = useState<Remaining | null>(null);
 
   useEffect(() => {
@@ -77,9 +83,12 @@ export default function LandingPromoCountdown() {
     expired: false,
   };
 
+  const alignClass =
+    align === "center" ? "mx-auto items-center text-center" : "items-start text-left";
+
   return (
     <div
-      className="lf-animate-in lf-animate-in-4 mt-4 w-full max-w-md"
+      className={`mt-4 flex w-full max-w-md flex-col ${alignClass} ${className}`.trim()}
       role="timer"
       aria-live="polite"
       aria-atomic="true"
@@ -92,7 +101,11 @@ export default function LandingPromoCountdown() {
           This welcome offer has ended.
         </p>
       ) : (
-        <div className="mt-2 flex flex-wrap items-center gap-2">
+        <div
+          className={`mt-2 flex flex-wrap items-center gap-2 ${
+            align === "center" ? "justify-center" : "justify-start"
+          }`}
+        >
           <Unit value={String(display.days)} label="Days" />
           <span className="lf-orbitron text-lg font-bold text-emerald-400/70" aria-hidden>
             :

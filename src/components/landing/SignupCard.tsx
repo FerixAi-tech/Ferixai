@@ -11,6 +11,7 @@ import {
   saveCampaignDraft,
 } from "@/lib/campaign/draft";
 import FuturisticScene3D from "@/components/landing/FuturisticScene3D";
+import LandingPromoCountdown from "@/components/landing/LandingPromoCountdown";
 import { trackCompleteRegistration } from "@/lib/meta/pixel";
 
 interface SignupCardProps {
@@ -340,6 +341,8 @@ export default function SignupCard({
                     </span>
                   </button>
                 </form>
+
+                <LandingPromoCountdown align="center" className="mx-auto" />
 
                 <p className="mt-4 text-center text-[11px] leading-relaxed tracking-wide text-[#64748b]">
                   One-time promo code valid for new verified business names only
