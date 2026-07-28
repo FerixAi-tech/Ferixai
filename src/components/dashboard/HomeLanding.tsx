@@ -218,6 +218,8 @@ export default function HomeLanding({
           </div>
         </section>
 
+        <LandingPricingPlans onClaim={() => setSignupOpen(true)} />
+
         <section className="pb-12 pt-4" id="how-it-works">
           <div className="lf-animate-in mb-12 text-center">
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-fuchsia-300">
@@ -251,8 +253,6 @@ export default function HomeLanding({
             ))}
           </div>
         </section>
-
-        <LandingPricingPlans onClaim={() => setSignupOpen(true)} />
 
         <SupportedAIPlatforms />
         <LandingCorporateSections />
