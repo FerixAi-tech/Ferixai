@@ -9,10 +9,20 @@ import { createCampaignForUser } from "@/lib/campaign/create-campaign";
 import { assertPromoCodeAvailable } from "@/lib/promo/codes";
 import { getIyzicoCheckoutCharge } from "@/lib/constants/checkout";
 import { initializeIyzicoCheckout } from "@/lib/iyzico/checkout";
+import {
+  getClientIpFromHeaders,
+  parseMetaCookies,
+} from "@/lib/meta/capi";
 import { NextResponse } from "next/server";
 import { randomUUID } from "crypto";
 
 export const runtime = "nodejs";
+
+function asOptionalCookie(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  return trimmed ? trimmed.slice(0, 512) : null;
+}
 
 export async function POST(request: Request) {
   try {
@@ -27,6 +37,15 @@ export async function POST(request: Request) {
 
     const body = await request.json();
     const input = validateCampaignInput(body);
+    const cookieHeader = request.headers.get("cookie");
+    const fromCookies = parseMetaCookies(cookieHeader);
+    const metaFbp =
+      asOptionalCookie(body.fbp) || asOptionalCookie(fromCookies.fbp);
+    const metaFbc =
+      asOptionalCookie(body.fbc) || asOptionalCookie(fromCookies.fbc);
+    const clientIp = getClientIpFromHeaders(request.headers) || null;
+    const clientUserAgent =
+      request.headers.get("user-agent")?.trim().slice(0, 512) || null;
 
     if (input.promoApplied && input.promoCode) {
       await assertPromoCodeAvailable(input.promoCode);
@@ -80,17 +99,15 @@ export async function POST(request: Request) {
       currency: charge.currency,
       status: "pending",
       campaign_payload: input,
+      client_ip: clientIp,
+      client_user_agent: clientUserAgent,
+      meta_fbp: metaFbp,
+      meta_fbc: metaFbc,
     });
 
     if (insertError) {
       throw new Error(insertError.message || "Could not create payment order");
     }
-
-    const forwarded = request.headers.get("x-forwarded-for");
-    const clientIp =
-      forwarded?.split(",")[0]?.trim() ||
-      request.headers.get("x-real-ip") ||
-      undefined;
 
     let checkout: { token: string; paymentPageUrl: string };
     try {

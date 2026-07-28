@@ -52,6 +52,14 @@ type Step = 1 | 2 | 3;
 
 const CATEGORY_OPTIONS = listBusinessCategoryOptions();
 
+function readBrowserCookie(name: string): string | undefined {
+  if (typeof document === "undefined") return undefined;
+  const match = document.cookie.match(
+    new RegExp(`(?:^|; )${name}=([^;]*)`),
+  );
+  return match?.[1] ? decodeURIComponent(match[1]) : undefined;
+}
+
 export default function CampaignWizard({
   initialBusinessName = "",
 }: {
@@ -305,6 +313,8 @@ export default function CampaignWizard({
             ? productDescription.trim()
             : undefined,
           keyFeatures: keyFeatures.map((f) => f.trim()),
+          fbp: readBrowserCookie("_fbp"),
+          fbc: readBrowserCookie("_fbc"),
         }),
       });
 

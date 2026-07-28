@@ -102,17 +102,22 @@ export function trackInitiateCheckout(options?: {
 export function trackPurchase(options: {
   value: number;
   currency: string;
+  content_name?: string;
   dedupeKey?: string;
+  /** Must match server CAPI `event_id` for Pixel ↔ CAPI deduplication. */
+  eventID?: string;
 }): void {
   const dedupeKey =
     options.dedupeKey ||
     `ferixai_meta_purchase:${options.value}:${options.currency}`;
+  const eventID = options.eventID || dedupeKey;
   trackMetaEvent(
     "Purchase",
     {
       value: options.value,
       currency: options.currency,
+      content_name: options.content_name || "FerixAI Subscription",
     },
-    { dedupeKey, eventID: dedupeKey },
+    { dedupeKey, eventID },
   );
 }

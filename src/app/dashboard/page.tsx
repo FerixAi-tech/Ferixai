@@ -107,6 +107,11 @@ export default async function DashboardPage({
             ? `${createdCampaign.content_slug}:${verifiedPaidOrder.id}`
             : undefined
         }
+        eventID={
+          paymentConfirmed && verifiedPaidOrder
+            ? verifiedPaidOrder.id
+            : undefined
+        }
         payableGbp={verifiedPaidOrder?.amount_gbp ?? 0}
       />
       {paymentConfirmed ? (
