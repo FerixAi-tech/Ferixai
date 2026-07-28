@@ -12,6 +12,7 @@ import LandingAppFeatures from "@/components/landing/LandingAppFeatures";
 import SupportedAIPlatforms from "@/components/landing/SupportedAIPlatforms";
 import LandingCorporateSections from "@/components/landing/LandingCorporateSections";
 import LandingPricingPlans from "@/components/landing/LandingPricingPlans";
+import LandingPromoCountdown from "@/components/landing/LandingPromoCountdown";
 import GlobalAiNetwork from "@/components/campaign/GlobalAiNetwork";
 import LiveAiCampaignsCard from "@/components/landing/LiveAiCampaignsCard";
 import "@/components/landing/landing-futuristic.css";
@@ -173,6 +174,8 @@ export default function HomeLanding({
                 View plans from {formatCurrency(FROM_MONTHLY_GBP)}/month
               </a>
             </div>
+
+            <LandingPromoCountdown />
 
             <div className="lf-animate-in lf-animate-in-5 mt-8 grid grid-cols-3 gap-4">
               <div>
