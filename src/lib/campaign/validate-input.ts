@@ -9,8 +9,9 @@ import {
   type PricingPlanSlug,
 } from "@/lib/constants/pricing-plans";
 import {
-  isBusinessCategory,
   isManufacturerCategory,
+  isValidCategoryName,
+  normalizeCategoryName,
 } from "@/lib/constants/categories";
 
 export interface CampaignInput {
@@ -76,9 +77,9 @@ export function validateCampaignInput(body: unknown): CampaignInput {
     throw new Error("Please select a valid pricing plan");
   }
 
-  const categoryName = String(category);
-  if (!isBusinessCategory(categoryName)) {
-    throw new Error("Please select a valid category");
+  const categoryName = normalizeCategoryName(String(category));
+  if (!isValidCategoryName(categoryName)) {
+    throw new Error("Please enter a valid category (2–80 characters)");
   }
 
   const plan = getPricingPlan(planSlug);

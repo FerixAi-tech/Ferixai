@@ -31,9 +31,9 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const pathname = request.nextUrl.pathname;
-  const isAuthPage = pathname.startsWith("/auth");
+  const isAuthFormPage = pathname === "/auth";
 
-  if (user && isAuthPage) {
+  if (user && isAuthFormPage) {
     const url = request.nextUrl.clone();
     const rawRedirect = url.searchParams.get("redirect");
     const safeRedirect = getSafeInternalPath(rawRedirect, "");

@@ -3,10 +3,13 @@
 import { useState, useEffect, useRef } from "react";
 import { UK_CITIES } from "@/lib/constants/cities";
 import {
+  CUSTOM_CATEGORY_OPTION_VALUE,
   isBusinessCategory,
   isManufacturerCategory,
+  isValidCategoryName,
   listBusinessCategoryOptions,
   MANUFACTURER_CATEGORY,
+  normalizeCategoryName,
 } from "@/lib/constants/categories";
 import {
   formatCurrency,
@@ -80,6 +83,8 @@ export default function CampaignWizard({
 
   const [businessName, setBusinessName] = useState(initialBusinessName);
   const [category, setCategory] = useState("");
+  const [customCategoryOpen, setCustomCategoryOpen] = useState(false);
+  const [customCategory, setCustomCategory] = useState("");
   const [productDescription, setProductDescription] = useState("");
   const [keyFeatures, setKeyFeatures] =
     useState<[string, string, string]>(() => emptyKeyFeatures());
@@ -98,6 +103,8 @@ export default function CampaignWizard({
     if (!draft) {
       setStep(1);
       setCategory("");
+      setCustomCategoryOpen(false);
+      setCustomCategory("");
       setProductDescription("");
       setKeyFeatures(emptyKeyFeatures());
       setCity("");
@@ -115,7 +122,20 @@ export default function CampaignWizard({
     }
 
     setBusinessName(draft.businessName || initialBusinessName);
-    setCategory(isBusinessCategory(draft.category) ? draft.category : "");
+    const draftCategory = normalizeCategoryName(draft.category || "");
+    if (draftCategory && isBusinessCategory(draftCategory)) {
+      setCategory(draftCategory);
+      setCustomCategoryOpen(false);
+      setCustomCategory("");
+    } else if (draftCategory) {
+      setCategory(CUSTOM_CATEGORY_OPTION_VALUE);
+      setCustomCategoryOpen(true);
+      setCustomCategory(draftCategory);
+    } else {
+      setCategory("");
+      setCustomCategoryOpen(false);
+      setCustomCategory("");
+    }
     setProductDescription(draft.productDescription || "");
     setKeyFeatures(normalizeKeyFeatures(draft.keyFeatures));
     setCity(draft.city);
@@ -142,7 +162,28 @@ export default function CampaignWizard({
     pricingPlan,
     pricing.payable,
   );
-  const isManufacturer = isManufacturerCategory(category);
+
+  function resolvedCategoryName(): string {
+    if (customCategoryOpen || category === CUSTOM_CATEGORY_OPTION_VALUE) {
+      return normalizeCategoryName(customCategory);
+    }
+    return normalizeCategoryName(category);
+  }
+
+  const resolvedCategory = resolvedCategoryName();
+  const isManufacturer = isManufacturerCategory(resolvedCategory);
+
+  async function persistCategoryToSupabase(name: string): Promise<void> {
+    try {
+      await fetch("/api/categories/ensure", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name }),
+      });
+    } catch {
+      // Campaign create also ensures the row — ignore network hiccups here.
+    }
+  }
 
   function updateKeyFeature(index: 0 | 1 | 2, value: string) {
     setKeyFeatures((prev) => {
@@ -154,10 +195,11 @@ export default function CampaignWizard({
 
   function persistDraft(nextStep: Step = step) {
     const name = businessName.trim();
-    if (!name && !category && !city) return;
+    const cat = resolvedCategoryName();
+    if (!name && !cat && !city) return;
     saveCampaignDraft({
       businessName: name,
-      category,
+      category: cat,
       productDescription: isManufacturer ? productDescription.trim() : "",
       keyFeatures,
       city,
@@ -176,6 +218,8 @@ export default function CampaignWizard({
     draftRestored,
     businessName,
     category,
+    customCategory,
+    customCategoryOpen,
     productDescription,
     keyFeatures,
     city,
@@ -185,17 +229,24 @@ export default function CampaignWizard({
 
   function getStep1Errors(): string[] {
     const errors: string[] = [];
+    const cat = resolvedCategoryName();
     if (businessName.trim().length < 2) {
       errors.push("Business name must be at least 2 characters.");
     }
-    if (!category) errors.push("Please choose a category.");
+    if (customCategoryOpen || category === CUSTOM_CATEGORY_OPTION_VALUE) {
+      if (!isValidCategoryName(customCategory)) {
+        errors.push("Please enter your category (2–80 characters).");
+      }
+    } else if (!category) {
+      errors.push("Please choose a category.");
+    }
     if (!city) errors.push("Please choose a town or city.");
-    if (isManufacturerCategory(category) && productDescription.trim().length < 3) {
+    if (isManufacturerCategory(cat) && productDescription.trim().length < 3) {
       errors.push(
         "Please describe what you manufacture (at least 3 characters).",
       );
     }
-    if (category) {
+    if (cat) {
       const trimmed = keyFeatures.map((f) => f.trim());
       if (trimmed.some((f) => f.length < 2)) {
         errors.push(
@@ -214,7 +265,7 @@ export default function CampaignWizard({
     return errors;
   }
 
-  function goToStep2() {
+  async function goToStep2() {
     const errors = getStep1Errors();
     if (errors.length) {
       setFieldErrors(errors);
@@ -222,6 +273,8 @@ export default function CampaignWizard({
     }
     setFieldErrors([]);
     setError("");
+    const cat = resolvedCategoryName();
+    await persistCategoryToSupabase(cat);
     persistDraft(2);
     setStep(2);
   }
@@ -304,7 +357,7 @@ export default function CampaignWizard({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           businessName: businessName.trim(),
-          category,
+          category: resolvedCategoryName(),
           city,
           planSlug,
           promoApplied: isApplied,
@@ -430,17 +483,58 @@ export default function CampaignWizard({
             <label className="mb-1.5 flex items-center gap-2 text-sm text-[#94a3b8]">
               <Tag className="h-4 w-4" /> Category
             </label>
-            <DarkSelect
-              value={category}
-              onChange={setCategory}
-              placeholder="Select a category"
-              options={CATEGORY_OPTIONS.map((c) => ({
-                value: c.name,
-                label: c.name,
-              }))}
-            />
+            {!customCategoryOpen ? (
+              <>
+                <DarkSelect
+                  value={category}
+                  onChange={(value) => {
+                    setCategory(value);
+                    setCustomCategoryOpen(false);
+                    setCustomCategory("");
+                  }}
+                  placeholder="Select a category"
+                  options={CATEGORY_OPTIONS.map((c) => ({
+                    value: c.name,
+                    label: c.name,
+                  }))}
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCustomCategoryOpen(true);
+                    setCategory(CUSTOM_CATEGORY_OPTION_VALUE);
+                    setCustomCategory("");
+                  }}
+                  className="mt-2 text-left text-sm font-semibold text-teal-300 transition hover:text-teal-200 hover:underline"
+                >
+                  If your category isn&apos;t listed, click here
+                </button>
+              </>
+            ) : (
+              <div className="space-y-2">
+                <input
+                  className="lf-input"
+                  value={customCategory}
+                  onChange={(e) => setCustomCategory(e.target.value)}
+                  placeholder="Type your category"
+                  maxLength={80}
+                  autoFocus
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCustomCategoryOpen(false);
+                    setCustomCategory("");
+                    setCategory("");
+                  }}
+                  className="text-sm font-semibold text-[#94a3b8] transition hover:text-white hover:underline"
+                >
+                  Back to category list
+                </button>
+              </div>
+            )}
           </div>
-          {category ? (
+          {resolvedCategory ? (
             <div>
               <label className="mb-1.5 flex items-center gap-2 text-sm text-[#94a3b8]">
                 <Sparkles className="h-4 w-4" /> What are the top 3 features that
@@ -606,7 +700,9 @@ export default function CampaignWizard({
               </div>
               <div>
                 <dt className="text-[#64748b]">Category</dt>
-                <dd className="text-white">{category || MANUFACTURER_CATEGORY}</dd>
+                <dd className="text-white">
+                  {resolvedCategory || MANUFACTURER_CATEGORY}
+                </dd>
               </div>
               {keyFeatures.some((f) => f.trim()) ? (
                 <div className="sm:col-span-2">

@@ -9,6 +9,7 @@ import {
 } from "@/lib/ai/campaign-brief";
 import type { CampaignInput } from "@/lib/campaign/validate-input";
 import { isManufacturerCategory } from "@/lib/constants/categories";
+import { ensureCategorySaved } from "@/lib/categories/ensure-category";
 import {
   calculateVisibilityMetricsForPlan,
   getCampaignContentPlanForPlan,
@@ -80,11 +81,7 @@ export async function createCampaignForUser(
   const endsAt = new Date(now);
   endsAt.setDate(endsAt.getDate() + BILLING_CYCLE_DAYS);
 
-  const { data: categoryData } = await admin
-    .from("categories")
-    .select("id")
-    .eq("name", category)
-    .single();
+  const categoryId = await ensureCategorySaved(category);
 
   let boneQuestions: string[] = [];
 
@@ -94,11 +91,11 @@ export async function createCampaignForUser(
       city,
       businessName,
     );
-  } else if (categoryData) {
+  } else {
     const { data: questions } = await admin
       .from("bone_questions")
       .select("question_text")
-      .eq("category_id", categoryData.id)
+      .eq("category_id", categoryId)
       .order("sort_order");
 
     boneQuestions = questions?.map((q) => q.question_text) || [];
