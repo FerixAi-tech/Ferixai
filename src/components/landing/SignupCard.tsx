@@ -309,14 +309,14 @@ export default function SignupCard({
                   </div>
                   <div>
                     <label className="mb-1.5 block text-sm font-medium text-[#94a3b8]">
-                      Work email
+                      Email Address
                     </label>
                     <input
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
-                      placeholder="name@company.co.uk"
+                      placeholder="Your Email"
                       className="lf-input border-white/[0.12] bg-white/[0.04] transition focus:border-fuchsia-400/50 focus:bg-white/[0.05] focus:shadow-[0_0_0_3px_rgba(139,92,246,0.18),0_0_24px_rgba(236,72,153,0.16)]"
                       autoComplete="email"
                     />
