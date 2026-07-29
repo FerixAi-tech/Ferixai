@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Loader2, Mail } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { getSafeInternalPath } from "@/lib/auth/safe-redirect";
 import BrandLogo from "@/components/layout/BrandLogo";
@@ -19,19 +19,13 @@ export default function AuthForm() {
     searchParams.get("redirect"),
     "/dashboard",
   );
-  const linkError = searchParams.get("error") === "magic_link_failed";
 
   const [mode, setMode] = useState<"login" | "register">(initialMode);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(
-    linkError
-      ? "That sign-in link is invalid or has expired. Enter your email to receive a new one."
-      : "",
-  );
-  const [magicLinkSent, setMagicLinkSent] = useState(false);
+  const [error, setError] = useState("");
 
   const title = useMemo(
     () =>
@@ -43,32 +37,23 @@ export default function AuthForm() {
     e.preventDefault();
     setLoading(true);
     setError("");
-    setMagicLinkSent(false);
 
     const normalizedEmail = email.trim().toLowerCase();
 
     try {
       if (mode === "login") {
-        const emailRedirectTo = `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(redirect)}`;
-        const { error: otpError } = await supabase.auth.signInWithOtp({
-          email: normalizedEmail,
-          options: {
-            shouldCreateUser: false,
-            emailRedirectTo,
-          },
+        const res = await fetch("/api/auth/email-login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: normalizedEmail }),
         });
-
-        if (otpError) {
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
           throw new Error(
-            otpError.message.includes("Signups not allowed") ||
-              otpError.message.toLowerCase().includes("user not found")
-              ? "No account found for this email. Please register first."
-              : otpError.message,
+            (data as { error?: string }).error || "Sign-in failed",
           );
         }
-
-        setMagicLinkSent(true);
-        setLoading(false);
+        window.location.assign(redirect);
         return;
       }
 
@@ -125,7 +110,6 @@ export default function AuthForm() {
               onClick={() => {
                 setMode("login");
                 setError("");
-                setMagicLinkSent(false);
               }}
               className={`rounded-lg px-3 py-2 text-sm font-semibold ${
                 mode === "login"
@@ -140,7 +124,6 @@ export default function AuthForm() {
               onClick={() => {
                 setMode("register");
                 setError("");
-                setMagicLinkSent(false);
               }}
               className={`rounded-lg px-3 py-2 text-sm font-semibold ${
                 mode === "register"
@@ -158,93 +141,68 @@ export default function AuthForm() {
             </div>
           )}
 
-          {magicLinkSent ? (
-            <div className="mt-5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm text-emerald-100">
-              <div className="flex items-start gap-3">
-                <Mail className="mt-0.5 h-5 w-5 shrink-0 text-emerald-300" />
-                <div>
-                  <p className="font-semibold text-white">Check your email</p>
-                  <p className="mt-1 text-emerald-100/90">
-                    We sent a sign-in link to{" "}
-                    <span className="font-semibold text-white">
-                      {email.trim().toLowerCase()}
-                    </span>
-                    . Open it to continue — no password needed.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => setMagicLinkSent(false)}
-                    className="mt-3 text-sm font-semibold text-teal-300 hover:underline"
-                  >
-                    Use a different email
-                  </button>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="mt-5 space-y-4">
-              {mode === "register" && (
-                <div>
-                  <label className="mb-1.5 block text-sm text-[#94a3b8]">
-                    Full name
-                  </label>
-                  <input
-                    className="lf-input"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    required
-                    placeholder="Your name"
-                    autoComplete="name"
-                  />
-                </div>
-              )}
+          <form onSubmit={handleSubmit} className="mt-5 space-y-4">
+            {mode === "register" && (
               <div>
                 <label className="mb-1.5 block text-sm text-[#94a3b8]">
-                  Email
+                  Full name
                 </label>
                 <input
-                  type="email"
                   className="lf-input"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
                   required
-                  placeholder="name@company.co.uk"
-                  autoComplete="email"
+                  placeholder="Your name"
+                  autoComplete="name"
                 />
               </div>
-              {mode === "register" ? (
-                <div>
-                  <label className="mb-1.5 block text-sm text-[#94a3b8]">
-                    Password
-                  </label>
-                  <input
-                    type="password"
-                    className="lf-input"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    minLength={6}
-                    placeholder="At least 6 characters"
-                    autoComplete="new-password"
-                  />
-                </div>
-              ) : (
-                <p className="text-sm text-[#94a3b8]">
-                  Enter the email you registered with. We&apos;ll email you a
-                  one-tap sign-in link — no password required.
-                </p>
-              )}
+            )}
+            <div>
+              <label className="mb-1.5 block text-sm text-[#94a3b8]">
+                Email
+              </label>
+              <input
+                type="email"
+                className="lf-input"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                placeholder="Your Email"
+                autoComplete="email"
+              />
+            </div>
+            {mode === "register" ? (
+              <div>
+                <label className="mb-1.5 block text-sm text-[#94a3b8]">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  className="lf-input"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  minLength={6}
+                  placeholder="At least 6 characters"
+                  autoComplete="new-password"
+                />
+              </div>
+            ) : (
+              <p className="text-sm text-[#94a3b8]">
+                Enter your registered email to sign in instantly — no password
+                needed.
+              </p>
+            )}
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="lf-btn-primary flex w-full min-h-[48px] items-center justify-center gap-2 rounded-xl py-3 font-bold text-white disabled:opacity-60"
-              >
-                {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-                {mode === "login" ? "Email me a sign-in link" : "Create account"}
-              </button>
-            </form>
-          )}
+            <button
+              type="submit"
+              disabled={loading}
+              className="lf-btn-primary flex w-full min-h-[48px] items-center justify-center gap-2 rounded-xl py-3 font-bold text-white disabled:opacity-60"
+            >
+              {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+              {mode === "login" ? "Sign in" : "Create account"}
+            </button>
+          </form>
 
           <p className="mt-5 text-center text-sm text-[#94a3b8]">
             <Link href="/" className="text-teal-300 hover:underline">
