@@ -49,6 +49,7 @@ import {
   Package,
   Sparkles,
 } from "lucide-react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import DarkSelect from "@/components/ui/DarkSelect";
 
@@ -248,12 +249,15 @@ export default function CampaignWizard({
         "Please describe what you manufacture (at least 3 characters).",
       );
     }
-    if (cat) {
-      const trimmed = keyFeatures.map((f) => f.trim());
-      if (trimmed.some((f) => f.length < 2)) {
-        errors.push(
-          "Please enter your top 3 key features (at least 2 characters each).",
-        );
+    for (const feature of keyFeatures) {
+      const trimmed = feature.trim();
+      if (trimmed.length === 1) {
+        errors.push("Each key feature must be at least 2 characters if filled.");
+        break;
+      }
+      if (trimmed.length > 120) {
+        errors.push("Each key feature must be 120 characters or fewer.");
+        break;
       }
     }
     return errors;
@@ -542,9 +546,6 @@ export default function CampaignWizard({
                 >
                   If your category isn&apos;t listed, click here
                 </button>
-                <p className="mt-2 text-xs font-medium text-emerald-200/90">
-                  ✓ 100% Automated • Zero technical setup required.
-                </p>
               </>
             ) : (
               <div className="space-y-2">
@@ -574,7 +575,8 @@ export default function CampaignWizard({
             <div>
               <label className="mb-1.5 flex items-center gap-2 text-sm text-[#94a3b8]">
                 <Sparkles className="h-4 w-4" /> What are the top 3 features that
-                best describe your business?
+                best describe your business?{" "}
+                <span className="font-normal text-[#64748b]">(optional)</span>
               </label>
               <p className="mb-3 text-xs text-[#64748b]">
                 e.g., 24/7 Emergency Service, Free Inspection, Family Owned
@@ -619,9 +621,6 @@ export default function CampaignWizard({
                 label: c,
               }))}
             />
-            <p className="mt-2 text-xs font-medium text-emerald-200/90">
-              ✓ 100% Automated • Zero technical setup required.
-            </p>
           </div>
           <button
             type="button"
@@ -680,11 +679,19 @@ export default function CampaignWizard({
                   <button
                     type="button"
                     onClick={() => void applyPromoCode()}
-                    disabled={promoLoading || !promoCode.trim()}
-                    className="inline-flex min-h-[48px] shrink-0 items-center justify-center rounded-xl border border-violet-400/35 bg-violet-500/15 px-5 py-3 text-sm font-bold text-violet-100 transition hover:border-violet-300/50 hover:bg-violet-500/25 disabled:opacity-50"
+                    disabled={
+                      promoLoading || !promoCode.trim() || isApplied
+                    }
+                    className={`inline-flex min-h-[48px] shrink-0 items-center justify-center rounded-xl px-5 py-3 text-sm font-bold transition ${
+                      isApplied
+                        ? "border border-emerald-400/40 bg-emerald-500/15 text-emerald-100"
+                        : "border border-violet-400/35 bg-violet-500/15 text-violet-100 hover:border-violet-300/50 hover:bg-violet-500/25 disabled:opacity-50"
+                    }`}
                   >
                     {promoLoading ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : isApplied ? (
+                      "Applied ✓"
                     ) : (
                       "Apply"
                     )}
@@ -846,16 +853,21 @@ export default function CampaignWizard({
           </div>
 
           <div className="flex flex-col gap-3">
-            <div className="flex flex-wrap items-center gap-2" aria-label="Accepted cards">
-              <span className="inline-flex h-8 items-center rounded border border-white/15 bg-white px-2.5 text-[11px] font-extrabold tracking-wide text-[#1A1F71]">
-                VISA
-              </span>
-              <span className="inline-flex h-8 items-center rounded border border-white/15 bg-white px-2.5 text-[11px] font-extrabold tracking-wide text-[#EB001B]">
-                Mastercard
-              </span>
-              <span className="inline-flex h-8 items-center rounded border border-white/15 bg-white px-2.5 text-[11px] font-extrabold tracking-wide text-[#006FCF]">
-                AMEX
-              </span>
+            <div className="flex flex-wrap items-center gap-3" aria-label="Accepted cards">
+              <Image
+                src="/visa.png"
+                alt="Visa"
+                width={72}
+                height={48}
+                className="h-8 w-auto object-contain"
+              />
+              <Image
+                src="/mastercard.webp"
+                alt="Mastercard"
+                width={72}
+                height={48}
+                className="h-8 w-auto object-contain"
+              />
             </div>
             <div className="flex flex-wrap gap-3">
               <button

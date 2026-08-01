@@ -34,21 +34,26 @@ export interface CampaignInput {
 }
 
 function parseKeyFeatures(value: unknown): [string, string, string] {
+  if (value === undefined || value === null) {
+    return ["", "", ""];
+  }
   if (!Array.isArray(value)) {
-    throw new Error("Please enter your top 3 business features");
+    throw new Error("Key features must be a list of up to 3 items");
   }
   const features: [string, string, string] = [
     String(value[0] ?? "").trim(),
     String(value[1] ?? "").trim(),
     String(value[2] ?? "").trim(),
   ];
-  if (features.some((f) => f.length < 2)) {
-    throw new Error(
-      "Please enter 3 key features (at least 2 characters each)",
-    );
-  }
-  if (features.some((f) => f.length > 120)) {
-    throw new Error("Each key feature must be 120 characters or fewer");
+  for (const feature of features) {
+    if (feature.length === 1) {
+      throw new Error(
+        "Each key feature must be at least 2 characters if filled",
+      );
+    }
+    if (feature.length > 120) {
+      throw new Error("Each key feature must be 120 characters or fewer");
+    }
   }
   return features;
 }
