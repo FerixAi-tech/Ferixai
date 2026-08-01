@@ -120,7 +120,7 @@ export default function MetricsPreview({
               {contentPlan.estimatedContentPieces} content pieces
             </p>
             <p className="mt-3 text-xs leading-relaxed text-[#94a3b8]">
-              Apply your FX30 code for £30 off the first month.
+              Apply code FX30 for £30 off the first month.
             </p>
           </>
         )}

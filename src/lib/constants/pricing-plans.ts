@@ -3,7 +3,7 @@ import type { AggressivenessLevel } from "@/lib/campaign/content-plan";
 export const PROMO_DISCOUNT_GBP = 30;
 export const BILLING_CYCLE_DAYS = 30;
 export const DEFAULT_BILLING_CYCLE = "monthly" as const;
-export const DEFAULT_PLAN_SLUG = "growth" as const;
+export const DEFAULT_PLAN_SLUG = "starter" as const;
 
 export type BillingCycle = typeof DEFAULT_BILLING_CYCLE;
 export type PricingPlanSlug = "starter" | "growth" | "premium" | "agency";
@@ -28,7 +28,8 @@ export const PRICING_PLANS: readonly PricingPlan[] = [
     slug: "starter",
     name: "Starter Plan",
     priceMonthlyGbp: 39,
-    description: "Perfect for 1 local business starting with AI automation.",
+    description:
+      "Index your business for ChatGPT, Gemini & Claude local recommendation queries.",
     aggressiveness: "Steady",
     intensityScore: 1,
     siteArticleCount: 1,
@@ -41,7 +42,7 @@ export const PRICING_PLANS: readonly PricingPlan[] = [
     name: "Growth Plan",
     priceMonthlyGbp: 59,
     description:
-      "Get noticed by 3x more local customers on Google and ChatGPT.",
+      "3× more AI visibility across ChatGPT, Gemini & Claude for local searches.",
     badge: "Most Popular",
     aggressiveness: "Active",
     intensityScore: 2,
@@ -55,7 +56,7 @@ export const PRICING_PLANS: readonly PricingPlan[] = [
     name: "Premium Plan",
     priceMonthlyGbp: 109,
     description:
-      "Aggressive local domination for multiple locations or busy shops.",
+      "Aggressive ChatGPT, Gemini & Claude coverage for busy shops and multi-location brands.",
     aggressiveness: "Intensive",
     intensityScore: 3,
     siteArticleCount: 3,
@@ -67,7 +68,8 @@ export const PRICING_PLANS: readonly PricingPlan[] = [
     slug: "agency",
     name: "Agency Plan",
     priceMonthlyGbp: 159,
-    description: "Built for digital agencies and large franchise brands.",
+    description:
+      "Maximum AI recommendation reach across ChatGPT, Gemini & Claude for agencies and franchises.",
     aggressiveness: "Maximum",
     intensityScore: 4,
     siteArticleCount: 3,

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { Orbitron } from "next/font/google";
 import BrandLogo from "@/components/layout/BrandLogo";
@@ -81,6 +80,12 @@ export default function HomeLanding({
 
       <SignupCard open={signupOpen} onClose={() => setSignupOpen(false)} />
 
+      <div className="relative z-20 border-b border-emerald-500/25 bg-emerald-500/10 px-4 py-2.5 text-center">
+        <p className="text-xs font-semibold tracking-wide text-emerald-100 sm:text-sm">
+          🇬🇧 UK Launch Offer: Get £30 OFF your first month with code FX30
+        </p>
+      </div>
+
       <div className="lf-page mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="hidden md:block">
           <SupportContact variant="topRight" />
@@ -97,14 +102,14 @@ export default function HomeLanding({
               onClick={() => setSignupOpen(true)}
               className="lf-btn-primary touch-target relative inline-flex min-h-[52px] w-full items-center justify-center gap-2 overflow-hidden rounded-xl px-6 py-3.5 text-base font-bold tracking-wide text-white sm:min-w-[300px]"
             >
-              <span aria-hidden className="text-[1.05em] leading-none">
-                🚀
-              </span>
-              <span>Claim My £30 Code & Start Free</span>
+              <span>Claim £30 OFF &amp; Start for £9</span>
               <span aria-hidden className="tracking-normal">
                 →
               </span>
             </button>
+            <p className="text-center text-xs font-medium text-[#94a3b8]">
+              ✓ No setup fee • Cancel anytime • 14-day money-back guarantee
+            </p>
             <LandingPromoCountdown align="center" />
             <p className="text-sm text-[#94a3b8]">
               Already have an account?{" "}
@@ -125,28 +130,22 @@ export default function HomeLanding({
             </div>
 
             <h1 className="lf-animate-in lf-animate-in-2 lf-orbitron text-2xl font-extrabold leading-tight tracking-tight sm:text-3xl lg:text-4xl xl:text-[2.75rem]">
-              Would you like{" "}
+              The System That Puts Your Business at the Top of{" "}
               <span className="bg-gradient-to-r from-emerald-300 to-green-400 bg-clip-text text-transparent">
-                AI to recommend
+                ChatGPT, Gemini &amp; Claude
               </span>{" "}
-              your business with a £30 welcome budget?
+              Answers.
             </h1>
 
             <div className="lf-animate-in lf-animate-in-3 mt-5 space-y-4 text-base leading-relaxed text-[#94a3b8] sm:text-lg">
               <p>
-                Millions of people ask ChatGPT or Gemini questions like:{" "}
+                When local UK customers ask AI engines like{" "}
                 <em className="text-[#e2e8f0]">
-                  “What is the best dental clinic in London?”
+                  &quot;Who is the best dentist in Manchester?&quot;
                 </em>
-                . If your business isn&apos;t there, you are losing customers.
-              </p>
-              <p>
-                <strong className="font-semibold text-white">
-                  Claim your £{PROMO_DISCOUNT_GBP} welcome credit today.
-                </strong>{" "}
-                Sign up below, get your exclusive promo code instantly, and
-                launch with £{PROMO_DISCOUNT_GBP} off your first month — plans
-                from {formatCurrency(FROM_MONTHLY_GBP)}/month.
+                , Ferixai forces AI to recommend{" "}
+                <strong className="font-semibold text-white">YOUR</strong>{" "}
+                business first—before your competitors.
               </p>
             </div>
 
@@ -160,10 +159,7 @@ export default function HomeLanding({
                 onClick={() => setSignupOpen(true)}
                 className="lf-btn-primary relative inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl px-7 py-3.5 text-base font-bold tracking-wide text-white"
               >
-                <span aria-hidden className="text-[1.05em] leading-none">
-                  🚀
-                </span>
-                <span>Claim My £{PROMO_DISCOUNT_GBP} Code & Start Free</span>
+                <span>Claim £30 OFF &amp; Start for £9</span>
                 <span aria-hidden className="tracking-normal">
                   →
                 </span>
@@ -176,6 +172,10 @@ export default function HomeLanding({
               </a>
             </div>
 
+            <p className="lf-animate-in lf-animate-in-4 mt-3 text-xs font-medium text-[#94a3b8]">
+              ✓ No setup fee • Cancel anytime • 14-day money-back guarantee
+            </p>
+
             <LandingPromoCountdown />
 
             <div className="lf-animate-in lf-animate-in-5 mt-8 grid grid-cols-3 gap-4">
@@ -184,7 +184,7 @@ export default function HomeLanding({
                   3+ Major
                 </p>
                 <p className="mt-1 text-xs tracking-wide text-[#94a3b8]">
-                  AI Engines Integrated (ChatGPT, Gemini, Perplexity)
+                  AI Engines Integrated (ChatGPT, Gemini, Claude)
                 </p>
               </div>
               <div>
@@ -281,14 +281,14 @@ export default function HomeLanding({
                 onClick={() => setSignupOpen(true)}
                 className="lf-btn-primary mt-7 inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl px-8 py-3 font-bold tracking-wide text-white"
               >
-                <span aria-hidden className="text-[1.05em] leading-none">
-                  🚀
-                </span>
-                <span>Claim My £30 Code & Start Free</span>
+                <span>Claim £30 OFF &amp; Start for £9</span>
                 <span aria-hidden className="tracking-normal">
                   →
                 </span>
               </button>
+              <p className="mx-auto mt-3 max-w-lg text-center text-xs font-medium text-[#94a3b8]">
+                ✓ No setup fee • Cancel anytime • 14-day money-back guarantee
+              </p>
               <LandingPromoCountdown align="center" className="mt-4" />
               <p className="mx-auto mt-4 max-w-lg text-center text-[11px] leading-relaxed tracking-wide text-[#64748b]">
                 One-time promo code valid for new verified business names only
@@ -313,16 +313,7 @@ export default function HomeLanding({
               Cancellation &amp; Refund Policy
             </Link>
           </div>
-          <div className="mt-6 flex justify-center">
-            <Image
-              src="/iyzico.png"
-              alt="Secure payments by iyzico"
-              width={643}
-              height={48}
-              className="h-8 w-auto opacity-80 sm:h-10"
-            />
-          </div>
-          <p className="mt-4">
+          <p className="mt-6">
             © {new Date().getFullYear()} FerixAI · Visibility for UK businesses
           </p>
         </footer>

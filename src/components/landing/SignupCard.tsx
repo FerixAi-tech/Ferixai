@@ -7,12 +7,12 @@ import { createClient } from "@/lib/supabase/client";
 import { DEFAULT_PLAN_SLUG } from "@/lib/constants/pricing-plans";
 import {
   clearWizardSessionState,
-  generateUniquePromoCode,
   saveCampaignDraft,
 } from "@/lib/campaign/draft";
 import FuturisticScene3D from "@/components/landing/FuturisticScene3D";
 import LandingPromoCountdown from "@/components/landing/LandingPromoCountdown";
-import { trackCompleteRegistration } from "@/lib/meta/pixel";
+import { trackCompleteRegistration, trackLead } from "@/lib/meta/pixel";
+import { LAUNCH_PROMO_CODE } from "@/lib/promo/codes";
 
 interface SignupCardProps {
   open: boolean;
@@ -50,6 +50,7 @@ export default function SignupCard({
       setContinuePath(redirectTo);
       setCopied(false);
       setPromoCodeValue("");
+      trackLead({ content_name: "Signup Modal" });
     }
   }, [open, initialBusinessName, redirectTo]);
 
@@ -79,15 +80,15 @@ export default function SignupCard({
   }
 
   async function copyPromoCode() {
-    if (!promoCodeValue) return;
+    const code = promoCodeValue || LAUNCH_PROMO_CODE;
     try {
-      await navigator.clipboard.writeText(promoCodeValue);
+      await navigator.clipboard.writeText(code);
       setCopied(true);
       window.setTimeout(() => setCopied(false), 2000);
     } catch {
       // Fallback for older browsers / denied clipboard
       const textarea = document.createElement("textarea");
-      textarea.value = promoCodeValue;
+      textarea.value = code;
       textarea.style.position = "fixed";
       textarea.style.opacity = "0";
       document.body.appendChild(textarea);
@@ -149,7 +150,6 @@ export default function SignupCard({
 
       // New account: wipe previous browser wizard/session state, then start at Step 1
       clearWizardSessionState();
-      const uniquePromoCode = generateUniquePromoCode();
       saveCampaignDraft({
         businessName: trimmedName,
         category: "",
@@ -158,13 +158,13 @@ export default function SignupCard({
         city: "",
         planSlug: DEFAULT_PLAN_SLUG,
         step: 1,
-        promoCode: uniquePromoCode,
+        promoCode: LAUNCH_PROMO_CODE,
         updatedAt: Date.now(),
       });
 
       setContinuePath(nextPath);
       setSubmittedEmail(trimmedEmail);
-      setPromoCodeValue(uniquePromoCode);
+      setPromoCodeValue(LAUNCH_PROMO_CODE);
       setCopied(false);
       setIsSubmitted(true);
       trackCompleteRegistration();
@@ -214,14 +214,15 @@ export default function SignupCard({
                   ✨ Account Created Successfully!
                 </h2>
                 <p className="mt-3 text-sm leading-relaxed text-[#94a3b8]">
-                  Your £30 welcome credit is ready. Copy the exclusive promo
-                  code below and apply it on the plan selection page for £30 off
+                  Your £30 welcome credit is ready. Code{" "}
+                  <strong className="text-white">{LAUNCH_PROMO_CODE}</strong>{" "}
+                  will be pre-applied on plan selection — Starter from £9 for
                   your first month.
                 </p>
 
                 <div className="mt-6 flex flex-col gap-3 rounded-2xl border border-violet-400/35 bg-[linear-gradient(135deg,rgba(139,92,246,0.16),rgba(236,72,153,0.1),rgba(18,12,30,0.95))] p-3 shadow-[0_0_32px_rgba(139,92,246,0.22)] sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:p-4">
                   <code className="lf-orbitron truncate px-2 text-center font-mono text-2xl font-extrabold tracking-[0.14em] text-[#f5d0fe] [text-shadow:0_0_18px_rgba(240,171,252,0.55),0_0_36px_rgba(168,85,247,0.35)] sm:text-left sm:text-3xl">
-                    {promoCodeValue}
+                    {LAUNCH_PROMO_CODE}
                   </code>
                   <button
                     type="button"
@@ -246,8 +247,8 @@ export default function SignupCard({
                 </button>
 
                 <p className="mt-4 text-center text-[11px] leading-relaxed tracking-wide text-[#64748b]">
-                  Keep this code handy — apply it on plan selection for £30 off
-                  your first month.
+                  FX30 is automatically applied at checkout for £30 off your
+                  first month.
                 </p>
               </div>
             ) : (
@@ -331,10 +332,7 @@ export default function SignupCard({
                       <Loader2 className="relative z-10 h-4 w-4 shrink-0 animate-spin" />
                     )}
                     <span className="relative z-10 inline-flex items-center gap-2">
-                      <span aria-hidden className="text-[1.05em] leading-none">
-                        🚀
-                      </span>
-                      <span>Claim My £30 Code & Start Free</span>
+                      <span>Claim £30 OFF &amp; Start for £9</span>
                       <span aria-hidden className="tracking-normal">
                         →
                       </span>

@@ -19,7 +19,7 @@ import {
   formatCheckoutCharge,
   getIyzicoCheckoutCharge,
 } from "@/lib/constants/checkout";
-import { trackInitiateCheckout } from "@/lib/meta/pixel";
+import { trackCompleteRegistration, trackInitiateCheckout } from "@/lib/meta/pixel";
 import {
   applyPromoDiscount,
   DEFAULT_PLAN_SLUG,
@@ -28,6 +28,7 @@ import {
   PROMO_DISCOUNT_GBP,
   type PricingPlanSlug,
 } from "@/lib/constants/pricing-plans";
+import { LAUNCH_PROMO_CODE } from "@/lib/promo/codes";
 import MetricsPreview from "@/components/campaign/MetricsPreview";
 import PricingPlanCards from "@/components/campaign/PricingPlanCards";
 import { createClient } from "@/lib/supabase/client";
@@ -91,11 +92,12 @@ export default function CampaignWizard({
   const [city, setCity] = useState("");
   const [planSlug, setPlanSlug] =
     useState<PricingPlanSlug>(DEFAULT_PLAN_SLUG);
-  const [promoCode, setPromoCode] = useState("");
-  const [isApplied, setIsApplied] = useState(false);
+  const [promoCode, setPromoCode] = useState(LAUNCH_PROMO_CODE);
+  const [isApplied, setIsApplied] = useState(true);
   const [promoLoading, setPromoLoading] = useState(false);
   const [promoError, setPromoError] = useState("");
   const launchLockRef = useRef(false);
+  const checkoutTrackedRef = useRef(false);
 
   useEffect(() => {
     if (draftRestored) return;
@@ -109,8 +111,8 @@ export default function CampaignWizard({
       setKeyFeatures(emptyKeyFeatures());
       setCity("");
       setPlanSlug(DEFAULT_PLAN_SLUG);
-      setPromoCode("");
-      setIsApplied(false);
+      setPromoCode(LAUNCH_PROMO_CODE);
+      setIsApplied(true);
       setPromoError("");
       if (initialBusinessName.trim()) {
         setBusinessName(initialBusinessName.trim());
@@ -143,8 +145,8 @@ export default function CampaignWizard({
       isPricingPlanSlug(draft.planSlug) ? draft.planSlug : DEFAULT_PLAN_SLUG,
     );
     setStep(draft.step || 1);
-    setPromoCode(draft.promoCode || "");
-    setIsApplied(false);
+    setPromoCode(draft.promoCode?.trim() || LAUNCH_PROMO_CODE);
+    setIsApplied(true);
     setDraftRestored(true);
   }, [draftRestored, initialBusinessName]);
 
@@ -265,6 +267,32 @@ export default function CampaignWizard({
     return errors;
   }
 
+  function trackPlanCheckout(
+    slug: PricingPlanSlug,
+    promoAppliedOverride?: boolean,
+  ) {
+    if (checkoutTrackedRef.current) return;
+    checkoutTrackedRef.current = true;
+    const plan = getPricingPlan(slug);
+    const applied =
+      promoAppliedOverride !== undefined ? promoAppliedOverride : isApplied;
+    const { payable } = applyPromoDiscount(
+      plan.priceMonthlyGbp,
+      applied ? PROMO_DISCOUNT_GBP : 0,
+    );
+    trackInitiateCheckout({
+      value: payable,
+      currency: "GBP",
+      content_name: plan.name,
+      dedupeKey: `ferixai_meta_initiate_checkout:${slug}`,
+    });
+  }
+
+  function selectPlan(slug: PricingPlanSlug) {
+    setPlanSlug(slug);
+    trackPlanCheckout(slug);
+  }
+
   async function goToStep2() {
     const errors = getStep1Errors();
     if (errors.length) {
@@ -276,6 +304,15 @@ export default function CampaignWizard({
     const cat = resolvedCategoryName();
     await persistCategoryToSupabase(cat);
     persistDraft(2);
+    trackCompleteRegistration({
+      dedupeKey: "ferixai_meta_complete_registration_step1",
+    });
+    // Ensure FX30 is visibly applied when entering plan selection.
+    if (!promoCode.trim()) {
+      setPromoCode(LAUNCH_PROMO_CODE);
+    }
+    setIsApplied(true);
+    trackPlanCheckout(planSlug, true);
     setStep(2);
   }
 
@@ -288,6 +325,7 @@ export default function CampaignWizard({
     setFieldErrors([]);
     setError("");
     persistDraft(2);
+    trackPlanCheckout(planSlug);
 
     void supabase.auth.getUser().then(({ data }) => {
       if (!data.user) {
@@ -385,14 +423,6 @@ export default function CampaignWizard({
       }
 
       if (data.paymentPageUrl) {
-        trackInitiateCheckout({
-          value: checkoutCharge.amount,
-          currency: checkoutCharge.currency,
-          content_name: pricingPlan.name,
-          dedupeKey: data.token
-            ? `ferixai_meta_initiate_checkout:${data.token}`
-            : `ferixai_meta_initiate_checkout:${planSlug}:${checkoutCharge.amount}`,
-        });
         window.location.assign(data.paymentPageUrl);
         return;
       }
@@ -400,7 +430,7 @@ export default function CampaignWizard({
       if (data.requiresPayment) {
         throw new Error(
           data.error ||
-            "iyzico payment page URL was missing. Check API keys and currency settings.",
+            "Payment page URL was missing. Please try again or contact support.",
         );
       }
 
@@ -408,7 +438,7 @@ export default function CampaignWizard({
       if (pricing.payable > 0) {
         throw new Error(
           data.error ||
-            "Payment is required for this plan, but checkout did not start. Set IYZICO_API_KEY / IYZICO_SECRET_KEY on Vercel and remove FERIXAI_PAYMENT_REQUIRED=false.",
+            "Payment is required for this plan, but checkout did not start. Please try again or contact support.",
         );
       }
 
@@ -468,6 +498,9 @@ export default function CampaignWizard({
 
       {step === 1 && (
         <div className="space-y-5">
+          <p className="rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-2.5 text-sm font-medium text-emerald-100">
+            ✓ 100% Automated • Zero technical setup required.
+          </p>
           <div>
             <label className="mb-1.5 flex items-center gap-2 text-sm text-[#94a3b8]">
               <Building2 className="h-4 w-4" /> Business name
@@ -509,6 +542,9 @@ export default function CampaignWizard({
                 >
                   If your category isn&apos;t listed, click here
                 </button>
+                <p className="mt-2 text-xs font-medium text-emerald-200/90">
+                  ✓ 100% Automated • Zero technical setup required.
+                </p>
               </>
             ) : (
               <div className="space-y-2">
@@ -583,6 +619,9 @@ export default function CampaignWizard({
                 label: c,
               }))}
             />
+            <p className="mt-2 text-xs font-medium text-emerald-200/90">
+              ✓ 100% Automated • Zero technical setup required.
+            </p>
           </div>
           <button
             type="button"
@@ -601,13 +640,14 @@ export default function CampaignWizard({
               Choose your plan
             </h2>
             <p className="mt-2 text-sm text-[#94a3b8]">
-              Fixed monthly packages for local AI visibility. Growth is our most
-              popular starting point.
+              Every plan indexes your business across ChatGPT, Gemini, and
+              Claude for local recommendation queries. Starter is pre-selected
+              with FX30 applied — first month from £9.
             </p>
             <div className="mt-5">
               <PricingPlanCards
                 selectedSlug={planSlug}
-                onSelect={setPlanSlug}
+                onSelect={selectPlan}
                 promoApplied={isApplied}
               />
             </div>
@@ -620,7 +660,7 @@ export default function CampaignWizard({
                   Promo code
                 </label>
                 <p className="mb-3 text-xs text-[#64748b]">
-                  Paste your FX30 code for £30 off the first month of any plan.
+                  FX30 is pre-applied for £30 off your first month of any plan.
                 </p>
                 <div className="flex flex-col gap-3 sm:flex-row">
                   <input
@@ -631,7 +671,7 @@ export default function CampaignWizard({
                       if (isApplied) setIsApplied(false);
                       if (promoError) setPromoError("");
                     }}
-                    placeholder="Enter your FX30 code"
+                    placeholder="FX30"
                     disabled={promoLoading}
                     className="lf-input flex-1 border border-violet-400/30 bg-[#0e0a18] px-4 py-3 shadow-[0_0_0_1px_rgba(139,92,246,0.12),0_0_24px_rgba(139,92,246,0.08)]"
                     autoComplete="off"
@@ -751,16 +791,16 @@ export default function CampaignWizard({
               </div>
             ) : null}
             <div className="mt-4 rounded-xl border border-teal-400/25 bg-teal-500/5 px-4 py-3 text-sm text-[#cbd5e1]">
-              Secure payment is handled by{" "}
-              <span className="font-semibold text-teal-200">iyzico</span>. When
-              you launch, you&apos;ll be redirected to the iyzico checkout page
-              to pay{" "}
-              <span className="font-semibold text-white">{checkoutLabel}</span>
-              {checkoutCharge.isTemporaryTryTest
-                ? "."
-                : isApplied
-                  ? " for your first month."
-                  : " / month."}
+              Secure 256-bit encrypted checkout. You will be redirected to
+              complete your payment securely.
+              {checkoutCharge.isTemporaryTryTest ? null : (
+                <>
+                  {" "}
+                  Amount due:{" "}
+                  <span className="font-semibold text-white">{checkoutLabel}</span>
+                  {isApplied ? " for your first month." : " / month."}
+                </>
+              )}
             </div>
 
             <div className="mt-6 flex items-end justify-between gap-4 border-t border-white/10 pt-5">
@@ -805,25 +845,38 @@ export default function CampaignWizard({
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-3">
-            <button
-              type="button"
-              onClick={() => setStep(2)}
-              className="inline-flex min-h-[48px] items-center gap-2 rounded-xl border border-white/10 px-5 py-3 text-sm text-[#94a3b8]"
-            >
-              <ArrowLeft className="h-4 w-4" /> Back
-            </button>
-            <button
-              type="button"
-              onClick={launchCampaign}
-              disabled={loading}
-              className="lf-btn-primary inline-flex min-h-[48px] items-center gap-2 rounded-xl px-6 py-3 font-bold text-white disabled:opacity-60"
-            >
-              {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-              {pricing.payable > 0
-                ? `Pay ${checkoutLabel} & launch`
-                : "Launch campaign"}
-            </button>
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-wrap items-center gap-2" aria-label="Accepted cards">
+              <span className="inline-flex h-8 items-center rounded border border-white/15 bg-white px-2.5 text-[11px] font-extrabold tracking-wide text-[#1A1F71]">
+                VISA
+              </span>
+              <span className="inline-flex h-8 items-center rounded border border-white/15 bg-white px-2.5 text-[11px] font-extrabold tracking-wide text-[#EB001B]">
+                Mastercard
+              </span>
+              <span className="inline-flex h-8 items-center rounded border border-white/15 bg-white px-2.5 text-[11px] font-extrabold tracking-wide text-[#006FCF]">
+                AMEX
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={() => setStep(2)}
+                className="inline-flex min-h-[48px] items-center gap-2 rounded-xl border border-white/10 px-5 py-3 text-sm text-[#94a3b8]"
+              >
+                <ArrowLeft className="h-4 w-4" /> Back
+              </button>
+              <button
+                type="button"
+                onClick={launchCampaign}
+                disabled={loading}
+                className="lf-btn-primary inline-flex min-h-[48px] items-center gap-2 rounded-xl px-6 py-3 font-bold text-white disabled:opacity-60"
+              >
+                {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+                {pricing.payable > 0
+                  ? `Pay ${checkoutLabel} & launch`
+                  : "Launch campaign"}
+              </button>
+            </div>
           </div>
         </div>
       )}

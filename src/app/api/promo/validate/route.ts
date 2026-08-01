@@ -6,8 +6,8 @@ import {
 } from "@/lib/promo/codes";
 
 /**
- * Promo validation for unique FX30-XXXXX welcome codes (£30 off first month).
- * Each code can only be redeemed once.
+ * Promo validation for FX30 UK launch code and unique FX30-XXXXX welcome codes
+ * (£30 off first month).
  */
 export async function POST(request: Request) {
   try {

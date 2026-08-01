@@ -26,7 +26,7 @@ export interface CampaignInput {
   totalCostGbp: number;
   promoApplied: boolean;
   discountGbp: number;
-  /** Unique FX30-XXXXX code when promoApplied */
+  /** FX30 or unique FX30-XXXXX code when promoApplied */
   promoCode?: string | null;
   productDescription?: string | null;
   /** Top 3 key features describing the business */

@@ -70,9 +70,21 @@ export function trackMetaEvent(
   }, 100);
 }
 
-export function trackCompleteRegistration(): void {
+export function trackLead(options?: { content_name?: string }): void {
+  trackMetaEvent(
+    "Lead",
+    options?.content_name
+      ? { content_name: options.content_name }
+      : undefined,
+    { dedupeKey: "ferixai_meta_lead" },
+  );
+}
+
+export function trackCompleteRegistration(options?: {
+  dedupeKey?: string;
+}): void {
   trackMetaEvent("CompleteRegistration", undefined, {
-    dedupeKey: "ferixai_meta_complete_registration",
+    dedupeKey: options?.dedupeKey || "ferixai_meta_complete_registration",
   });
 }
 

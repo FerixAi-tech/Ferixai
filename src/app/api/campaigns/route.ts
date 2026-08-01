@@ -33,14 +33,14 @@ export async function POST(request: Request) {
     const input = validateCampaignInput(body);
 
     if (input.promoApplied && input.promoCode) {
-      await assertPromoCodeAvailable(input.promoCode);
+      await assertPromoCodeAvailable(input.promoCode, user.id);
     }
 
     if (isPaymentRequired(input.totalCostGbp)) {
       return NextResponse.json(
         {
           error:
-            "Payment is required. Use the iyzico checkout flow to launch this campaign.",
+            "Payment is required. Use the secure checkout flow to launch this campaign.",
         },
         { status: 402 },
       );

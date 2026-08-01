@@ -48,7 +48,7 @@ export async function POST(request: Request) {
       request.headers.get("user-agent")?.trim().slice(0, 512) || null;
 
     if (input.promoApplied && input.promoCode) {
-      await assertPromoCodeAvailable(input.promoCode);
+      await assertPromoCodeAvailable(input.promoCode, user.id);
     }
 
     // Only fully free first-month (or explicit FERIXAI_PAYMENT_REQUIRED=false) skips checkout

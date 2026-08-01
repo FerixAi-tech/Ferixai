@@ -70,7 +70,7 @@ export default async function NewCampaignPage({
           </h1>
           <p className="mt-2 max-w-xl text-sm text-[#94a3b8]">
             Enter your business details, choose a monthly plan, and complete
-            secure checkout with iyzico to launch.
+            secure checkout to launch.
           </p>
         </div>
 

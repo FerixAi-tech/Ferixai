@@ -30,8 +30,8 @@ export default function LandingPricingPlans({
         </h2>
         <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-[#94a3b8]">
           First-month prices below include your £{PROMO_DISCOUNT_GBP} welcome
-          credit. Claim your FX30 code at signup, then apply it when you choose
-          a plan.
+          credit with code FX30. Every plan indexes your business across
+          ChatGPT, Gemini, and Claude for local recommendation queries.
         </p>
       </div>
 
@@ -91,7 +91,7 @@ export default function LandingPricingPlans({
             onClick={onClaim}
             className="lf-btn-primary inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl px-8 py-3 font-bold tracking-wide text-white"
           >
-            <span>Claim My £{PROMO_DISCOUNT_GBP} Code &amp; Start Free</span>
+            <span>Claim £30 OFF &amp; Start for £9</span>
             <span aria-hidden>→</span>
           </button>
           <LandingPromoCountdown align="center" />
