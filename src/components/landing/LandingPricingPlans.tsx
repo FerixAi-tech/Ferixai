@@ -91,6 +91,9 @@ export default function LandingPricingPlans({
             onClick={onClaim}
             className="lf-btn-primary inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl px-8 py-3 font-bold tracking-wide text-white"
           >
+            <span aria-hidden className="text-[1.05em] leading-none">
+              🚀
+            </span>
             <span>Claim £30 OFF &amp; Start for £9</span>
             <span aria-hidden>→</span>
           </button>

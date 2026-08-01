@@ -332,6 +332,9 @@ export default function SignupCard({
                       <Loader2 className="relative z-10 h-4 w-4 shrink-0 animate-spin" />
                     )}
                     <span className="relative z-10 inline-flex items-center gap-2">
+                      <span aria-hidden className="text-[1.05em] leading-none">
+                        🚀
+                      </span>
                       <span>Claim £30 OFF &amp; Start for £9</span>
                       <span aria-hidden className="tracking-normal">
                         →

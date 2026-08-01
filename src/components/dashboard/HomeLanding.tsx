@@ -102,6 +102,9 @@ export default function HomeLanding({
               onClick={() => setSignupOpen(true)}
               className="lf-btn-primary touch-target relative inline-flex min-h-[52px] w-full items-center justify-center gap-2 overflow-hidden rounded-xl px-6 py-3.5 text-base font-bold tracking-wide text-white sm:min-w-[300px]"
             >
+              <span aria-hidden className="text-[1.05em] leading-none">
+                🚀
+              </span>
               <span>Claim £30 OFF &amp; Start for £9</span>
               <span aria-hidden className="tracking-normal">
                 →
@@ -159,6 +162,9 @@ export default function HomeLanding({
                 onClick={() => setSignupOpen(true)}
                 className="lf-btn-primary relative inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl px-7 py-3.5 text-base font-bold tracking-wide text-white"
               >
+                <span aria-hidden className="text-[1.05em] leading-none">
+                  🚀
+                </span>
                 <span>Claim £30 OFF &amp; Start for £9</span>
                 <span aria-hidden className="tracking-normal">
                   →
@@ -281,6 +287,9 @@ export default function HomeLanding({
                 onClick={() => setSignupOpen(true)}
                 className="lf-btn-primary mt-7 inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl px-8 py-3 font-bold tracking-wide text-white"
               >
+                <span aria-hidden className="text-[1.05em] leading-none">
+                  🚀
+                </span>
                 <span>Claim £30 OFF &amp; Start for £9</span>
                 <span aria-hidden className="tracking-normal">
                   →
