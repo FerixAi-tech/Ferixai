@@ -37,7 +37,6 @@ export default async function NewCampaignPage({
     <>
       <AppNav
         logoHref="/dashboard"
-        backLink={{ href: "/dashboard", label: "My campaigns" }}
         right={<DashboardActions />}
       />
 
