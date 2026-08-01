@@ -3,7 +3,7 @@ import type { AggressivenessLevel } from "@/lib/campaign/content-plan";
 export const PROMO_DISCOUNT_GBP = 30;
 export const BILLING_CYCLE_DAYS = 30;
 export const DEFAULT_BILLING_CYCLE = "monthly" as const;
-export const DEFAULT_PLAN_SLUG = "starter" as const;
+export const DEFAULT_PLAN_SLUG = "growth" as const;
 
 export type BillingCycle = typeof DEFAULT_BILLING_CYCLE;
 export type PricingPlanSlug = "starter" | "growth" | "premium" | "agency";
