@@ -75,7 +75,6 @@ export const UK_CITIES = [
   "Sunderland",
   "Swansea",
   "Truro",
-  "United Kingdom",
   "Wakefield",
   "Wells",
   "Westminster",
@@ -84,6 +83,8 @@ export const UK_CITIES = [
   "Worcester",
   "Wrexham",
   "York",
+  // Country-wide option, always last in the dropdown.
+  "United Kingdom",
 ] as const;
 
 export type UkCity = (typeof UK_CITIES)[number];
