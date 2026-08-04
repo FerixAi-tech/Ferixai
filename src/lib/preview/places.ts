@@ -13,36 +13,25 @@ export type PlacesLookupResult = {
   fromGoogle: boolean;
 };
 
-type GoogleTextSearchResponse = {
-  status?: string;
-  error_message?: string;
-  results?: Array<{
-    place_id?: string;
+type PlacesNewSearchResponse = {
+  places?: Array<{
+    id?: string;
     name?: string;
-    formatted_address?: string;
+    displayName?: { text?: string };
+    formattedAddress?: string;
+    nationalPhoneNumber?: string;
+    internationalPhoneNumber?: string;
     rating?: number;
-    user_ratings_total?: number;
+    userRatingCount?: number;
   }>;
-};
-
-type GooglePlaceDetailsResponse = {
-  status?: string;
-  error_message?: string;
-  result?: {
-    name?: string;
-    formatted_address?: string;
-    formatted_phone_number?: string;
-    international_phone_number?: string;
-    rating?: number;
-    user_ratings_total?: number;
-  };
+  error?: { message?: string; status?: string };
 };
 
 function getApiKey(): string | undefined {
   return process.env.GOOGLE_PLACES_API_KEY?.trim() || undefined;
 }
 
-/** Only used when Places status !== "OK" or the request fails. */
+/** Only used when Places fails or returns no usable result. */
 export function fallbackPlacesResult(city: string): PlacesLookupResult {
   const trimmedCity = city.trim() || "United Kingdom";
   return {
@@ -56,48 +45,10 @@ export function fallbackPlacesResult(city: string): PlacesLookupResult {
   };
 }
 
-async function fetchPlaceDetails(
-  placeId: string,
-  apiKey: string,
-): Promise<GooglePlaceDetailsResponse["result"] | null> {
-  const fields = [
-    "name",
-    "formatted_address",
-    "formatted_phone_number",
-    "rating",
-    "user_ratings_total",
-  ].join(",");
-
-  const url =
-    `https://maps.googleapis.com/maps/api/place/details/json` +
-    `?place_id=${encodeURIComponent(placeId)}` +
-    `&fields=${encodeURIComponent(fields)}` +
-    `&key=${encodeURIComponent(apiKey)}`;
-
-  const response = await fetch(url, { method: "GET", cache: "no-store" });
-  if (!response.ok) {
-    console.error("Google Place Details HTTP error:", response.status);
-    return null;
-  }
-
-  const body = (await response.json()) as GooglePlaceDetailsResponse;
-  console.log("Google Places Result:", body.result || body);
-
-  if (body.status !== "OK" || !body.result) {
-    console.error(
-      "Google Place Details status:",
-      body.status,
-      body.error_message || "",
-    );
-    return null;
-  }
-
-  return body.result;
-}
-
 /**
- * Text Search → Place Details for real address, phone, and rating.
- * Fallback ONLY when Places returns status !== "OK" or the request fails.
+ * Google Places API (New) — Text Search via places:searchText.
+ * Returns address, phone, and rating in one authorized call.
+ * Legacy maps.googleapis.com Place Text Search is blocked for many modern keys.
  */
 export async function lookupBusinessPlace(
   input: PlacesLookupInput,
@@ -117,100 +68,113 @@ export async function lookupBusinessPlace(
     return fallbackPlacesResult(city);
   }
 
-  // Exact query shape requested for Text Search.
-  const query = `${businessName} ${city}`;
-  const searchUrl =
-    `https://maps.googleapis.com/maps/api/place/textsearch/json` +
-    `?query=${encodeURIComponent(query)}` +
-    `&key=${encodeURIComponent(apiKey)}`;
+  const textQuery = `${businessName} ${city}`;
+  const fieldMask = [
+    "places.id",
+    "places.displayName",
+    "places.formattedAddress",
+    "places.nationalPhoneNumber",
+    "places.internationalPhoneNumber",
+    "places.rating",
+    "places.userRatingCount",
+  ].join(",");
 
   try {
-    const searchResponse = await fetch(searchUrl, {
-      method: "GET",
-      cache: "no-store",
-    });
+    const response = await fetch(
+      "https://places.googleapis.com/v1/places:searchText",
+      {
+        method: "POST",
+        cache: "no-store",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Goog-Api-Key": apiKey,
+          "X-Goog-FieldMask": fieldMask,
+        },
+        body: JSON.stringify({
+          textQuery,
+          languageCode: "en",
+          regionCode: "GB",
+          maxResultCount: 5,
+        }),
+      },
+    );
 
-    if (!searchResponse.ok) {
-      console.error(
-        "Google Places Text Search HTTP error:",
-        searchResponse.status,
-      );
+    const body = (await response.json().catch(() => ({}))) as PlacesNewSearchResponse;
+
+    if (!response.ok) {
+      console.error("Google Places (New) HTTP error:", response.status, body);
       return fallbackPlacesResult(city);
     }
 
-    const searchBody =
-      (await searchResponse.json()) as GoogleTextSearchResponse;
+    const top = body.places?.[0];
+    console.log("Google Places Result:", top || body);
 
-    console.log("Google Places Text Search:", {
-      query,
-      status: searchBody.status,
-      error_message: searchBody.error_message,
-      topResult: searchBody.results?.[0]
-        ? {
-            name: searchBody.results[0].name,
-            place_id: searchBody.results[0].place_id,
-            formatted_address: searchBody.results[0].formatted_address,
-          }
-        : null,
-    });
+    if (!top) {
+      console.error("Google Places (New) returned no places for:", textQuery);
+      return fallbackPlacesResult(city);
+    }
 
-    // Fallback only when status is not OK (includes ZERO_RESULTS / REQUEST_DENIED).
-    if (searchBody.status !== "OK") {
-      console.error(
-        "Google Places Text Search status:",
-        searchBody.status,
-        searchBody.error_message || "",
+    const placeId =
+      top.id?.trim() ||
+      (top.name?.startsWith("places/")
+        ? top.name.replace(/^places\//, "").trim()
+        : null);
+
+    // Optional Place Details (New) enrichment when search omits phone/address.
+    let details = top;
+    if (
+      placeId &&
+      (!top.formattedAddress ||
+        !(top.nationalPhoneNumber || top.internationalPhoneNumber))
+    ) {
+      const detailMask = [
+        "id",
+        "displayName",
+        "formattedAddress",
+        "nationalPhoneNumber",
+        "internationalPhoneNumber",
+        "rating",
+        "userRatingCount",
+      ].join(",");
+
+      const detailResponse = await fetch(
+        `https://places.googleapis.com/v1/places/${encodeURIComponent(placeId)}`,
+        {
+          method: "GET",
+          cache: "no-store",
+          headers: {
+            "X-Goog-Api-Key": apiKey,
+            "X-Goog-FieldMask": detailMask,
+          },
+        },
       );
-      if (
-        searchBody.status === "REQUEST_DENIED" &&
-        String(searchBody.error_message || "")
-          .toLowerCase()
-          .includes("referer")
-      ) {
+
+      if (detailResponse.ok) {
+        const detailBody = (await detailResponse.json()) as NonNullable<
+          PlacesNewSearchResponse["places"]
+        >[number];
+        console.log("Google Places Result:", detailBody);
+        details = { ...top, ...detailBody };
+      } else {
         console.error(
-          "GOOGLE_PLACES_API_KEY has HTTP referer restrictions. " +
-            "Server-side /api/preview-ai needs a server key " +
-            "(IP restriction or unrestricted) with Places API enabled.",
+          "Google Place Details (New) HTTP error:",
+          detailResponse.status,
         );
       }
-      return fallbackPlacesResult(city);
-    }
-
-    const top = searchBody.results?.[0];
-    const placeId = top?.place_id?.trim();
-    if (!top || !placeId) {
-      console.error("Google Places Text Search OK but missing place_id");
-      return fallbackPlacesResult(city);
-    }
-
-    const details = await fetchPlaceDetails(placeId, apiKey);
-    if (!details) {
-      return fallbackPlacesResult(city);
     }
 
     const address =
-      details.formatted_address?.trim() ||
-      top.formatted_address?.trim() ||
-      `${city}, UK`;
-
+      details.formattedAddress?.trim() || `${city}, UK`;
     const phone =
-      details.formatted_phone_number?.trim() ||
-      details.international_phone_number?.trim() ||
+      details.nationalPhoneNumber?.trim() ||
+      details.internationalPhoneNumber?.trim() ||
       null;
-
     const rating =
-      typeof details.rating === "number"
-        ? details.rating
-        : typeof top.rating === "number"
-          ? top.rating
-          : null;
-
+      typeof details.rating === "number" ? details.rating : null;
     const userRatingsTotal =
-      typeof details.user_ratings_total === "number"
-        ? details.user_ratings_total
-        : typeof top.user_ratings_total === "number"
-          ? top.user_ratings_total
-          : null;
+      typeof details.userRatingCount === "number"
+        ? details.userRatingCount
+        : null;
 
     console.log("Google Places mapped fields:", {
       placeId,
@@ -221,7 +185,7 @@ export async function lookupBusinessPlace(
     });
 
     return {
-      name: details.name?.trim() || top.name?.trim() || null,
+      name: details.displayName?.text?.trim() || null,
       formattedAddress: address,
       phoneNumber: phone,
       rating,
