@@ -20,7 +20,7 @@ function asTrimmed(value: unknown, max = 120): string {
 
 /**
  * Live business audit + ChatGPT-style recommendation preview.
- * Uses Google Places Text Search when GOOGLE_PLACES_API_KEY is set.
+ * Text Search → Place Details (address, phone, rating) via GOOGLE_PLACES_API_KEY.
  */
 export async function POST(request: Request) {
   try {
@@ -61,6 +61,7 @@ export async function POST(request: Request) {
       feature2,
       feature3,
       address: place.formattedAddress,
+      phoneNumber: place.phoneNumber,
       rating: place.rating,
       userRatingsTotal: place.userRatingsTotal,
       fromGoogle: place.fromGoogle,

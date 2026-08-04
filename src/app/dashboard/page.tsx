@@ -14,11 +14,12 @@ import PaymentProcessingBanner from "@/components/dashboard/PaymentProcessingBan
 import MetaPaymentSuccessTracker from "@/components/meta/MetaPaymentSuccessTracker";
 import AppNav from "@/components/layout/AppNav";
 import SupportContact from "@/components/layout/SupportContact";
+import DashboardAiPreviewCard from "@/components/dashboard/DashboardAiPreviewCard";
 
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ created?: string; payment?: string }>;
+  searchParams: Promise<{ created?: string; payment?: string; preview?: string }>;
 }) {
   const params = await searchParams;
   const supabase = await createClient();
@@ -146,6 +147,8 @@ export default async function DashboardPage({
             initiallyReady={contentReady}
           />
         ) : null}
+
+        <DashboardAiPreviewCard />
 
         <div className="lf-animate-in lf-animate-in-2 mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>

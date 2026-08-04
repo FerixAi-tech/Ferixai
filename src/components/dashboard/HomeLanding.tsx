@@ -12,6 +12,7 @@ import SupportedAIPlatforms from "@/components/landing/SupportedAIPlatforms";
 import LandingCorporateSections from "@/components/landing/LandingCorporateSections";
 import LandingPricingPlans from "@/components/landing/LandingPricingPlans";
 import LandingPromoCountdown from "@/components/landing/LandingPromoCountdown";
+import LeadMagnetHero from "@/components/landing/LeadMagnetHero";
 import GlobalAiNetwork from "@/components/campaign/GlobalAiNetwork";
 import LiveAiCampaignsCard from "@/components/landing/LiveAiCampaignsCard";
 import "@/components/landing/landing-futuristic.css";
@@ -97,9 +98,8 @@ export default function HomeLanding({
             <SupportContact />
           </div>
           <div className="flex w-full max-w-lg flex-col items-center gap-3">
-            <button
-              type="button"
-              onClick={() => setSignupOpen(true)}
+            <a
+              href="#lead-magnet"
               className="lf-btn-primary touch-target relative inline-flex min-h-[52px] w-full items-center justify-center gap-2 overflow-hidden rounded-xl px-6 py-3.5 text-base font-bold tracking-wide text-white sm:min-w-[300px]"
             >
               <span aria-hidden className="text-[1.05em] leading-none">
@@ -109,7 +109,7 @@ export default function HomeLanding({
               <span aria-hidden className="tracking-normal">
                 →
               </span>
-            </button>
+            </a>
             <p className="text-center text-xs font-medium text-[#94a3b8]">
               ✓ No setup fee • Cancel anytime • 14-day money-back guarantee
             </p>
@@ -157,9 +157,8 @@ export default function HomeLanding({
             </div>
 
             <div className="lf-animate-in lf-animate-in-4 mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-              <button
-                type="button"
-                onClick={() => setSignupOpen(true)}
+              <a
+                href="#lead-magnet"
                 className="lf-btn-primary relative inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl px-7 py-3.5 text-base font-bold tracking-wide text-white"
               >
                 <span aria-hidden className="text-[1.05em] leading-none">
@@ -169,7 +168,7 @@ export default function HomeLanding({
                 <span aria-hidden className="tracking-normal">
                   →
                 </span>
-              </button>
+              </a>
               <a
                 href="#pricing"
                 className="inline-flex min-h-[48px] items-center justify-center rounded-xl border border-slate-700/40 bg-white/[0.03] px-7 py-3.5 text-sm font-semibold text-[#94a3b8] transition hover:border-fuchsia-500/40 hover:text-[#e2e8f0]"
@@ -212,7 +211,9 @@ export default function HomeLanding({
             </div>
           </div>
 
-          <div className="hidden min-h-[320px] lg:block" aria-hidden />
+          <div className="w-full lg:pt-2">
+            <LeadMagnetHero />
+          </div>
         </section>
 
         <section className="pb-10">
@@ -228,7 +229,14 @@ export default function HomeLanding({
           </div>
         </section>
 
-        <LandingPricingPlans onClaim={() => setSignupOpen(true)} />
+        <LandingPricingPlans
+          onClaim={() => {
+            document.getElementById("lead-magnet")?.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+            });
+          }}
+        />
 
         <section className="pb-12 pt-4" id="how-it-works">
           <div className="lf-animate-in mb-12 text-center">
@@ -282,9 +290,8 @@ export default function HomeLanding({
                 Sign up, get your £30 promo code instantly, and launch with £30
                 off your first month — no credit card needed to explore.
               </p>
-              <button
-                type="button"
-                onClick={() => setSignupOpen(true)}
+              <a
+                href="#lead-magnet"
                 className="lf-btn-primary mt-7 inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl px-8 py-3 font-bold tracking-wide text-white"
               >
                 <span aria-hidden className="text-[1.05em] leading-none">
@@ -294,7 +301,7 @@ export default function HomeLanding({
                 <span aria-hidden className="tracking-normal">
                   →
                 </span>
-              </button>
+              </a>
               <p className="mx-auto mt-3 max-w-lg text-center text-xs font-medium text-[#94a3b8]">
                 ✓ No setup fee • Cancel anytime • 14-day money-back guarantee
               </p>

@@ -6,6 +6,7 @@ export type PreviewAnswerInput = {
   feature2?: string | null;
   feature3?: string | null;
   address: string;
+  phoneNumber?: string | null;
   rating: number | null;
   userRatingsTotal: number | null;
   fromGoogle: boolean;
@@ -19,6 +20,7 @@ export type AiPreviewPayload = {
   city: string;
   category: string;
   address: string;
+  phoneNumber: string;
   ratingLabel: string;
   reviewsLabel: string;
   highlights: string[];
@@ -31,24 +33,22 @@ function cleanFeature(value: string | null | undefined): string | null {
   return trimmed.length >= 2 ? trimmed : null;
 }
 
-function ratingLabel(rating: number | null, fromGoogle: boolean): string {
+function formatRatingLine(
+  rating: number | null,
+  userRatingsTotal: number | null,
+  fromGoogle: boolean,
+): string {
   if (typeof rating === "number" && rating > 0) {
-    return `${rating.toFixed(1)} / 5`;
+    const reviews =
+      typeof userRatingsTotal === "number" && userRatingsTotal > 0
+        ? ` (${userRatingsTotal.toLocaleString("en-GB")} reviews)`
+        : "";
+    return `${rating.toFixed(1)} / 5${reviews}`;
   }
   return fromGoogle ? "Verified on Google" : "Verified Local Business";
 }
 
-function reviewsLabel(
-  total: number | null,
-  fromGoogle: boolean,
-): string {
-  if (typeof total === "number" && total > 0) {
-    return `${total.toLocaleString("en-GB")} reviews`;
-  }
-  return fromGoogle ? "Google Business listing" : "Indexed for local AI queries";
-}
-
-/** Build ChatGPT-style preview copy from Places data + optional USPs. */
+/** Build ChatGPT-style preview copy from Places Details + optional USPs. */
 export function buildAiPreviewPayload(
   input: PreviewAnswerInput & { placeId?: string | null },
 ): AiPreviewPayload {
@@ -56,14 +56,21 @@ export function buildAiPreviewPayload(
   const city = input.city.trim();
   const category = input.category.trim();
 
+  const address =
+    input.address.trim() || `${city || "United Kingdom"}, UK`;
+  const phoneNumber =
+    input.phoneNumber?.trim() || "Verified Direct Line";
+  const ratingLine = formatRatingLine(
+    input.rating,
+    input.userRatingsTotal,
+    input.fromGoogle,
+  );
+
   const highlights = [
     cleanFeature(input.feature1) || "Verified local service provider",
     cleanFeature(input.feature2) || "High customer satisfaction",
     cleanFeature(input.feature3) || "Indexed for local AI queries",
   ];
-
-  const rating = ratingLabel(input.rating, input.fromGoogle);
-  const reviews = reviewsLabel(input.userRatingsTotal, input.fromGoogle);
 
   const question = `Who is the most reliable ${category} in ${city}?`;
 
@@ -71,16 +78,15 @@ export function buildAiPreviewPayload(
     `If you are looking for a highly recommended ${category} in ${city}, **${businessName}** is one of the top choices available.`,
     ``,
     `Here is why AI search engines recommend them:`,
-    `- 📍 **Address:** ${input.address}`,
-    `- ⭐ **Rating:** ${rating} (${reviews})`,
+    `- 📍 **Address:** ${address}`,
+    `- 📞 **Phone:** ${phoneNumber}`,
+    `- ⭐ **Rating:** ${ratingLine}`,
     `- 🚀 **Highlights:** ${highlights.join(", ")}`,
     ``,
     `*Status: Draft Profile - Not yet published to ChatGPT & Gemini networks.*`,
   ].join("\n");
 
-  const answerPlain = answerMarkdown
-    .replace(/\*\*/g, "")
-    .replace(/\*/g, "");
+  const answerPlain = answerMarkdown.replace(/\*\*/g, "").replace(/\*/g, "");
 
   return {
     question,
@@ -89,9 +95,13 @@ export function buildAiPreviewPayload(
     businessName,
     city,
     category,
-    address: input.address,
-    ratingLabel: rating,
-    reviewsLabel: reviews,
+    address,
+    phoneNumber,
+    ratingLabel: ratingLine,
+    reviewsLabel:
+      typeof input.userRatingsTotal === "number" && input.userRatingsTotal > 0
+        ? `${input.userRatingsTotal.toLocaleString("en-GB")} reviews`
+        : "Verified Local Business",
     highlights,
     fromGoogle: input.fromGoogle,
     placeId: input.placeId ?? null,
