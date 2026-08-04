@@ -73,7 +73,6 @@ export default function CampaignAiPreview({
   feature1,
   feature2,
   feature3,
-  onClaim,
 }: {
   businessName: string;
   city: string;
@@ -81,7 +80,6 @@ export default function CampaignAiPreview({
   feature1?: string;
   feature2?: string;
   feature3?: string;
-  onClaim?: () => void;
 }) {
   const [phase, setPhase] = useState<PreviewPhase>("idle");
   const [showPreview, setShowPreview] = useState(false);
@@ -246,30 +244,6 @@ export default function CampaignAiPreview({
                   </div>
                   <TypewriterMarkdown text={preview.answerMarkdown} active />
                 </div>
-              </div>
-
-              <div className="rounded-2xl border border-emerald-400/30 bg-emerald-500/10 p-4 sm:p-5">
-                <p className="text-xs font-bold uppercase tracking-[0.16em] text-emerald-300">
-                  🟢 Status: PREVIEW MODE (DRAFT)
-                </p>
-                <p className="mt-2 text-sm leading-relaxed text-emerald-50/90">
-                  Publish your business data live across ChatGPT, Gemini &amp;
-                  Claude today.
-                </p>
-                {onClaim ? (
-                  <button
-                    type="button"
-                    onClick={onClaim}
-                    className="lf-btn-primary mt-4 inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white sm:w-auto"
-                  >
-                    <span aria-hidden>🚀</span>
-                    <span>Claim £30 Credit &amp; Launch Live for £9</span>
-                    <span aria-hidden>→</span>
-                  </button>
-                ) : null}
-                <p className="mt-2 text-xs text-emerald-100/70">
-                  No credit card required to start • Setup in 30 seconds
-                </p>
               </div>
             </>
           ) : null}

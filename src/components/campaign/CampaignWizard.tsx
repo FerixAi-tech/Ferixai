@@ -631,7 +631,6 @@ export default function CampaignWizard({
             feature1={keyFeatures[0]}
             feature2={keyFeatures[1]}
             feature3={keyFeatures[2]}
-            onClaim={() => void goToStep2()}
           />
 
           <button
