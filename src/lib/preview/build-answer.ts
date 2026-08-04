@@ -36,16 +36,15 @@ function cleanFeature(value: string | null | undefined): string | null {
 function formatRatingLine(
   rating: number | null,
   userRatingsTotal: number | null,
-  fromGoogle: boolean,
 ): string {
   if (typeof rating === "number" && rating > 0) {
     const reviews =
-      typeof userRatingsTotal === "number" && userRatingsTotal > 0
+      typeof userRatingsTotal === "number" && userRatingsTotal >= 0
         ? ` (${userRatingsTotal.toLocaleString("en-GB")} reviews)`
         : "";
-    return `${rating.toFixed(1)} / 5${reviews}`;
+    return `${rating} / 5${reviews}`;
   }
-  return fromGoogle ? "Verified on Google" : "Verified Local Business";
+  return "Verified Local Business";
 }
 
 /** Build ChatGPT-style preview copy from Places Details + optional USPs. */
@@ -56,15 +55,9 @@ export function buildAiPreviewPayload(
   const city = input.city.trim();
   const category = input.category.trim();
 
-  const address =
-    input.address.trim() || `${city || "United Kingdom"}, UK`;
-  const phoneNumber =
-    input.phoneNumber?.trim() || "Verified Direct Line";
-  const ratingLine = formatRatingLine(
-    input.rating,
-    input.userRatingsTotal,
-    input.fromGoogle,
-  );
+  const address = input.address.trim() || `${city || "United Kingdom"}, UK`;
+  const phoneNumber = input.phoneNumber?.trim() || "Verified Direct Line";
+  const ratingLine = formatRatingLine(input.rating, input.userRatingsTotal);
 
   const highlights = [
     cleanFeature(input.feature1) || "Verified local service provider",
