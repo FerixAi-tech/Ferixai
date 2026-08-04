@@ -31,6 +31,7 @@ import {
 import { LAUNCH_PROMO_CODE } from "@/lib/promo/codes";
 import MetricsPreview from "@/components/campaign/MetricsPreview";
 import PricingPlanCards from "@/components/campaign/PricingPlanCards";
+import CampaignAiPreview from "@/components/campaign/CampaignAiPreview";
 import { createClient } from "@/lib/supabase/client";
 import {
   emptyKeyFeatures,
@@ -622,6 +623,17 @@ export default function CampaignWizard({
               }))}
             />
           </div>
+
+          <CampaignAiPreview
+            businessName={businessName}
+            city={city}
+            category={resolvedCategory}
+            feature1={keyFeatures[0]}
+            feature2={keyFeatures[1]}
+            feature3={keyFeatures[2]}
+            onClaim={() => void goToStep2()}
+          />
+
           <button
             type="button"
             onClick={goToStep2}

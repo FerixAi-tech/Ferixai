@@ -12,10 +12,15 @@ import SupportedAIPlatforms from "@/components/landing/SupportedAIPlatforms";
 import LandingCorporateSections from "@/components/landing/LandingCorporateSections";
 import LandingPricingPlans from "@/components/landing/LandingPricingPlans";
 import LandingPromoCountdown from "@/components/landing/LandingPromoCountdown";
-import BusinessPreviewSection from "@/components/landing/BusinessPreviewSection";
 import GlobalAiNetwork from "@/components/campaign/GlobalAiNetwork";
 import LiveAiCampaignsCard from "@/components/landing/LiveAiCampaignsCard";
 import "@/components/landing/landing-futuristic.css";
+import {
+  applyPromoDiscount,
+  listPricingPlans,
+  PROMO_DISCOUNT_GBP,
+} from "@/lib/constants/pricing-plans";
+import { formatCurrency } from "@/lib/constants/metrics";
 
 const orbitron = Orbitron({
   subsets: ["latin"],
@@ -52,6 +57,11 @@ const TRUST = [
   "Active across all major UK cities: London, Manchester, Bristol & more.",
   "100% Risk-Free. 14-Day Money-Back Guarantee. Cancel anytime with one click.",
 ] as const;
+
+const FROM_MONTHLY_GBP = applyPromoDiscount(
+  listPricingPlans()[0].priceMonthlyGbp,
+  PROMO_DISCOUNT_GBP,
+).payable;
 
 export default function HomeLanding({
   openSignup = false,
@@ -161,10 +171,10 @@ export default function HomeLanding({
                 </span>
               </button>
               <a
-                href="#ai-preview"
+                href="#pricing"
                 className="inline-flex min-h-[48px] items-center justify-center rounded-xl border border-slate-700/40 bg-white/[0.03] px-7 py-3.5 text-sm font-semibold text-[#94a3b8] transition hover:border-fuchsia-500/40 hover:text-[#e2e8f0]"
               >
-                Generate My AI Preview
+                View plans from {formatCurrency(FROM_MONTHLY_GBP)}/month
               </a>
             </div>
 
@@ -217,8 +227,6 @@ export default function HomeLanding({
             ))}
           </div>
         </section>
-
-        <BusinessPreviewSection onClaim={() => setSignupOpen(true)} />
 
         <LandingPricingPlans onClaim={() => setSignupOpen(true)} />
 
