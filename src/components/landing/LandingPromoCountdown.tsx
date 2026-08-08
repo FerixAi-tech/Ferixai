@@ -5,10 +5,10 @@ import { useEffect, useState } from "react";
 /**
  * Shared absolute deadline for the landing promo countdown.
  * All visitors see the same remaining time; refresh does not reset it.
- * Seeded to ~4d from 2026-08-01 21:25 Europe/Istanbul.
+ * Seeded to ~0d 20h 59m from 2026-08-08 12:29 Europe/Istanbul.
  */
 export const LANDING_PROMO_ENDS_AT_MS = Date.parse(
-  "2026-08-05T21:25:00+03:00",
+  "2026-08-09T09:28:00+03:00",
 );
 
 type Remaining = {
