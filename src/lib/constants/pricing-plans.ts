@@ -55,7 +55,7 @@ export const PRICING_PLANS: readonly PricingPlan[] = [
     name: "Premium Plan",
     priceMonthlyGbp: 109,
     description:
-      "Aggressive ChatGPT, Gemini & Claude coverage for busy shops and multi-location brands.",
+      "Aggressive ChatGPT, Gemini & Claude coverage for maximum market dominance.",
     badge: "Most Popular",
     aggressiveness: "Intensive",
     intensityScore: 3,
@@ -69,7 +69,7 @@ export const PRICING_PLANS: readonly PricingPlan[] = [
     name: "Agency Plan",
     priceMonthlyGbp: 159,
     description:
-      "Maximum AI recommendation reach across ChatGPT, Gemini & Claude for agencies and franchises.",
+      "Ultimate AI recommendation reach and top-tier indexing authority across ChatGPT, Gemini & Claude.",
     aggressiveness: "Maximum",
     intensityScore: 4,
     siteArticleCount: 3,
