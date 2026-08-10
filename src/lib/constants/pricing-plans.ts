@@ -43,7 +43,6 @@ export const PRICING_PLANS: readonly PricingPlan[] = [
     priceMonthlyGbp: 59,
     description:
       "3× more AI visibility across ChatGPT, Gemini & Claude for local searches.",
-    badge: "Most Popular",
     aggressiveness: "Active",
     intensityScore: 2,
     siteArticleCount: 2,
@@ -57,6 +56,7 @@ export const PRICING_PLANS: readonly PricingPlan[] = [
     priceMonthlyGbp: 109,
     description:
       "Aggressive ChatGPT, Gemini & Claude coverage for busy shops and multi-location brands.",
+    badge: "Most Popular",
     aggressiveness: "Intensive",
     intensityScore: 3,
     siteArticleCount: 3,
