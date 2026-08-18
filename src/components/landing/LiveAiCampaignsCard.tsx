@@ -3,27 +3,20 @@
 import { useEffect, useRef, useState } from "react";
 
 type LiveStats = {
-  activeCampaigns: number;
-  ukBusinesses: number;
-  recommendationsToday: number;
+  globalActiveBusinesses: number;
+  globalActiveCampaigns: number;
 };
 
-function startOfUtcDay(now: number): number {
-  const d = new Date(now);
-  return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
-}
+const BASE_GLOBAL_ACTIVE_BUSINESSES = 12_745;
+const BASE_GLOBAL_ACTIVE_CAMPAIGNS = 27_458;
 
 function computeLiveStats(now = Date.now()): LiveStats {
-  const minutesToday = Math.floor(
-    Math.max(0, now - startOfUtcDay(now)) / 60_000,
-  );
-  // Tiny live pulse around the published figures (no long-term drift)
   const pulse = Math.floor(now / 5_000);
 
   return {
-    activeCampaigns: 1_482 + (pulse % 4),
-    ukBusinesses: 524 + (pulse % 3),
-    recommendationsToday: 12_840 + Math.floor(minutesToday / 18) + (pulse % 6),
+    globalActiveBusinesses:
+      BASE_GLOBAL_ACTIVE_BUSINESSES + (pulse % 3),
+    globalActiveCampaigns: BASE_GLOBAL_ACTIVE_CAMPAIGNS + (pulse % 4),
   };
 }
 
@@ -66,29 +59,22 @@ function useAnimatedNumber(target: number, durationMs = 900): number {
 const METRICS: {
   key: keyof LiveStats;
   label: string;
-  suffix?: string;
 }[] = [
-  { key: "activeCampaigns", label: "Active AI Campaigns" },
-  { key: "ukBusinesses", label: "Total UK Businesses Optimized" },
   {
-    key: "recommendationsToday",
-    label: "AI Recommendations Dispatched Today",
-    suffix: "+",
+    key: "globalActiveBusinesses",
+    label: "Global active businesses using FerixAI",
+  },
+  {
+    key: "globalActiveCampaigns",
+    label: "Global active campaigns",
   },
 ];
 
-function MetricValue({
-  value,
-  suffix,
-}: {
-  value: number;
-  suffix?: string;
-}) {
+function MetricValue({ value }: { value: number }) {
   const animated = useAnimatedNumber(value);
   return (
     <p className="lf-orbitron text-xl font-bold tabular-nums tracking-tight text-white sm:text-2xl">
       {formatCount(animated)}
-      {suffix ?? ""}
     </p>
   );
 }
@@ -108,7 +94,7 @@ export default function LiveAiCampaignsCard() {
     <div
       className="relative w-full overflow-hidden rounded-2xl border border-emerald-400/20 bg-neutral-900/40 p-4 shadow-[0_0_40px_rgba(16,185,129,0.12)] backdrop-blur-md sm:p-5"
       aria-live="polite"
-      aria-label="Live AI campaigns activity"
+      aria-label="Global FerixAI activity"
     >
       <div
         className="pointer-events-none absolute inset-0 opacity-80"
@@ -130,29 +116,23 @@ export default function LiveAiCampaignsCard() {
         aria-hidden
       />
 
-      <div className="relative flex items-center justify-between gap-3">
-        <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-emerald-300 sm:text-[11px]">
-          <span className="relative flex h-2.5 w-2.5" aria-hidden>
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,1)]" />
-          </span>
-          Live
-        </div>
-        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#64748b] sm:text-[11px]">
-          Live AI Campaigns
+      <div className="relative flex items-center gap-2">
+        <span className="relative flex h-2.5 w-2.5 shrink-0" aria-hidden>
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+          <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,1)]" />
+        </span>
+        <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-emerald-300 sm:text-[11px]">
+          Live global activity
         </p>
       </div>
 
-      <div className="relative mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
+      <div className="relative mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
         {METRICS.map((metric) => (
           <div
             key={metric.key}
             className="min-w-0 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-3 sm:px-3.5"
           >
-            <MetricValue
-              value={stats[metric.key]}
-              suffix={metric.suffix}
-            />
+            <MetricValue value={stats[metric.key]} />
             <p className="mt-1.5 text-[10px] leading-snug tracking-wide text-[#94a3b8] sm:text-xs">
               {metric.label}
             </p>
