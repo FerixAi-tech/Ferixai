@@ -3,7 +3,7 @@ import type { AggressivenessLevel } from "@/lib/campaign/content-plan";
 export const PROMO_DISCOUNT_GBP = 30;
 export const BILLING_CYCLE_DAYS = 30;
 export const DEFAULT_BILLING_CYCLE = "monthly" as const;
-export const DEFAULT_PLAN_SLUG = "premium" as const;
+export const DEFAULT_PLAN_SLUG = "growth" as const;
 
 export type BillingCycle = typeof DEFAULT_BILLING_CYCLE;
 export type PricingPlanSlug = "starter" | "growth" | "premium" | "agency";
@@ -43,6 +43,7 @@ export const PRICING_PLANS: readonly PricingPlan[] = [
     priceMonthlyGbp: 89,
     description:
       "3× more AI visibility across ChatGPT, Gemini & Claude for local searches.",
+    badge: "Most Popular",
     aggressiveness: "Active",
     intensityScore: 2,
     siteArticleCount: 2,
@@ -56,7 +57,6 @@ export const PRICING_PLANS: readonly PricingPlan[] = [
     priceMonthlyGbp: 129,
     description:
       "Aggressive ChatGPT, Gemini & Claude coverage for maximum market dominance.",
-    badge: "Most Popular",
     aggressiveness: "Intensive",
     intensityScore: 3,
     siteArticleCount: 3,
