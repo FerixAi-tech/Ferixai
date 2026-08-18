@@ -15,7 +15,7 @@ export default function LandingPricingPlans({
 }) {
   const plans = listPricingPlans();
   const fromPrice = applyPromoDiscount(
-    plans[0]?.priceMonthlyGbp ?? 39,
+    plans[0]?.priceMonthlyGbp ?? 59,
     PROMO_DISCOUNT_GBP,
   ).payable;
 

@@ -27,7 +27,7 @@ export const PRICING_PLANS: readonly PricingPlan[] = [
   {
     slug: "starter",
     name: "Starter Plan",
-    priceMonthlyGbp: 39,
+    priceMonthlyGbp: 59,
     description:
       "Index your business for ChatGPT, Gemini & Claude local recommendation queries.",
     aggressiveness: "Steady",
@@ -40,7 +40,7 @@ export const PRICING_PLANS: readonly PricingPlan[] = [
   {
     slug: "growth",
     name: "Growth Plan",
-    priceMonthlyGbp: 59,
+    priceMonthlyGbp: 89,
     description:
       "3× more AI visibility across ChatGPT, Gemini & Claude for local searches.",
     aggressiveness: "Active",
@@ -53,7 +53,7 @@ export const PRICING_PLANS: readonly PricingPlan[] = [
   {
     slug: "premium",
     name: "Premium Plan",
-    priceMonthlyGbp: 109,
+    priceMonthlyGbp: 129,
     description:
       "Aggressive ChatGPT, Gemini & Claude coverage for maximum market dominance.",
     badge: "Most Popular",
@@ -67,7 +67,7 @@ export const PRICING_PLANS: readonly PricingPlan[] = [
   {
     slug: "agency",
     name: "Agency Plan",
-    priceMonthlyGbp: 159,
+    priceMonthlyGbp: 199,
     description:
       "Ultimate AI recommendation reach and top-tier indexing authority across ChatGPT, Gemini & Claude.",
     aggressiveness: "Maximum",
