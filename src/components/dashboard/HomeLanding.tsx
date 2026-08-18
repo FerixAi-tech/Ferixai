@@ -12,7 +12,6 @@ import SupportedAIPlatforms from "@/components/landing/SupportedAIPlatforms";
 import LandingCorporateSections from "@/components/landing/LandingCorporateSections";
 import LandingPricingPlans from "@/components/landing/LandingPricingPlans";
 import GlobalAiNetwork from "@/components/campaign/GlobalAiNetwork";
-import LiveAiCampaignsCard from "@/components/landing/LiveAiCampaignsCard";
 import "@/components/landing/landing-futuristic.css";
 import { listPricingPlans } from "@/lib/constants/pricing-plans";
 import { formatCurrency } from "@/lib/constants/metrics";
@@ -135,10 +134,6 @@ export default function HomeLanding({
                 <strong className="font-semibold text-white">YOUR</strong>{" "}
                 business first—before your competitors.
               </p>
-            </div>
-
-            <div className="mt-6">
-              <LiveAiCampaignsCard />
             </div>
 
             <div className="lf-animate-in lf-animate-in-4 mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
