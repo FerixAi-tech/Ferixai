@@ -11,15 +11,10 @@ import LandingAppFeatures from "@/components/landing/LandingAppFeatures";
 import SupportedAIPlatforms from "@/components/landing/SupportedAIPlatforms";
 import LandingCorporateSections from "@/components/landing/LandingCorporateSections";
 import LandingPricingPlans from "@/components/landing/LandingPricingPlans";
-import LandingPromoCountdown from "@/components/landing/LandingPromoCountdown";
 import GlobalAiNetwork from "@/components/campaign/GlobalAiNetwork";
 import LiveAiCampaignsCard from "@/components/landing/LiveAiCampaignsCard";
 import "@/components/landing/landing-futuristic.css";
-import {
-  applyPromoDiscount,
-  listPricingPlans,
-  PROMO_DISCOUNT_GBP,
-} from "@/lib/constants/pricing-plans";
+import { listPricingPlans } from "@/lib/constants/pricing-plans";
 import { formatCurrency } from "@/lib/constants/metrics";
 
 const orbitron = Orbitron({
@@ -58,10 +53,7 @@ const TRUST = [
   "100% Risk-Free. 14-Day Money-Back Guarantee. Cancel anytime with one click.",
 ] as const;
 
-const FROM_MONTHLY_GBP = applyPromoDiscount(
-  listPricingPlans()[0].priceMonthlyGbp,
-  PROMO_DISCOUNT_GBP,
-).payable;
+const FROM_MONTHLY_GBP = listPricingPlans()[0].priceMonthlyGbp;
 
 export default function HomeLanding({
   openSignup = false,
@@ -79,12 +71,6 @@ export default function HomeLanding({
       <div className="lf-vignette" aria-hidden />
 
       <SignupCard open={signupOpen} onClose={() => setSignupOpen(false)} />
-
-      <div className="relative z-20 border-b border-emerald-500/25 bg-emerald-500/10 px-4 py-2.5 text-center">
-        <p className="text-xs font-semibold tracking-wide text-emerald-100 sm:text-sm">
-          🇬🇧 UK Launch Offer: Get £30 OFF your first month with code FX30
-        </p>
-      </div>
 
       <div className="lf-page mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="hidden md:block">
@@ -105,7 +91,7 @@ export default function HomeLanding({
               <span aria-hidden className="text-[1.05em] leading-none">
                 🚀
               </span>
-              <span>Claim £30 OFF &amp; Start for £9</span>
+              <span>Get Started</span>
               <span aria-hidden className="tracking-normal">
                 →
               </span>
@@ -113,7 +99,6 @@ export default function HomeLanding({
             <p className="text-center text-xs font-medium text-[#94a3b8]">
               ✓ No setup fee • Cancel anytime • 14-day money-back guarantee
             </p>
-            <LandingPromoCountdown align="center" />
             <p className="text-sm text-[#94a3b8]">
               Already have an account?{" "}
               <Link
@@ -165,7 +150,7 @@ export default function HomeLanding({
                 <span aria-hidden className="text-[1.05em] leading-none">
                   🚀
                 </span>
-                <span>Claim £30 OFF &amp; Start for £9</span>
+                <span>Get Started</span>
                 <span aria-hidden className="tracking-normal">
                   →
                 </span>
@@ -181,8 +166,6 @@ export default function HomeLanding({
             <p className="lf-animate-in lf-animate-in-4 mt-3 text-xs font-medium text-[#94a3b8]">
               ✓ No setup fee • Cancel anytime • 14-day money-back guarantee
             </p>
-
-            <LandingPromoCountdown />
 
             <div className="lf-animate-in lf-animate-in-5 mt-8 grid grid-cols-3 gap-4">
               <div>
@@ -279,8 +262,8 @@ export default function HomeLanding({
                 Ready to show up when people ask AI?
               </h2>
               <p className="mx-auto mt-3 max-w-xl text-sm text-[#94a3b8]">
-                Sign up, get your £30 promo code instantly, and launch with £30
-                off your first month — no credit card needed to explore.
+                Create your account, choose a plan, and launch your AI visibility
+                campaign — no credit card needed to explore.
               </p>
               <button
                 type="button"
@@ -290,7 +273,7 @@ export default function HomeLanding({
                 <span aria-hidden className="text-[1.05em] leading-none">
                   🚀
                 </span>
-                <span>Claim £30 OFF &amp; Start for £9</span>
+                <span>Get Started</span>
                 <span aria-hidden className="tracking-normal">
                   →
                 </span>
@@ -298,10 +281,8 @@ export default function HomeLanding({
               <p className="mx-auto mt-3 max-w-lg text-center text-xs font-medium text-[#94a3b8]">
                 ✓ No setup fee • Cancel anytime • 14-day money-back guarantee
               </p>
-              <LandingPromoCountdown align="center" className="mt-4" />
               <p className="mx-auto mt-4 max-w-lg text-center text-[11px] leading-relaxed tracking-wide text-[#64748b]">
-                One-time promo code valid for new verified business names only
-                to prevent abuse. No credit card required to explore.
+                No credit card required to explore.
               </p>
             </div>
           </div>

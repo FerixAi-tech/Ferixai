@@ -1,21 +1,15 @@
 "use client";
 
-import {
-  applyPromoDiscount,
-  listPricingPlans,
-  type PricingPlanSlug,
-} from "@/lib/constants/pricing-plans";
+import { listPricingPlans, type PricingPlanSlug } from "@/lib/constants/pricing-plans";
 import { formatCurrency } from "@/lib/constants/metrics";
 import { Check } from "lucide-react";
 
 export default function PricingPlanCards({
   selectedSlug,
   onSelect,
-  promoApplied = false,
 }: {
   selectedSlug: PricingPlanSlug;
   onSelect: (slug: PricingPlanSlug) => void;
-  promoApplied?: boolean;
 }) {
   const plans = listPricingPlans();
 
@@ -24,10 +18,6 @@ export default function PricingPlanCards({
       {plans.map((plan) => {
         const selected = plan.slug === selectedSlug;
         const popular = plan.badge === "Most Popular";
-        const { listPrice, payable } = applyPromoDiscount(
-          plan.priceMonthlyGbp,
-          promoApplied ? undefined : 0,
-        );
 
         return (
           <button
@@ -63,30 +53,12 @@ export default function PricingPlanCards({
             </div>
 
             <div className="mt-4">
-              {promoApplied ? (
-                <>
-                  <p className="flex flex-wrap items-baseline gap-2">
-                    <span className="text-sm text-[#64748b] line-through">
-                      {formatCurrency(listPrice)}
-                    </span>
-                    <span className="lf-orbitron text-3xl font-bold text-emerald-300">
-                      {formatCurrency(payable)}
-                    </span>
-                  </p>
-                  <p className="mt-1 text-xs font-medium text-emerald-200/90">
-                    first month · then {formatCurrency(listPrice)}/month
-                  </p>
-                </>
-              ) : (
-                <>
-                  <p className="lf-orbitron text-3xl font-bold text-white">
-                    {formatCurrency(listPrice)}
-                    <span className="ml-1 text-sm font-semibold text-[#94a3b8]">
-                      /month
-                    </span>
-                  </p>
-                </>
-              )}
+              <p className="lf-orbitron text-3xl font-bold text-white">
+                {formatCurrency(plan.priceMonthlyGbp)}
+                <span className="ml-1 text-sm font-semibold text-[#94a3b8]">
+                  /month
+                </span>
+              </p>
             </div>
 
             <p className="mt-3 flex-1 text-sm leading-relaxed text-[#94a3b8]">

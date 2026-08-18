@@ -4,7 +4,6 @@ import {
   saveCampaignDraft,
   type CampaignDraft,
 } from "@/lib/campaign/draft";
-import { LAUNCH_PROMO_CODE } from "@/lib/promo/codes";
 
 export type LeadMagnetInput = {
   businessName: string;
@@ -59,7 +58,6 @@ export function saveLeadMagnetInput(input: LeadMagnetInput): void {
     city: payload.city,
     planSlug: DEFAULT_PLAN_SLUG,
     step: 1,
-    promoCode: LAUNCH_PROMO_CODE,
     updatedAt: Date.now(),
   };
   saveCampaignDraft(draft);

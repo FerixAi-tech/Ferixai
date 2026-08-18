@@ -1,12 +1,7 @@
 "use client";
 
-import {
-  applyPromoDiscount,
-  listPricingPlans,
-  PROMO_DISCOUNT_GBP,
-} from "@/lib/constants/pricing-plans";
+import { listPricingPlans } from "@/lib/constants/pricing-plans";
 import { formatCurrency } from "@/lib/constants/metrics";
-import LandingPromoCountdown from "@/components/landing/LandingPromoCountdown";
 
 export default function LandingPricingPlans({
   onClaim,
@@ -14,10 +9,7 @@ export default function LandingPricingPlans({
   onClaim?: () => void;
 }) {
   const plans = listPricingPlans();
-  const fromPrice = applyPromoDiscount(
-    plans[0]?.priceMonthlyGbp ?? 59,
-    PROMO_DISCOUNT_GBP,
-  ).payable;
+  const fromPrice = plans[0]?.priceMonthlyGbp ?? 59;
 
   return (
     <section className="pb-16 pt-4" id="pricing">
@@ -29,18 +21,13 @@ export default function LandingPricingPlans({
           Plans from {formatCurrency(fromPrice)}/month
         </h2>
         <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-[#94a3b8]">
-          First-month prices below include your £{PROMO_DISCOUNT_GBP} welcome
-          credit with code FX30. Every plan indexes your business across
-          ChatGPT, Gemini, and Claude for local recommendation queries.
+          Every plan indexes your business across ChatGPT, Gemini, and Claude
+          for local recommendation queries.
         </p>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {plans.map((plan) => {
-          const { listPrice, payable } = applyPromoDiscount(
-            plan.priceMonthlyGbp,
-            PROMO_DISCOUNT_GBP,
-          );
           const popular = plan.badge === "Most Popular";
 
           return (
@@ -63,16 +50,11 @@ export default function LandingPricingPlans({
               </h3>
 
               <div className="mt-4">
-                <p className="flex flex-wrap items-baseline gap-2">
-                  <span className="text-sm text-[#64748b] line-through">
-                    {formatCurrency(listPrice)}
+                <p className="lf-orbitron text-3xl font-bold text-white">
+                  {formatCurrency(plan.priceMonthlyGbp)}
+                  <span className="ml-1 text-sm font-semibold text-[#94a3b8]">
+                    /month
                   </span>
-                  <span className="lf-orbitron text-3xl font-bold text-emerald-300">
-                    {formatCurrency(payable)}
-                  </span>
-                </p>
-                <p className="mt-1 text-xs font-medium text-emerald-200/90">
-                  first month · then {formatCurrency(listPrice)}/month
                 </p>
               </div>
 
@@ -94,10 +76,9 @@ export default function LandingPricingPlans({
             <span aria-hidden className="text-[1.05em] leading-none">
               🚀
             </span>
-            <span>Claim £30 OFF &amp; Start for £9</span>
+            <span>Get Started</span>
             <span aria-hidden>→</span>
           </button>
-          <LandingPromoCountdown align="center" />
         </div>
       ) : null}
     </section>

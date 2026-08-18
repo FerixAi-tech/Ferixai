@@ -15,8 +15,13 @@ import {
   normalizeKeyFeatures,
   saveCampaignDraft,
 } from "@/lib/campaign/draft";
-import { DEFAULT_PLAN_SLUG } from "@/lib/constants/pricing-plans";
-import { LAUNCH_PROMO_CODE } from "@/lib/promo/codes";
+import {
+  DEFAULT_PLAN_SLUG,
+  getPricingPlan,
+} from "@/lib/constants/pricing-plans";
+import { formatCurrency } from "@/lib/constants/metrics";
+
+const defaultPlanPrice = getPricingPlan(DEFAULT_PLAN_SLUG).priceMonthlyGbp;
 
 function TypewriterMarkdown({
   text,
@@ -169,7 +174,6 @@ export default function DashboardAiPreviewCard() {
         city,
         planSlug: loadCampaignDraft()?.planSlug || DEFAULT_PLAN_SLUG,
         step: 1,
-        promoCode: LAUNCH_PROMO_CODE,
         updatedAt: Date.now(),
       });
       const result = await fetchPreview({
@@ -305,7 +309,7 @@ export default function DashboardAiPreviewCard() {
           className="lf-btn-primary mt-4 inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white sm:w-auto"
         >
           <span aria-hidden>🚀</span>
-          <span>Launch Live for £9 (Use Code: FX30)</span>
+          <span>Launch Live for {formatCurrency(defaultPlanPrice)}/month</span>
           <span aria-hidden>→</span>
         </Link>
       </div>

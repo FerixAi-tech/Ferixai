@@ -10,9 +10,7 @@ import {
   saveCampaignDraft,
 } from "@/lib/campaign/draft";
 import FuturisticScene3D from "@/components/landing/FuturisticScene3D";
-import LandingPromoCountdown from "@/components/landing/LandingPromoCountdown";
 import { trackCompleteRegistration, trackLead } from "@/lib/meta/pixel";
-import { LAUNCH_PROMO_CODE } from "@/lib/promo/codes";
 
 interface SignupCardProps {
   open: boolean;
@@ -38,8 +36,6 @@ export default function SignupCard({
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submittedEmail, setSubmittedEmail] = useState("");
   const [continuePath, setContinuePath] = useState(redirectTo);
-  const [promoCodeValue, setPromoCodeValue] = useState("");
-  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -48,8 +44,6 @@ export default function SignupCard({
       setIsSubmitted(false);
       setSubmittedEmail("");
       setContinuePath(redirectTo);
-      setCopied(false);
-      setPromoCodeValue("");
       trackLead({ content_name: "Signup Modal" });
     }
   }, [open, initialBusinessName, redirectTo]);
@@ -77,27 +71,6 @@ export default function SignupCard({
     window.location.assign(
       `${continuePath}${separator}business=${businessParam}`,
     );
-  }
-
-  async function copyPromoCode() {
-    const code = promoCodeValue || LAUNCH_PROMO_CODE;
-    try {
-      await navigator.clipboard.writeText(code);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 2000);
-    } catch {
-      // Fallback for older browsers / denied clipboard
-      const textarea = document.createElement("textarea");
-      textarea.value = code;
-      textarea.style.position = "fixed";
-      textarea.style.opacity = "0";
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand("copy");
-      document.body.removeChild(textarea);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 2000);
-    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -148,7 +121,6 @@ export default function SignupCard({
         );
       }
 
-      // New account: wipe previous browser wizard/session state, then start at Step 1
       clearWizardSessionState();
       saveCampaignDraft({
         businessName: trimmedName,
@@ -158,14 +130,11 @@ export default function SignupCard({
         city: "",
         planSlug: DEFAULT_PLAN_SLUG,
         step: 1,
-        promoCode: LAUNCH_PROMO_CODE,
         updatedAt: Date.now(),
       });
 
       setContinuePath(nextPath);
       setSubmittedEmail(trimmedEmail);
-      setPromoCodeValue(LAUNCH_PROMO_CODE);
-      setCopied(false);
       setIsSubmitted(true);
       trackCompleteRegistration();
       setLoading(false);
@@ -211,27 +180,12 @@ export default function SignupCard({
                   id={titleId}
                   className="lf-orbitron mt-2 text-2xl font-bold tracking-tight text-white sm:text-[1.7rem]"
                 >
-                  ✨ Account Created Successfully!
+                  Account created successfully
                 </h2>
                 <p className="mt-3 text-sm leading-relaxed text-[#94a3b8]">
-                  Your £30 welcome credit is ready. Code{" "}
-                  <strong className="text-white">{LAUNCH_PROMO_CODE}</strong>{" "}
-                  will be pre-applied on plan selection — Starter from £9 for
-                  your first month.
+                  You&apos;re ready to choose a plan and launch your AI
+                  visibility campaign.
                 </p>
-
-                <div className="mt-6 flex flex-col gap-3 rounded-2xl border border-violet-400/35 bg-[linear-gradient(135deg,rgba(139,92,246,0.16),rgba(236,72,153,0.1),rgba(18,12,30,0.95))] p-3 shadow-[0_0_32px_rgba(139,92,246,0.22)] sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:p-4">
-                  <code className="lf-orbitron truncate px-2 text-center font-mono text-2xl font-extrabold tracking-[0.14em] text-[#f5d0fe] [text-shadow:0_0_18px_rgba(240,171,252,0.55),0_0_36px_rgba(168,85,247,0.35)] sm:text-left sm:text-3xl">
-                    {LAUNCH_PROMO_CODE}
-                  </code>
-                  <button
-                    type="button"
-                    onClick={() => void copyPromoCode()}
-                    className="lf-btn-primary inline-flex min-h-[44px] shrink-0 items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold tracking-wide text-white"
-                  >
-                    {copied ? "✅ Copied!" : "📋 Copy Code"}
-                  </button>
-                </div>
 
                 <button
                   type="button"
@@ -240,16 +194,11 @@ export default function SignupCard({
                   }
                   className="mt-6 flex w-full min-h-[48px] items-center justify-center gap-2 rounded-xl border border-fuchsia-400/35 bg-fuchsia-500/10 px-4 py-3.5 text-sm font-bold tracking-wide text-fuchsia-100 transition hover:border-fuchsia-300/50 hover:bg-fuchsia-500/20 sm:text-base"
                 >
-                  <span>Go to Plan Selection</span>
+                  <span>Go to plan selection</span>
                   <span aria-hidden className="tracking-normal">
                     →
                   </span>
                 </button>
-
-                <p className="mt-4 text-center text-[11px] leading-relaxed tracking-wide text-[#64748b]">
-                  FX30 is automatically applied at checkout for £30 off your
-                  first month.
-                </p>
               </div>
             ) : (
               <>
@@ -260,7 +209,7 @@ export default function SignupCard({
                   id={titleId}
                   className="lf-orbitron mt-2 text-2xl font-bold tracking-tight text-white sm:text-[1.7rem]"
                 >
-                  Claim your £30 welcome code
+                  Create your account
                 </h2>
                 <p className="mt-2 text-sm leading-relaxed text-[#94a3b8]">
                   No credit card required to explore. Set up your AI profile in
@@ -270,15 +219,11 @@ export default function SignupCard({
                 <div className="mt-3 mb-4 flex justify-between gap-1.5 text-[12px] leading-snug text-[#9CA3AF] sm:gap-2 sm:text-[13px]">
                   <span className="inline-flex items-center gap-1">
                     <span aria-hidden>⚡</span>
-                    Instant Access
-                  </span>
-                  <span className="inline-flex items-center gap-1">
-                    <span aria-hidden>🎁</span>
-                    £30 Free Budget Inside
+                    Instant access
                   </span>
                   <span className="inline-flex items-center gap-1">
                     <span aria-hidden>🔒</span>
-                    No Card Required to Start
+                    No card required to start
                   </span>
                 </div>
 
@@ -310,14 +255,14 @@ export default function SignupCard({
                   </div>
                   <div>
                     <label className="mb-1.5 block text-sm font-medium text-[#94a3b8]">
-                      Email Address
+                      Email address
                     </label>
                     <input
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
-                      placeholder="Your Email"
+                      placeholder="Your email"
                       className="lf-input border-white/[0.12] bg-white/[0.04] transition focus:border-fuchsia-400/50 focus:bg-white/[0.05] focus:shadow-[0_0_0_3px_rgba(139,92,246,0.18),0_0_24px_rgba(236,72,153,0.16)]"
                       autoComplete="email"
                     />
@@ -335,20 +280,13 @@ export default function SignupCard({
                       <span aria-hidden className="text-[1.05em] leading-none">
                         🚀
                       </span>
-                      <span>Claim £30 OFF &amp; Start for £9</span>
+                      <span>Get started</span>
                       <span aria-hidden className="tracking-normal">
                         →
                       </span>
                     </span>
                   </button>
                 </form>
-
-                <LandingPromoCountdown align="center" className="mx-auto" />
-
-                <p className="mt-4 text-center text-[11px] leading-relaxed tracking-wide text-[#64748b]">
-                  One-time promo code valid for new verified business names only
-                  to prevent abuse. No credit card required to explore.
-                </p>
 
                 <p className="mt-5 text-center text-sm text-[#94a3b8]">
                   Already have an account?{" "}

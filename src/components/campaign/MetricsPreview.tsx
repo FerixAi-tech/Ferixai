@@ -1,10 +1,8 @@
 "use client";
 
 import {
-  applyPromoDiscount,
   BILLING_CYCLE_DAYS,
   getPricingPlan,
-  PROMO_DISCOUNT_GBP,
   type PricingPlanSlug,
 } from "@/lib/constants/pricing-plans";
 import {
@@ -15,7 +13,6 @@ import { Calendar, Eye, Search, TrendingUp } from "lucide-react";
 
 interface MetricsPreviewProps {
   planSlug: PricingPlanSlug;
-  promoApplied?: boolean;
 }
 
 function formatCompactNumber(value: number): string {
@@ -36,16 +33,10 @@ function getOutcomeMetrics(intensityScore: number, listPrice: number) {
   return { estimatedReach, visibilityBoost, keywordCount };
 }
 
-export default function MetricsPreview({
-  planSlug,
-  promoApplied = false,
-}: MetricsPreviewProps) {
+export default function MetricsPreview({ planSlug }: MetricsPreviewProps) {
   const pricing = getPricingPlan(planSlug);
-  const { listPrice, payable } = applyPromoDiscount(
-    pricing.priceMonthlyGbp,
-    promoApplied ? PROMO_DISCOUNT_GBP : 0,
-  );
-  const contentPlan = getCampaignContentPlanForPlan(pricing, payable);
+  const listPrice = pricing.priceMonthlyGbp;
+  const contentPlan = getCampaignContentPlanForPlan(pricing, listPrice);
   const outcomes = getOutcomeMetrics(pricing.intensityScore, listPrice);
 
   const items = [
@@ -81,49 +72,18 @@ export default function MetricsPreview({
 
   return (
     <div className="space-y-6">
-      <div
-        className={`rounded-[18px] border p-6 ${
-          promoApplied
-            ? "border-emerald-400/35 bg-[linear-gradient(165deg,rgba(16,185,129,0.14),#0e0a18_55%,#090610)] shadow-[0_0_28px_rgba(16,185,129,0.18)]"
-            : "border-violet-950/70 bg-[linear-gradient(165deg,#120c1e_0%,#0e0a18_45%,#090610_100%)]"
-        }`}
-      >
+      <div className="rounded-[18px] border border-violet-950/70 bg-[linear-gradient(165deg,#120c1e_0%,#0e0a18_45%,#090610_100%)] p-6">
         <p className="text-sm text-[#94a3b8]">{pricing.name}</p>
-        {promoApplied ? (
-          <>
-            <p className="mt-1 flex flex-wrap items-baseline gap-2">
-              <span className="text-lg text-[#64748b] line-through">
-                {formatCurrency(listPrice)}
-              </span>
-              <span className="lf-orbitron text-3xl font-bold text-emerald-300">
-                {formatCurrency(payable)}
-              </span>
-            </p>
-            <p className="mt-1 text-sm text-[#64748b]">
-              first month · then {formatCurrency(listPrice)}/month
-            </p>
-            <p className="mt-3 text-xs font-semibold leading-relaxed text-emerald-200/90">
-              £30 promo applied — strike-through shows list price vs first-month
-              total.
-            </p>
-          </>
-        ) : (
-          <>
-            <p className="lf-orbitron mt-1 text-3xl font-bold text-white">
-              {formatCurrency(listPrice)}
-              <span className="ml-1 text-base font-semibold text-[#94a3b8]">
-                /month
-              </span>
-            </p>
-            <p className="mt-1 text-sm text-[#64748b]">
-              {contentPlan.aggressiveness} intensity ·{" "}
-              {contentPlan.estimatedContentPieces} content pieces
-            </p>
-            <p className="mt-3 text-xs leading-relaxed text-[#94a3b8]">
-              Apply code FX30 for £30 off the first month.
-            </p>
-          </>
-        )}
+        <p className="lf-orbitron mt-1 text-3xl font-bold text-white">
+          {formatCurrency(listPrice)}
+          <span className="ml-1 text-base font-semibold text-[#94a3b8]">
+            /month
+          </span>
+        </p>
+        <p className="mt-1 text-sm text-[#64748b]">
+          {contentPlan.aggressiveness} intensity ·{" "}
+          {contentPlan.estimatedContentPieces} content pieces
+        </p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
