@@ -11,6 +11,7 @@ import LandingAppFeatures from "@/components/landing/LandingAppFeatures";
 import SupportedAIPlatforms from "@/components/landing/SupportedAIPlatforms";
 import LandingCorporateSections from "@/components/landing/LandingCorporateSections";
 import LandingPricingPlans from "@/components/landing/LandingPricingPlans";
+import GlobalAiNetwork from "@/components/campaign/GlobalAiNetwork";
 import LandingSignupCtaLabel, {
   landingSignupButtonClassName,
 } from "@/components/landing/LandingSignupCtaLabel";

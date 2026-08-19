@@ -13,6 +13,7 @@ import FuturisticScene3D from "@/components/landing/FuturisticScene3D";
 import LandingSignupCtaLabel, {
   landingSignupButtonClassName,
 } from "@/components/landing/LandingSignupCtaLabel";
+import { trackCompleteRegistration, trackLead } from "@/lib/meta/pixel";
 
 interface SignupCardProps {
   open: boolean;
