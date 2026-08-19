@@ -280,7 +280,7 @@ export default function SignupCard({
                       <span aria-hidden className="text-[1.05em] leading-none">
                         🚀
                       </span>
-                      <span>Get started</span>
+                      <span>Signup For Free</span>
                       <span aria-hidden className="tracking-normal">
                         →
                       </span>

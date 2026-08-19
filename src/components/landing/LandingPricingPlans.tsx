@@ -76,7 +76,7 @@ export default function LandingPricingPlans({
             <span aria-hidden className="text-[1.05em] leading-none">
               🚀
             </span>
-            <span>Get Started</span>
+            <span>Signup For Free</span>
             <span aria-hidden>→</span>
           </button>
         </div>
