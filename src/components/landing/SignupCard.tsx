@@ -216,14 +216,22 @@ export default function SignupCard({
                   seconds.
                 </p>
 
-                <div className="mt-3 mb-4 flex justify-between gap-1.5 text-[12px] leading-snug text-[#9CA3AF] sm:gap-2 sm:text-[13px]">
-                  <span className="inline-flex items-center gap-1">
+                <div className="mt-3 mb-4 grid grid-cols-1 gap-2 text-[12px] leading-snug text-[#9CA3AF] sm:grid-cols-2 sm:gap-x-3 sm:gap-y-2 sm:text-[13px]">
+                  <span className="inline-flex items-center gap-1.5">
                     <span aria-hidden>⚡</span>
                     Instant access
                   </span>
-                  <span className="inline-flex items-center gap-1">
+                  <span className="inline-flex items-center gap-1.5">
                     <span aria-hidden>🔒</span>
                     No card required to start
+                  </span>
+                  <span className="inline-flex items-center gap-1.5">
+                    <span aria-hidden>🛡️</span>
+                    Stripe-style 3D Secure checkout
+                  </span>
+                  <span className="inline-flex items-center gap-1.5">
+                    <span aria-hidden>⏱️</span>
+                    Results begin within 48 hours
                   </span>
                 </div>
 
