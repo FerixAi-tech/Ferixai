@@ -22,8 +22,6 @@ const orbitron = Orbitron({
   variable: "--font-orbitron",
 });
 
-const LOGIN_HREF = "/auth?redirect=/dashboard";
-
 const STEPS = [
   {
     step: "01",
@@ -80,33 +78,6 @@ export default function HomeLanding({
           <BrandLogo href="/" size="2xl" priority centered />
           <div className="w-full md:hidden">
             <SupportContact />
-          </div>
-          <div className="flex w-full max-w-lg flex-col items-center gap-3">
-            <button
-              type="button"
-              onClick={() => setSignupOpen(true)}
-              className="lf-btn-primary touch-target relative inline-flex min-h-[52px] w-full items-center justify-center gap-2 overflow-hidden rounded-xl px-6 py-3.5 text-base font-bold tracking-wide text-white sm:min-w-[300px]"
-            >
-              <span aria-hidden className="text-[1.05em] leading-none">
-                🚀
-              </span>
-              <span>Get Started</span>
-              <span aria-hidden className="tracking-normal">
-                →
-              </span>
-            </button>
-            <p className="text-center text-xs font-medium text-[#94a3b8]">
-              ✓ No setup fee • Cancel anytime • 14-day money-back guarantee
-            </p>
-            <p className="text-sm text-[#94a3b8]">
-              Already have an account?{" "}
-              <Link
-                href={LOGIN_HREF}
-                className="font-semibold text-fuchsia-300 transition hover:text-pink-200 hover:underline"
-              >
-                Sign in
-              </Link>
-            </p>
           </div>
         </nav>
 
@@ -248,39 +219,6 @@ export default function HomeLanding({
 
         <section className="pb-10">
           <GlobalAiNetwork />
-        </section>
-
-        <section className="pb-16">
-          <div className="lf-card-border rounded-3xl p-[1px]">
-            <div className="rounded-[23px] bg-[rgba(8,12,18,0.96)] px-6 py-10 text-center sm:px-12">
-              <h2 className="lf-orbitron text-2xl font-bold text-white sm:text-3xl">
-                Ready to show up when people ask AI?
-              </h2>
-              <p className="mx-auto mt-3 max-w-xl text-sm text-[#94a3b8]">
-                Create your account, choose a plan, and launch your AI visibility
-                campaign — no credit card needed to explore.
-              </p>
-              <button
-                type="button"
-                onClick={() => setSignupOpen(true)}
-                className="lf-btn-primary mt-7 inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl px-8 py-3 font-bold tracking-wide text-white"
-              >
-                <span aria-hidden className="text-[1.05em] leading-none">
-                  🚀
-                </span>
-                <span>Get Started</span>
-                <span aria-hidden className="tracking-normal">
-                  →
-                </span>
-              </button>
-              <p className="mx-auto mt-3 max-w-lg text-center text-xs font-medium text-[#94a3b8]">
-                ✓ No setup fee • Cancel anytime • 14-day money-back guarantee
-              </p>
-              <p className="mx-auto mt-4 max-w-lg text-center text-[11px] leading-relaxed tracking-wide text-[#64748b]">
-                No credit card required to explore.
-              </p>
-            </div>
-          </div>
         </section>
 
         <footer className="border-t border-white/5 py-8 text-center text-xs text-[#94a3b8]">
