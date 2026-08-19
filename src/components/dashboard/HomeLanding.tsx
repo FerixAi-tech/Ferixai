@@ -11,7 +11,7 @@ import LandingAppFeatures from "@/components/landing/LandingAppFeatures";
 import SupportedAIPlatforms from "@/components/landing/SupportedAIPlatforms";
 import LandingCorporateSections from "@/components/landing/LandingCorporateSections";
 import LandingPricingPlans from "@/components/landing/LandingPricingPlans";
-import GlobalAiNetwork from "@/components/campaign/GlobalAiNetwork";
+import LandingSignupCtaLabel from "@/components/landing/LandingSignupCtaLabel";
 import "@/components/landing/landing-futuristic.css";
 import { listPricingPlans } from "@/lib/constants/pricing-plans";
 import { formatCurrency } from "@/lib/constants/metrics";
@@ -111,15 +111,9 @@ export default function HomeLanding({
               <button
                 type="button"
                 onClick={() => setSignupOpen(true)}
-                className="lf-btn-primary relative inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl px-7 py-3.5 text-base font-bold tracking-wide text-white"
+                className="lf-btn-primary relative inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl px-5 py-3.5 text-base font-bold tracking-wide text-white sm:px-7"
               >
-                <span aria-hidden className="text-[1.05em] leading-none">
-                  🚀
-                </span>
-                <span>Signup For Free</span>
-                <span aria-hidden className="tracking-normal">
-                  →
-                </span>
+                <LandingSignupCtaLabel />
               </button>
               <a
                 href="#pricing"

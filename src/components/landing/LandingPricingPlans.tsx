@@ -1,7 +1,7 @@
 "use client";
 
 import { listPricingPlans } from "@/lib/constants/pricing-plans";
-import { formatCurrency } from "@/lib/constants/metrics";
+import LandingSignupCtaLabel from "@/components/landing/LandingSignupCtaLabel";
 
 export default function LandingPricingPlans({
   onClaim,
@@ -71,13 +71,9 @@ export default function LandingPricingPlans({
           <button
             type="button"
             onClick={onClaim}
-            className="lf-btn-primary inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl px-8 py-3 font-bold tracking-wide text-white"
+            className="lf-btn-primary inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl px-5 py-3 font-bold tracking-wide text-white sm:px-8"
           >
-            <span aria-hidden className="text-[1.05em] leading-none">
-              🚀
-            </span>
-            <span>Signup For Free</span>
-            <span aria-hidden>→</span>
+            <LandingSignupCtaLabel />
           </button>
         </div>
       ) : null}

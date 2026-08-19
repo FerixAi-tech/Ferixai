@@ -10,7 +10,7 @@ import {
   saveCampaignDraft,
 } from "@/lib/campaign/draft";
 import FuturisticScene3D from "@/components/landing/FuturisticScene3D";
-import { trackCompleteRegistration, trackLead } from "@/lib/meta/pixel";
+import LandingSignupCtaLabel from "@/components/landing/LandingSignupCtaLabel";
 
 interface SignupCardProps {
   open: boolean;
@@ -273,18 +273,11 @@ export default function SignupCard({
                     disabled={loading}
                     className="lf-btn-primary relative flex w-full min-h-[48px] items-center justify-center gap-2 overflow-hidden rounded-xl px-4 py-3.5 text-sm font-bold tracking-wide text-white transition hover:-translate-y-0.5 disabled:opacity-60 sm:text-base"
                   >
-                    {loading && (
+                    {loading ? (
                       <Loader2 className="relative z-10 h-4 w-4 shrink-0 animate-spin" />
+                    ) : (
+                      <LandingSignupCtaLabel />
                     )}
-                    <span className="relative z-10 inline-flex items-center gap-2">
-                      <span aria-hidden className="text-[1.05em] leading-none">
-                        🚀
-                      </span>
-                      <span>Signup For Free</span>
-                      <span aria-hidden className="tracking-normal">
-                        →
-                      </span>
-                    </span>
                   </button>
                 </form>
 
