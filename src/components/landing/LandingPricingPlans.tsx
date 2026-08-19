@@ -1,7 +1,10 @@
 "use client";
 
 import { listPricingPlans } from "@/lib/constants/pricing-plans";
-import LandingSignupCtaLabel from "@/components/landing/LandingSignupCtaLabel";
+import { formatCurrency } from "@/lib/constants/metrics";
+import LandingSignupCtaLabel, {
+  landingSignupButtonClassName,
+} from "@/components/landing/LandingSignupCtaLabel";
 
 export default function LandingPricingPlans({
   onClaim,
@@ -67,11 +70,11 @@ export default function LandingPricingPlans({
       </div>
 
       {onClaim ? (
-        <div className="mt-8 flex flex-col items-center">
+        <div className="mx-auto mt-8 flex w-full max-w-xl justify-center">
           <button
             type="button"
             onClick={onClaim}
-            className="lf-btn-primary inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl px-5 py-3 font-bold tracking-wide text-white sm:px-8"
+            className={landingSignupButtonClassName}
           >
             <LandingSignupCtaLabel />
           </button>

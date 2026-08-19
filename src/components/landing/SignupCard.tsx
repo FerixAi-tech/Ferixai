@@ -10,7 +10,9 @@ import {
   saveCampaignDraft,
 } from "@/lib/campaign/draft";
 import FuturisticScene3D from "@/components/landing/FuturisticScene3D";
-import LandingSignupCtaLabel from "@/components/landing/LandingSignupCtaLabel";
+import LandingSignupCtaLabel, {
+  landingSignupButtonClassName,
+} from "@/components/landing/LandingSignupCtaLabel";
 
 interface SignupCardProps {
   open: boolean;
@@ -279,7 +281,7 @@ export default function SignupCard({
                   <button
                     type="submit"
                     disabled={loading}
-                    className="lf-btn-primary relative flex w-full min-h-[48px] items-center justify-center gap-2 overflow-hidden rounded-xl px-4 py-3.5 text-sm font-bold tracking-wide text-white transition hover:-translate-y-0.5 disabled:opacity-60 sm:text-base"
+                    className={`${landingSignupButtonClassName} overflow-hidden transition hover:-translate-y-0.5 disabled:opacity-60`}
                   >
                     {loading ? (
                       <Loader2 className="relative z-10 h-4 w-4 shrink-0 animate-spin" />

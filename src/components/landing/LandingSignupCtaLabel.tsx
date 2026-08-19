@@ -1,3 +1,6 @@
+export const landingSignupButtonClassName =
+  "lf-btn-primary relative inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl px-5 py-3.5 text-base font-bold tracking-wide text-white sm:w-auto sm:px-7";
+
 export default function LandingSignupCtaLabel({
   className = "",
 }: {
