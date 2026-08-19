@@ -23,7 +23,7 @@ export default function LandingSignupCtaLabel({
         aria-hidden
         className="text-base leading-none tracking-normal text-white/85"
       >
-        →
+        ←
       </span>
     </span>
   );
