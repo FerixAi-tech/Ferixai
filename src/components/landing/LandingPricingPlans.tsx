@@ -71,12 +71,9 @@ export default function LandingPricingPlans({
       </div>
 
       <div
-        className="mx-auto mt-10 flex max-w-3xl flex-col items-center gap-5"
+        className="mx-auto mt-10 flex max-w-3xl flex-col items-center"
         aria-label="Accepted payment methods"
       >
-        <p className="text-xs font-medium uppercase tracking-[0.16em] text-[#64748b]">
-          Secure checkout
-        </p>
         <div className="flex flex-wrap items-center justify-center gap-5 sm:gap-6">
           <Image
             src="/birlesik.png"
