@@ -406,7 +406,7 @@ export default function CampaignWizard({
         open={signupOpen}
         onClose={() => setSignupOpen(false)}
         initialBusinessName={businessName}
-        redirectTo="/dashboard/new"
+        redirectTo="/dashboard"
         onSuccess={() => {
           setSignupOpen(false);
           if (pendingAfterSignup === "launch") {
