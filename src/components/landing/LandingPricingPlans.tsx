@@ -71,33 +71,33 @@ export default function LandingPricingPlans({
       </div>
 
       <div
-        className="mx-auto mt-8 flex max-w-2xl flex-col items-center gap-4"
+        className="mx-auto mt-10 flex max-w-3xl flex-col items-center gap-5"
         aria-label="Accepted payment methods"
       >
         <p className="text-xs font-medium uppercase tracking-[0.16em] text-[#64748b]">
           Secure checkout
         </p>
-        <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-5">
+        <div className="flex flex-wrap items-center justify-center gap-5 sm:gap-6">
           <Image
-            src="/google-apple-pay.webp"
+            src="/birlesik.png"
             alt="Apple Pay and Google Pay"
-            width={280}
-            height={72}
-            className="h-10 w-auto object-contain sm:h-11"
+            width={360}
+            height={96}
+            className="h-14 w-auto object-contain sm:h-16"
           />
           <Image
             src="/visa.png"
             alt="Visa"
-            width={72}
-            height={48}
-            className="h-8 w-auto object-contain"
+            width={96}
+            height={64}
+            className="h-11 w-auto object-contain sm:h-12"
           />
           <Image
             src="/mastercard.webp"
             alt="Mastercard"
-            width={72}
-            height={48}
-            className="h-8 w-auto object-contain"
+            width={96}
+            height={64}
+            className="h-11 w-auto object-contain sm:h-12"
           />
         </div>
       </div>
