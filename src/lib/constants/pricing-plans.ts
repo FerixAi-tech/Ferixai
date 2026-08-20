@@ -6,7 +6,7 @@ export const DEFAULT_BILLING_CYCLE = "monthly" as const;
 export const DEFAULT_PLAN_SLUG = "growth" as const;
 
 export type BillingCycle = typeof DEFAULT_BILLING_CYCLE;
-export type PricingPlanSlug = "starter" | "growth" | "premium" | "agency";
+export type PricingPlanSlug = "starter" | "growth" | "premium";
 
 export interface PricingPlan {
   slug: PricingPlanSlug;
@@ -53,8 +53,8 @@ export const PRICING_PLANS: readonly PricingPlan[] = [
   },
   {
     slug: "premium",
-    name: "Premium Plan",
-    priceMonthlyGbp: 129,
+    name: "Domination Plan",
+    priceMonthlyGbp: 159,
     description:
       "Aggressive ChatGPT, Gemini & Claude coverage for maximum market dominance.",
     aggressiveness: "Intensive",
@@ -64,34 +64,31 @@ export const PRICING_PLANS: readonly PricingPlan[] = [
     devToArticleCount: 1,
     boneQuestionDepth: 12,
   },
-  {
-    slug: "agency",
-    name: "Agency Plan",
-    priceMonthlyGbp: 199,
-    description:
-      "Ultimate AI recommendation reach and top-tier indexing authority across ChatGPT, Gemini & Claude.",
-    aggressiveness: "Maximum",
-    intensityScore: 4,
-    siteArticleCount: 3,
-    blogArticleCount: 3,
-    devToArticleCount: 2,
-    boneQuestionDepth: 15,
-  },
 ] as const;
 
 export function listPricingPlans(): readonly PricingPlan[] {
   return PRICING_PLANS;
 }
 
+/** Maps legacy slugs (e.g. agency) to current plan tiers. */
+export function resolvePricingPlanSlug(
+  value: unknown,
+): PricingPlanSlug | null {
+  if (typeof value !== "string") return null;
+  if (value === "agency") return "premium";
+  return isPricingPlanSlug(value) ? value : null;
+}
+
 export function isPricingPlanSlug(value: unknown): value is PricingPlanSlug {
-  return (
-    typeof value === "string" &&
-    PRICING_PLANS.some((plan) => plan.slug === value)
-  );
+  if (typeof value !== "string") return false;
+  if (value === "agency") return false;
+  return PRICING_PLANS.some((plan) => plan.slug === value);
 }
 
 export function getPricingPlan(slug: string): PricingPlan {
-  const plan = PRICING_PLANS.find((p) => p.slug === slug);
+  const normalized =
+    slug === "agency" ? "premium" : slug;
+  const plan = PRICING_PLANS.find((p) => p.slug === normalized);
   if (!plan) {
     throw new Error(`Unknown pricing plan: ${slug}`);
   }

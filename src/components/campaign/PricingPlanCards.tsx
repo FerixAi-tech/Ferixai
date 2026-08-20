@@ -14,7 +14,7 @@ export default function PricingPlanCards({
   const plans = listPricingPlans();
 
   return (
-    <div className="grid grid-cols-1 gap-4 lg:grid-cols-4">
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
       {plans.map((plan) => {
         const selected = plan.slug === selectedSlug;
         const popular = plan.badge === "Most Popular";

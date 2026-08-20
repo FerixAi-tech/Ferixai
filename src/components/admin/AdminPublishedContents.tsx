@@ -2,7 +2,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { formatCurrency } from "@/lib/constants/metrics";
 import {
   getPricingPlan,
-  isPricingPlanSlug,
+  resolvePricingPlanSlug,
 } from "@/lib/constants/pricing-plans";
 import AdminPanelLogoutButton from "@/components/admin/AdminPanelLogoutButton";
 import Link from "next/link";
@@ -68,9 +68,12 @@ export default async function AdminPublishedContents() {
                   </p>
                 </div>
                 <div className="text-sm text-[#94a3b8]">
-                  {isPricingPlanSlug(campaign.plan_slug)
-                    ? getPricingPlan(campaign.plan_slug).name
-                    : "Legacy"}{" "}
+                  {(() => {
+                    const planSlug = resolvePricingPlanSlug(campaign.plan_slug);
+                    return planSlug
+                      ? getPricingPlan(planSlug).name
+                      : "Legacy";
+                  })()}{" "}
                   · {formatCurrency(Number(campaign.total_cost))} payable ·{" "}
                   {campaign.status}
                 </div>

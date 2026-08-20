@@ -23,7 +23,7 @@ import { trackCompleteRegistration, trackInitiateCheckout } from "@/lib/meta/pix
 import {
   DEFAULT_PLAN_SLUG,
   getPricingPlan,
-  isPricingPlanSlug,
+  resolvePricingPlanSlug,
   type PricingPlanSlug,
 } from "@/lib/constants/pricing-plans";
 import MetricsPreview from "@/components/campaign/MetricsPreview";
@@ -134,7 +134,7 @@ export default function CampaignWizard({
     setKeyFeatures(normalizeKeyFeatures(draft.keyFeatures));
     setCity(draft.city);
     setPlanSlug(
-      isPricingPlanSlug(draft.planSlug) ? draft.planSlug : DEFAULT_PLAN_SLUG,
+      resolvePricingPlanSlug(draft.planSlug) ?? DEFAULT_PLAN_SLUG,
     );
     setStep(draft.step || 1);
     setDraftRestored(true);

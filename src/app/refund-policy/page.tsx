@@ -30,8 +30,8 @@ const SECTIONS: { heading: string; body: React.ReactNode }[] = [
     heading: "2. Subscription Plans",
     body: (
       <>
-        FerixAI offers monthly subscription plans (Starter, Growth, Premium,
-        and Agency). Each plan is billed monthly and renews automatically at
+        FerixAI offers monthly subscription plans (Starter, Growth, and
+        Domination). Each plan is billed monthly and renews automatically at
         the end of every billing cycle unless cancelled. Promotional discounts
         (such as the £30 welcome code) apply to the first month only, unless
         stated otherwise.

@@ -4,7 +4,7 @@ import { Plus, Calendar, FileText } from "lucide-react";
 import { formatCurrency, getCampaignContentPlanForPlan } from "@/lib/constants/metrics";
 import {
   getPricingPlan,
-  isPricingPlanSlug,
+  resolvePricingPlanSlug,
 } from "@/lib/constants/pricing-plans";
 import DashboardActions from "@/components/dashboard/DashboardActions";
 import ClearCampaignDraftOnSuccess from "@/components/campaign/ClearCampaignDraftOnSuccess";
@@ -174,9 +174,7 @@ export default async function DashboardPage({
         {campaigns && campaigns.length > 0 ? (
           <div className="grid gap-4">
             {campaigns.map((campaign) => {
-              const planSlug = isPricingPlanSlug(campaign.plan_slug)
-                ? campaign.plan_slug
-                : null;
+              const planSlug = resolvePricingPlanSlug(campaign.plan_slug);
               const pricingPlan = planSlug ? getPricingPlan(planSlug) : null;
               const contentPlan = pricingPlan
                 ? getCampaignContentPlanForPlan(
