@@ -23,6 +23,7 @@ import { trackCompleteRegistration, trackInitiateCheckout } from "@/lib/meta/pix
 import {
   DEFAULT_PLAN_SLUG,
   getPricingPlan,
+  isPricingPlanSlug,
   resolvePricingPlanSlug,
   type PricingPlanSlug,
 } from "@/lib/constants/pricing-plans";
