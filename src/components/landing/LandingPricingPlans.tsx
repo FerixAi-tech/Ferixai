@@ -99,6 +99,13 @@ export default function LandingPricingPlans({
             height={64}
             className="h-11 w-auto object-contain sm:h-12"
           />
+          <Image
+            src="/stripe.png"
+            alt="Stripe"
+            width={96}
+            height={64}
+            className="h-11 w-auto object-contain sm:h-12"
+          />
         </div>
       </div>
 
