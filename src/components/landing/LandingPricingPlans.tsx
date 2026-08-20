@@ -93,7 +93,7 @@ export default function LandingPricingPlans({
             className="h-11 w-auto object-contain sm:h-12"
           />
           <Image
-            src="/mastercard.webp"
+            src="/mastercard.png"
             alt="Mastercard"
             width={96}
             height={64}

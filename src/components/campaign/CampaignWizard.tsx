@@ -730,7 +730,7 @@ export default function CampaignWizard({
                 className="h-8 w-auto object-contain"
               />
               <Image
-                src="/mastercard.webp"
+                src="/mastercard.png"
                 alt="Mastercard"
                 width={72}
                 height={48}
