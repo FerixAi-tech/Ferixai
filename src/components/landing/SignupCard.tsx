@@ -28,7 +28,7 @@ export default function SignupCard({
   onClose,
   initialBusinessName = "",
   onSuccess,
-  redirectTo = "/dashboard",
+  redirectTo = "/dashboard/new",
 }: SignupCardProps) {
   const titleId = useId();
   const supabase = createClient();
@@ -257,7 +257,7 @@ export default function SignupCard({
             <p className="mt-5 text-center text-sm text-[#94a3b8]">
               Already have an account?{" "}
               <Link
-                href="/auth?mode=login&redirect=/dashboard"
+                href="/auth?mode=login&redirect=/dashboard/new"
                 className="font-semibold text-fuchsia-300 hover:underline"
               >
                 Sign in

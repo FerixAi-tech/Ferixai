@@ -111,7 +111,7 @@ export async function POST(request: Request) {
       password,
       businessName,
       userId,
-      redirectTo: getSafeInternalPath(redirect, "/dashboard"),
+      redirectTo: getSafeInternalPath(redirect, "/dashboard/new"),
     });
   } catch (err) {
     console.error("Quick register error:", err);
