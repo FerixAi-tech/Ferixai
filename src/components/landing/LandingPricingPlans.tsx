@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { listPricingPlans } from "@/lib/constants/pricing-plans";
 import { formatCurrency } from "@/lib/constants/metrics";
 import LandingSignupCtaLabel, {
@@ -67,6 +68,38 @@ export default function LandingPricingPlans({
             </article>
           );
         })}
+      </div>
+
+      <div
+        className="mx-auto mt-8 flex max-w-2xl flex-col items-center gap-4"
+        aria-label="Accepted payment methods"
+      >
+        <p className="text-xs font-medium uppercase tracking-[0.16em] text-[#64748b]">
+          Secure checkout
+        </p>
+        <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-5">
+          <Image
+            src="/google-apple-pay.webp"
+            alt="Apple Pay and Google Pay"
+            width={280}
+            height={72}
+            className="h-10 w-auto object-contain sm:h-11"
+          />
+          <Image
+            src="/visa.png"
+            alt="Visa"
+            width={72}
+            height={48}
+            className="h-8 w-auto object-contain"
+          />
+          <Image
+            src="/mastercard.webp"
+            alt="Mastercard"
+            width={72}
+            height={48}
+            className="h-8 w-auto object-contain"
+          />
+        </div>
       </div>
 
       {onClaim ? (
