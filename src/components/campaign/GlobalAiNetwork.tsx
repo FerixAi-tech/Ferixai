@@ -177,10 +177,9 @@ export default function GlobalAiNetwork() {
           Global AI Network Active
         </h3>
         <p className="mt-3 text-sm leading-relaxed text-[#94a3b8] sm:text-base">
-          We are continuously deploying active local advertising and SEO
-          campaigns across 5 countries including the UK, USA, Canada, Turkey,
-          and Australia. Delivering high-impact visibility for local businesses
-          worldwide.
+          Powering real-time knowledge graphs across the UK, USA, Canada, Turkey,
+          and Australia. Ensuring local brands are accurately indexed and
+          surfaced in AI-driven answers worldwide.
         </p>
       </div>
 
