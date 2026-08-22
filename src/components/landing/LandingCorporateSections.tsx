@@ -45,11 +45,11 @@ export default function LandingCorporateSections() {
             Why FerixAI
           </p>
           <h2 className="lf-orbitron mt-3 text-2xl font-bold text-white sm:text-3xl">
-            A calm, professional way to get found
+            Be the answer AI models recommend to your next clients.
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-[#94a3b8]">
-            No jargon. No inflated claims. Just a structured system that helps
-            people understand what your business offers.
+            Stop losing customers to invisible search. We help your brand get
+            indexed, cited, and recommended across all AI platforms.
           </p>
         </div>
 
