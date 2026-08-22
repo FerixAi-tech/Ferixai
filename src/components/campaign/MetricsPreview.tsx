@@ -1,74 +1,21 @@
 "use client";
 
-import {
-  BILLING_CYCLE_DAYS,
-  getPricingPlan,
-  type PricingPlanSlug,
-} from "@/lib/constants/pricing-plans";
+import { getPricingPlan, type PricingPlanSlug } from "@/lib/constants/pricing-plans";
+import { getPlanDetails } from "@/lib/constants/plan-details";
 import {
   formatCurrency,
   getCampaignContentPlanForPlan,
 } from "@/lib/constants/metrics";
-import { Calendar, Eye, Search, TrendingUp } from "lucide-react";
 
 interface MetricsPreviewProps {
   planSlug: PricingPlanSlug;
-}
-
-function formatCompactNumber(value: number): string {
-  return new Intl.NumberFormat("en-GB").format(value);
-}
-
-function getOutcomeMetrics(intensityScore: number, listPrice: number) {
-  const estimatedReach = Math.max(
-    1_200,
-    Math.round(listPrice * 90 + intensityScore * 2200),
-  );
-  const visibilityBoost = Math.min(
-    480,
-    Math.max(120, Math.round(110 + intensityScore * 55)),
-  );
-  const keywordCount = Math.max(10, Math.round(10 + intensityScore * 8));
-
-  return { estimatedReach, visibilityBoost, keywordCount };
 }
 
 export default function MetricsPreview({ planSlug }: MetricsPreviewProps) {
   const pricing = getPricingPlan(planSlug);
   const listPrice = pricing.priceMonthlyGbp;
   const contentPlan = getCampaignContentPlanForPlan(pricing, listPrice);
-  const outcomes = getOutcomeMetrics(pricing.intensityScore, listPrice);
-
-  const items = [
-    {
-      icon: Eye,
-      heading: "Estimated AI Reach",
-      highlight: `Est. ${formatCompactNumber(outcomes.estimatedReach)}+`,
-      description:
-        "targeted local views. The volume of monthly local AI assistant searches we index your business for under this plan.",
-    },
-    {
-      icon: TrendingUp,
-      heading: "AI Visibility Boost",
-      highlight: `Up to +${outcomes.visibilityBoost}%`,
-      description:
-        "faster indexing. Higher plans signal our system to inject deeper semantic structured data into ChatGPT and Gemini pipelines.",
-    },
-    {
-      icon: Search,
-      heading: "AI Discovery Keywords",
-      highlight: `${outcomes.keywordCount}+`,
-      description:
-        "High-intent search phrases optimized (e.g., 'best clinic near me', 'top-rated cafe'). Higher plans unlock more local long-tail keywords.",
-    },
-    {
-      icon: Calendar,
-      heading: "Billing cycle",
-      highlight: `${BILLING_CYCLE_DAYS}-day month`,
-      description:
-        "Your optimized business matrix is actively pushed and validated across modern answer engines for the full monthly cycle.",
-    },
-  ];
+  const details = getPlanDetails(planSlug);
 
   return (
     <div className="space-y-6">
@@ -86,32 +33,21 @@ export default function MetricsPreview({ planSlug }: MetricsPreviewProps) {
         </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        {items.map((item) => (
-          <div
-            key={item.heading}
-            className="rounded-[18px] border border-violet-950/70 bg-[linear-gradient(165deg,#120c1e_0%,#0e0a18_45%,#090610_100%)] p-4"
-          >
-            <div className="mb-2 flex items-center gap-2">
-              <item.icon className="h-4 w-4 text-emerald-300" />
-              <span className="text-xs font-semibold uppercase tracking-wide text-[#94a3b8]">
-                {item.heading}
-              </span>
+      <div className="rounded-[18px] border border-violet-950/70 bg-[linear-gradient(165deg,#120c1e_0%,#0e0a18_45%,#090610_100%)] p-5">
+        <dl className="space-y-3">
+          {details.metrics.map((metric) => (
+            <div key={metric.label}>
+              <dt className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#94a3b8]">
+                {metric.label}
+              </dt>
+              <dd className="mt-0.5 text-sm leading-snug text-white">
+                {metric.value}
+              </dd>
             </div>
-            <p className="lf-orbitron text-lg font-bold text-white sm:text-xl">
-              {item.highlight}
-            </p>
-            <p className="mt-2 text-xs leading-relaxed text-[#94a3b8]">
-              {item.description}
-            </p>
-          </div>
-        ))}
-      </div>
-
-      <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4">
-        <p className="text-center text-sm text-emerald-100/90">
-          These estimates update as you switch plans — so you can see what your
-          business acquires before you launch.
+          ))}
+        </dl>
+        <p className="mt-4 border-t border-white/10 pt-4 text-sm leading-relaxed text-[#cbd5e1]">
+          {details.summary}
         </p>
       </div>
     </div>

@@ -48,7 +48,7 @@ import {
   Package,
   Sparkles,
 } from "lucide-react";
-import Image from "next/image";
+import PaymentMethodLogos from "@/components/payment/PaymentMethodLogos";
 import { useRouter } from "next/navigation";
 import DarkSelect from "@/components/ui/DarkSelect";
 
@@ -721,22 +721,7 @@ export default function CampaignWizard({
           </div>
 
           <div className="flex flex-col gap-3">
-            <div className="flex flex-wrap items-center gap-3" aria-label="Accepted cards">
-              <Image
-                src="/visa.png"
-                alt="Visa"
-                width={72}
-                height={48}
-                className="h-8 w-auto object-contain"
-              />
-              <Image
-                src="/mastercard.png"
-                alt="Mastercard"
-                width={72}
-                height={48}
-                className="h-8 w-auto object-contain"
-              />
-            </div>
+            <PaymentMethodLogos />
             <div className="flex flex-wrap gap-3">
               <button
                 type="button"
