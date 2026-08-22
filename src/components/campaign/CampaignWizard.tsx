@@ -661,10 +661,6 @@ export default function CampaignWizard({
                 </dd>
               </div>
               <div>
-                <dt className="text-[#64748b]">Content pieces</dt>
-                <dd className="text-white">{contentPlan.estimatedContentPieces}</dd>
-              </div>
-              <div>
                 <dt className="text-[#64748b]">Intensity</dt>
                 <dd className="text-white">{contentPlan.aggressiveness}</dd>
               </div>

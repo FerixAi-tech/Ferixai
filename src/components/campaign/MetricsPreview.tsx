@@ -2,10 +2,7 @@
 
 import { getPricingPlan, type PricingPlanSlug } from "@/lib/constants/pricing-plans";
 import { getPlanDetails } from "@/lib/constants/plan-details";
-import {
-  formatCurrency,
-  getCampaignContentPlanForPlan,
-} from "@/lib/constants/metrics";
+import { formatCurrency } from "@/lib/constants/metrics";
 
 interface MetricsPreviewProps {
   planSlug: PricingPlanSlug;
@@ -14,7 +11,6 @@ interface MetricsPreviewProps {
 export default function MetricsPreview({ planSlug }: MetricsPreviewProps) {
   const pricing = getPricingPlan(planSlug);
   const listPrice = pricing.priceMonthlyGbp;
-  const contentPlan = getCampaignContentPlanForPlan(pricing, listPrice);
   const details = getPlanDetails(planSlug);
 
   return (
@@ -26,10 +22,6 @@ export default function MetricsPreview({ planSlug }: MetricsPreviewProps) {
           <span className="ml-1 text-base font-semibold text-[#94a3b8]">
             /month
           </span>
-        </p>
-        <p className="mt-1 text-sm text-[#64748b]">
-          {contentPlan.aggressiveness} intensity ·{" "}
-          {contentPlan.estimatedContentPieces} content pieces
         </p>
       </div>
 
