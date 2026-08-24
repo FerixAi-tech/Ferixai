@@ -45,6 +45,7 @@ export const paymentElementOptions: StripeCheckoutPaymentElementOptions = {
   },
   fields: {
     billingDetails: {
+      name: "always",
       address: {
         country: "never",
       },
