@@ -19,9 +19,8 @@ import type { StripeExpressCheckoutElementConfirmEvent } from "@stripe/stripe-js
 import { Loader2 } from "lucide-react";
 import { getStripeCheckoutAppearance } from "@/lib/stripe/appearance";
 import {
-  expressCheckoutOptions,
+  getExpressCheckoutOptions,
   paymentElementOptions,
-  paymentElementWalletFallbackOptions,
 } from "@/lib/stripe/payment-methods";
 import {
   fetchStripeCheckoutClientSecret,
@@ -31,17 +30,13 @@ import {
 export type { StripeCheckoutPayload };
 
 class ExpressCheckoutBoundary extends Component<
-  { children: ReactNode; onFailure: () => void },
+  { children: ReactNode },
   { failed: boolean }
 > {
   state = { failed: false };
 
   static getDerivedStateFromError(): { failed: boolean } {
     return { failed: true };
-  }
-
-  componentDidCatch(): void {
-    this.props.onFailure();
   }
 
   render(): ReactNode {
@@ -62,21 +57,11 @@ function CheckoutPaymentForm({
   const [submitting, setSubmitting] = useState(false);
   const [walletLabel, setWalletLabel] = useState("Apple Pay · Google Pay");
   const [mountExpress, setMountExpress] = useState(false);
-  const [showExpressRow, setShowExpressRow] = useState(false);
-  const [useWalletFallback, setUseWalletFallback] = useState(false);
 
-  useEffect(() => {
-    if (checkoutState.type !== "success") return;
-    if (!mountExpress || useWalletFallback || showExpressRow) return;
-
-    const timeout = window.setTimeout(() => {
-      setMountExpress(false);
-      setShowExpressRow(false);
-      setUseWalletFallback(true);
-    }, 3000);
-
-    return () => window.clearTimeout(timeout);
-  }, [checkoutState.type, mountExpress, useWalletFallback, showExpressRow]);
+  const expressOptions = useMemo(
+    () => getExpressCheckoutOptions(typeof window !== "undefined" ? window.navigator.userAgent : ""),
+    [],
+  );
 
   if (checkoutState.type === "loading") {
     return (
@@ -103,33 +88,6 @@ function CheckoutPaymentForm({
   }
 
   const { checkout } = checkoutState;
-
-  function enableWalletFallback() {
-    setMountExpress(false);
-    setShowExpressRow(false);
-    setUseWalletFallback(true);
-  }
-
-  function handleExpressReady(event: {
-    availablePaymentMethods?: {
-      applePay?: boolean;
-      googlePay?: boolean;
-    };
-  }) {
-    const methods = event.availablePaymentMethods;
-    if (!methods?.applePay && !methods?.googlePay) {
-      enableWalletFallback();
-      return;
-    }
-
-    setShowExpressRow(true);
-    const labels: string[] = [];
-    if (methods.googlePay) labels.push("Google Pay");
-    if (methods.applePay) labels.push("Apple Pay");
-    if (labels.length > 0) {
-      setWalletLabel(labels.join(" · "));
-    }
-  }
 
   async function confirmCardPayment() {
     setSubmitting(true);
@@ -158,30 +116,28 @@ function CheckoutPaymentForm({
       });
   }
 
-  const paymentOptions = useWalletFallback
-    ? paymentElementWalletFallbackOptions
-    : paymentElementOptions;
-
   return (
     <div className="space-y-5">
-      {!useWalletFallback && mountExpress ? (
-        <ExpressCheckoutBoundary onFailure={enableWalletFallback}>
+      {mountExpress ? (
+        <ExpressCheckoutBoundary>
           <div className="space-y-3">
-            {showExpressRow ? (
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#64748b]">
-                {walletLabel}
-              </p>
-            ) : null}
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#64748b]">
+              {walletLabel}
+            </p>
             <div className="min-h-[48px]">
               <ExpressCheckoutElement
-                options={expressCheckoutOptions}
-                onReady={handleExpressReady}
-                onAvailablePaymentMethodsChange={({ paymentMethods }) => {
-                  if (!paymentMethods) {
-                    enableWalletFallback();
+                options={expressOptions}
+                onReady={(event) => {
+                  const methods = event.availablePaymentMethods;
+                  if (!methods) return;
+
+                  const labels: string[] = [];
+                  if (methods.applePay) labels.push("Apple Pay");
+                  if (methods.googlePay) labels.push("Google Pay");
+                  if (labels.length > 0) {
+                    setWalletLabel(labels.join(" · "));
                   }
                 }}
-                onLoadError={enableWalletFallback}
                 onConfirm={handleExpressConfirm}
               />
             </div>
@@ -198,18 +154,13 @@ function CheckoutPaymentForm({
       >
         <div className="space-y-3">
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#64748b]">
-            {useWalletFallback
-              ? "Pay with card, Apple Pay, or Google Pay"
-              : "Debit or credit card"}
+            Debit or credit card
           </p>
           <div className="rounded-xl border border-white/10 bg-[#0e0a18]/60 p-4 sm:p-5">
             <PaymentElement
-              key={useWalletFallback ? "wallet-fallback" : "card-only"}
-              options={paymentOptions}
+              options={paymentElementOptions}
               onReady={() => {
-                if (!useWalletFallback) {
-                  setMountExpress(true);
-                }
+                setMountExpress(true);
               }}
             />
           </div>

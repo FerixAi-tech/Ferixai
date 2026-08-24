@@ -3,9 +3,21 @@ import type {
   StripeCheckoutPaymentElementOptions,
 } from "@stripe/stripe-js";
 
-/** Express wallets — Google Pay forced visible on Chrome when domain is verified. */
-export const expressCheckoutOptions: StripeCheckoutExpressCheckoutElementOptions =
-  {
+function isApplePayBrowser(userAgent: string): boolean {
+  const ua = userAgent.toLowerCase();
+  const isIos = /iphone|ipad|ipod/.test(ua);
+  const isSafari =
+    /safari/.test(ua) && !/chrome|chromium|crios|fxios|edg\//.test(ua);
+  return isIos || isSafari;
+}
+
+/** Express wallets — Safari gets Apple Pay always; Chrome gets Google Pay always. */
+export function getExpressCheckoutOptions(
+  userAgent: string,
+): StripeCheckoutExpressCheckoutElementOptions {
+  const applePayBrowser = isApplePayBrowser(userAgent);
+
+  return {
     buttonHeight: 48,
     buttonTheme: {
       applePay: "white-outline",
@@ -20,18 +32,21 @@ export const expressCheckoutOptions: StripeCheckoutExpressCheckoutElementOptions
       maxRows: 1,
       overflow: "auto",
     },
-    paymentMethodOrder: ["googlePay", "applePay"],
+    paymentMethodOrder: applePayBrowser
+      ? ["applePay", "googlePay"]
+      : ["googlePay", "applePay"],
     paymentMethods: {
-      applePay: "auto",
-      googlePay: "always",
+      applePay: applePayBrowser ? "always" : "auto",
+      googlePay: applePayBrowser ? "auto" : "always",
       amazonPay: "never",
       link: "never",
       paypal: "never",
       klarna: "never",
     },
   };
+}
 
-/** Card-only while Express row is active above. */
+/** Card form — wallets render via ExpressCheckoutElement above. */
 export const paymentElementOptions: StripeCheckoutPaymentElementOptions = {
   layout: {
     type: "tabs",
@@ -51,28 +66,5 @@ export const paymentElementOptions: StripeCheckoutPaymentElementOptions = {
     },
   },
 };
-
-/** Shown when Express renders no wallet buttons. */
-export const paymentElementWalletFallbackOptions: StripeCheckoutPaymentElementOptions =
-  {
-    layout: {
-      type: "accordion",
-      defaultCollapsed: false,
-      radios: "always",
-    },
-    paymentMethodOrder: ["google_pay", "apple_pay", "card"],
-    wallets: {
-      applePay: "auto",
-      googlePay: "auto",
-      link: "never",
-    },
-    fields: {
-      billingDetails: {
-        address: {
-          country: "never",
-        },
-      },
-    },
-  };
 
 export const checkoutSessionPaymentMethodTypes = ["card"] as const;
