@@ -48,7 +48,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import PaymentMethodLogos from "@/components/payment/PaymentMethodLogos";
-import EmbeddedStripeCheckout from "@/components/payment/EmbeddedStripeCheckout";
+import CustomStripeCheckout from "@/components/payment/CustomStripeCheckout";
 import { useRouter } from "next/navigation";
 import DarkSelect from "@/components/ui/DarkSelect";
 
@@ -643,8 +643,8 @@ export default function CampaignWizard({
           <div className="rounded-[18px] border border-violet-950/70 bg-[linear-gradient(165deg,#120c1e_0%,#0e0a18_45%,#090610_100%)] p-6">
             <h3 className="text-lg font-bold text-white">Checkout</h3>
             <div className="mt-4 rounded-xl border border-teal-400/25 bg-teal-500/5 px-4 py-3 text-sm text-[#cbd5e1]">
-              Secure Stripe checkout. Complete your payment below without leaving
-              this page. Amount due:{" "}
+              Enter your payment details below to launch your campaign. Amount
+              due:{" "}
               <span className="font-semibold text-white">{checkoutLabel}</span> /
               month.
             </div>
@@ -662,7 +662,10 @@ export default function CampaignWizard({
             </div>
 
             {listPrice > 0 ? (
-              <EmbeddedStripeCheckout payload={embeddedCheckoutPayload} />
+              <CustomStripeCheckout
+                payload={embeddedCheckoutPayload}
+                payLabel={`Pay ${checkoutLabel} & launch`}
+              />
             ) : null}
           </div>
 
