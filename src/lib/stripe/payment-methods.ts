@@ -3,7 +3,7 @@ import type {
   StripeCheckoutPaymentElementOptions,
 } from "@stripe/stripe-js";
 
-/** Express wallet buttons — dark checkout theme. */
+/** Express wallet buttons — force render when domain is verified. */
 export const expressCheckoutOptions: StripeCheckoutExpressCheckoutElementOptions =
   {
     buttonHeight: 48,
@@ -22,8 +22,8 @@ export const expressCheckoutOptions: StripeCheckoutExpressCheckoutElementOptions
     },
     paymentMethodOrder: ["applePay", "googlePay"],
     paymentMethods: {
-      applePay: "auto",
-      googlePay: "auto",
+      applePay: "always",
+      googlePay: "always",
       amazonPay: "never",
       link: "never",
       paypal: "never",
@@ -34,8 +34,9 @@ export const expressCheckoutOptions: StripeCheckoutExpressCheckoutElementOptions
 /** Card form — wallets render via ExpressCheckoutElement above. */
 export const paymentElementOptions: StripeCheckoutPaymentElementOptions = {
   layout: {
-    type: "tabs",
+    type: "accordion",
     defaultCollapsed: false,
+    radios: "never",
   },
   paymentMethodOrder: ["card"],
   wallets: {

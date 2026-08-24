@@ -32,7 +32,7 @@ function CheckoutPaymentForm({
   const checkoutState = useCheckoutElements();
   const [message, setMessage] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [showWallets, setShowWallets] = useState(false);
+  const [expressFailed, setExpressFailed] = useState(false);
 
   if (checkoutState.type === "loading") {
     return (
@@ -89,21 +89,22 @@ function CheckoutPaymentForm({
 
   return (
     <div className="space-y-5">
-      <div
-        className="space-y-3"
-        style={{ visibility: showWallets ? "visible" : "hidden" }}
-      >
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#64748b]">
-          Apple Pay · Google Pay
-        </p>
-        <ExpressCheckoutElement
-          options={expressCheckoutOptions}
-          onAvailablePaymentMethodsChange={({ paymentMethods }) => {
-            setShowWallets(Boolean(paymentMethods));
-          }}
-          onConfirm={handleExpressConfirm}
-        />
-      </div>
+      {!expressFailed ? (
+        <div className="space-y-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#64748b]">
+            Apple Pay · Google Pay
+          </p>
+          <div className="min-h-[48px]">
+            <ExpressCheckoutElement
+              options={expressCheckoutOptions}
+              onLoadError={() => {
+                setExpressFailed(true);
+              }}
+              onConfirm={handleExpressConfirm}
+            />
+          </div>
+        </div>
+      ) : null}
 
       <form
         className="space-y-5"
