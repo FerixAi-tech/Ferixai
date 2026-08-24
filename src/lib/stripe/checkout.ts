@@ -18,7 +18,7 @@ export async function createStripeCheckoutSession(options: {
   const stripe = getStripe();
 
   const session = await stripe.checkout.sessions.create({
-    ui_mode: "custom",
+    ui_mode: "elements",
     mode: "payment",
     redirect_on_completion: "always",
     customer_email: email,
@@ -47,7 +47,7 @@ export async function createStripeCheckoutSession(options: {
   });
 
   if (!session.client_secret || !session.id) {
-    throw new Error("Stripe did not return a custom checkout session");
+    throw new Error("Stripe did not return a checkout session client secret");
   }
 
   return {
