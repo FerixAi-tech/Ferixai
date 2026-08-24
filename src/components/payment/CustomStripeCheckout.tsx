@@ -32,7 +32,6 @@ function CheckoutPaymentForm({
   const checkoutState = useCheckoutElements();
   const [message, setMessage] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [mountExpress, setMountExpress] = useState(false);
   const [showWallets, setShowWallets] = useState(false);
 
   if (checkoutState.type === "loading") {
@@ -90,23 +89,21 @@ function CheckoutPaymentForm({
 
   return (
     <div className="space-y-5">
-      {mountExpress ? (
-        <div
-          className="space-y-3"
-          style={{ visibility: showWallets ? "visible" : "hidden" }}
-        >
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#64748b]">
-            Apple Pay · Google Pay
-          </p>
-          <ExpressCheckoutElement
-            options={expressCheckoutOptions}
-            onAvailablePaymentMethodsChange={({ paymentMethods }) => {
-              setShowWallets(Boolean(paymentMethods));
-            }}
-            onConfirm={handleExpressConfirm}
-          />
-        </div>
-      ) : null}
+      <div
+        className="space-y-3"
+        style={{ visibility: showWallets ? "visible" : "hidden" }}
+      >
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#64748b]">
+          Apple Pay · Google Pay
+        </p>
+        <ExpressCheckoutElement
+          options={expressCheckoutOptions}
+          onAvailablePaymentMethodsChange={({ paymentMethods }) => {
+            setShowWallets(Boolean(paymentMethods));
+          }}
+          onConfirm={handleExpressConfirm}
+        />
+      </div>
 
       <form
         className="space-y-5"
@@ -120,12 +117,7 @@ function CheckoutPaymentForm({
             Debit or credit card
           </p>
           <div className="rounded-xl border border-white/10 bg-[#0e0a18]/60 p-4 sm:p-5">
-            <PaymentElement
-              options={paymentElementOptions}
-              onReady={() => {
-                setMountExpress(true);
-              }}
-            />
+            <PaymentElement options={paymentElementOptions} />
           </div>
         </div>
 
