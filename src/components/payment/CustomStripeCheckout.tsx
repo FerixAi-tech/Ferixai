@@ -19,7 +19,8 @@ import type { StripeExpressCheckoutElementConfirmEvent } from "@stripe/stripe-js
 import { Loader2 } from "lucide-react";
 import { getStripeCheckoutAppearance } from "@/lib/stripe/appearance";
 import {
-  expressCheckoutOptions,
+  getExpressCheckoutOptions,
+  getWalletSectionLabel,
   paymentElementOptions,
 } from "@/lib/stripe/payment-methods";
 import {
@@ -30,13 +31,17 @@ import {
 export type { StripeCheckoutPayload };
 
 class ExpressCheckoutBoundary extends Component<
-  { children: ReactNode },
+  { children: ReactNode; onFailure: () => void },
   { failed: boolean }
 > {
   state = { failed: false };
 
   static getDerivedStateFromError(): { failed: boolean } {
     return { failed: true };
+  }
+
+  componentDidCatch(): void {
+    this.props.onFailure();
   }
 
   render(): ReactNode {
@@ -57,6 +62,19 @@ function CheckoutPaymentForm({
   const [submitting, setSubmitting] = useState(false);
   const [walletLabel, setWalletLabel] = useState("Apple Pay · Google Pay");
   const [mountExpress, setMountExpress] = useState(false);
+  const [expressEnabled, setExpressEnabled] = useState(true);
+
+  const expressOptions = useMemo(() => {
+    if (typeof window === "undefined") {
+      return getExpressCheckoutOptions("");
+    }
+    return getExpressCheckoutOptions(window.navigator.userAgent);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    setWalletLabel(getWalletSectionLabel(window.navigator.userAgent));
+  }, []);
 
   if (checkoutState.type === "loading") {
     return (
@@ -113,15 +131,15 @@ function CheckoutPaymentForm({
 
   return (
     <div className="space-y-5">
-      {mountExpress ? (
-        <ExpressCheckoutBoundary>
+      {mountExpress && expressEnabled ? (
+        <ExpressCheckoutBoundary onFailure={() => setExpressEnabled(false)}>
           <div className="space-y-3">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#64748b]">
               {walletLabel}
             </p>
             <div className="min-h-[48px]">
               <ExpressCheckoutElement
-                options={expressCheckoutOptions}
+                options={expressOptions}
                 onReady={(event) => {
                   const methods = event.availablePaymentMethods;
                   if (!methods) return;
@@ -133,6 +151,7 @@ function CheckoutPaymentForm({
                     setWalletLabel(labels.join(" · "));
                   }
                 }}
+                onLoadError={() => setExpressEnabled(false)}
                 onConfirm={handleExpressConfirm}
               />
             </div>
