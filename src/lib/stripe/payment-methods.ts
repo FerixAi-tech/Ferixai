@@ -18,7 +18,7 @@ export const expressCheckoutOptions: StripeCheckoutExpressCheckoutElementOptions
     layout: {
       maxColumns: 2,
       maxRows: 1,
-      overflow: "never",
+      overflow: "auto",
     },
     paymentMethodOrder: ["googlePay", "applePay"],
     paymentMethods: {
