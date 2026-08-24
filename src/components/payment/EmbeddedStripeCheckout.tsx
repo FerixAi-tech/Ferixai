@@ -38,8 +38,9 @@ function readBrowserCookie(name: string): string | undefined {
 
 async function createEmbeddedCheckout(
   stripe: StripeEmbeddedCapable,
-  options: StripeEmbeddedCheckoutOptions,
+  clientSecret: string,
 ): Promise<StripeEmbeddedCheckout> {
+  const options: StripeEmbeddedCheckoutOptions = { clientSecret };
   if (stripe.createEmbeddedCheckoutPage) {
     return stripe.createEmbeddedCheckoutPage(options);
   }
@@ -80,11 +81,12 @@ async function fetchCheckoutClientSecret(
     throw new Error("__redirect__");
   }
 
-  if (!data.clientSecret) {
+  const clientSecret = data.clientSecret?.trim();
+  if (!clientSecret) {
     throw new Error(data.error || "Could not start embedded checkout.");
   }
 
-  return data.clientSecret;
+  return clientSecret;
 }
 
 export default function EmbeddedStripeCheckout({
@@ -94,6 +96,7 @@ export default function EmbeddedStripeCheckout({
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const checkoutRef = useRef<StripeEmbeddedCheckout | null>(null);
+  const clientSecretCacheRef = useRef<Map<string, Promise<string>>>(new Map());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -113,26 +116,48 @@ export default function EmbeddedStripeCheckout({
     const stripePublishableKey = publishableKey;
     let cancelled = false;
 
+    function getClientSecretOnce(): Promise<string> {
+      const cache = clientSecretCacheRef.current;
+      let pending = cache.get(payloadKey);
+      if (!pending) {
+        pending = fetchCheckoutClientSecret(payload);
+        cache.set(payloadKey, pending);
+        void pending.catch(() => {
+          cache.delete(payloadKey);
+        });
+      }
+      return pending;
+    }
+
     async function mountCheckout() {
       setLoading(true);
       setError(null);
 
       try {
+        const clientSecret = await getClientSecretOnce();
+        if (cancelled) return;
+
         const stripe = await loadStripe(stripePublishableKey);
         if (!stripe || cancelled) return;
 
-        checkoutRef.current?.destroy();
+        try {
+          checkoutRef.current?.destroy();
+        } catch {
+          // ignore double-destroy from React Strict Mode
+        }
         checkoutRef.current = null;
 
         const checkout = await createEmbeddedCheckout(
           stripe as StripeEmbeddedCapable,
-          {
-            fetchClientSecret: () => fetchCheckoutClientSecret(payload),
-          },
+          clientSecret,
         );
 
         if (cancelled) {
-          checkout.destroy();
+          try {
+            checkout.destroy();
+          } catch {
+            // ignore
+          }
           return;
         }
 
@@ -168,9 +193,9 @@ export default function EmbeddedStripeCheckout({
   }, [payloadKey]);
 
   return (
-    <div className="mt-6 border-t border-white/10 pt-5">
+    <div className="relative mt-6 border-t border-white/10 pt-5">
       {loading ? (
-        <div className="flex items-center justify-center gap-2 py-10 text-sm text-[#94a3b8]">
+        <div className="absolute inset-0 z-10 flex items-center justify-center gap-2 bg-[#0e0a18]/80 py-10 text-sm text-[#94a3b8]">
           <Loader2 className="h-5 w-5 animate-spin" />
           Loading secure checkout…
         </div>
@@ -180,10 +205,7 @@ export default function EmbeddedStripeCheckout({
           {error}
         </p>
       ) : null}
-      <div
-        ref={containerRef}
-        className={loading || error ? "hidden" : "min-h-[420px] w-full"}
-      />
+      <div ref={containerRef} className="min-h-[420px] w-full" aria-hidden={Boolean(error)} />
     </div>
   );
 }

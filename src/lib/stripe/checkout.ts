@@ -20,6 +20,7 @@ export async function createStripeCheckoutSession(options: {
   const session = await stripe.checkout.sessions.create({
     ui_mode: "embedded",
     mode: "payment",
+    redirect_on_completion: "always",
     customer_email: email,
     client_reference_id: conversationId,
     line_items: [
