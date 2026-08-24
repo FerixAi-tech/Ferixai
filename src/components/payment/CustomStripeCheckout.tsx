@@ -75,6 +75,13 @@ function CheckoutPaymentForm({ payLabel }: { payLabel: string }) {
               type: "tabs",
               defaultCollapsed: false,
             },
+            fields: {
+              billingDetails: {
+                address: {
+                  country: "never",
+                },
+              },
+            },
           }}
         />
       </div>
@@ -187,6 +194,11 @@ export default function CustomStripeCheckout({
         stripe={stripePromise}
         options={{
           clientSecret,
+          defaultValues: {
+            billingAddress: {
+              address: { country: "GB" },
+            },
+          },
           elementsOptions: {
             appearance: getStripeCheckoutAppearance(),
           },
