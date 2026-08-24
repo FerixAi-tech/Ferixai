@@ -1,15 +1,20 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { loadStripe } from "@stripe/stripe-js/pure";
+import { loadStripe } from "@stripe/stripe-js";
 import {
   CheckoutElementsProvider,
+  ExpressCheckoutElement,
   PaymentElement,
   useCheckoutElements,
 } from "@stripe/react-stripe-js/checkout";
+import type { StripeExpressCheckoutElementConfirmEvent } from "@stripe/stripe-js";
 import { Loader2 } from "lucide-react";
 import { getStripeCheckoutAppearance } from "@/lib/stripe/appearance";
-import { paymentElementOptions } from "@/lib/stripe/payment-methods";
+import {
+  expressCheckoutOptions,
+  paymentElementOptions,
+} from "@/lib/stripe/payment-methods";
 import {
   fetchStripeCheckoutClientSecret,
   type StripeCheckoutPayload,
@@ -27,6 +32,8 @@ function CheckoutPaymentForm({
   const checkoutState = useCheckoutElements();
   const [message, setMessage] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [mountExpress, setMountExpress] = useState(false);
+  const [showWallets, setShowWallets] = useState(false);
 
   if (checkoutState.type === "loading") {
     return (
@@ -54,7 +61,7 @@ function CheckoutPaymentForm({
 
   const { checkout } = checkoutState;
 
-  async function confirmPayment() {
+  async function confirmCardPayment() {
     setSubmitting(true);
     setMessage(null);
 
@@ -67,42 +74,81 @@ function CheckoutPaymentForm({
     setSubmitting(false);
   }
 
-  return (
-    <form
-      className="space-y-5"
-      onSubmit={(event) => {
-        event.preventDefault();
-        void confirmPayment();
-      }}
-    >
-      <div className="space-y-3">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#64748b]">
-          Pay with card, Apple Pay, or Google Pay
-        </p>
-        <div className="rounded-xl border border-white/10 bg-[#0e0a18]/60 p-4 sm:p-5">
-          <PaymentElement options={paymentElementOptions} />
-        </div>
-      </div>
+  function handleExpressConfirm(event: StripeExpressCheckoutElementConfirmEvent) {
+    setSubmitting(true);
+    setMessage(null);
 
-      {message ? (
-        <p className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-200">
-          {message}
-        </p>
+    void checkout
+      .confirm({ expressCheckoutConfirmEvent: event })
+      .then((confirmResult) => {
+        if (confirmResult.type === "error") {
+          setMessage(confirmResult.error.message);
+        }
+        setSubmitting(false);
+      });
+  }
+
+  return (
+    <div className="space-y-5">
+      {mountExpress ? (
+        <div
+          className="space-y-3"
+          style={{ visibility: showWallets ? "visible" : "hidden" }}
+        >
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#64748b]">
+            Apple Pay · Google Pay
+          </p>
+          <ExpressCheckoutElement
+            options={expressCheckoutOptions}
+            onAvailablePaymentMethodsChange={({ paymentMethods }) => {
+              setShowWallets(Boolean(paymentMethods));
+            }}
+            onConfirm={handleExpressConfirm}
+          />
+        </div>
       ) : null}
 
-      <button
-        type="submit"
-        disabled={submitting}
-        className="lf-btn-primary inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl px-6 py-3 font-bold text-white disabled:opacity-60"
+      <form
+        className="space-y-5"
+        onSubmit={(event) => {
+          event.preventDefault();
+          void confirmCardPayment();
+        }}
       >
-        {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-        {payLabel}
-      </button>
+        <div className="space-y-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#64748b]">
+            Debit or credit card
+          </p>
+          <div className="rounded-xl border border-white/10 bg-[#0e0a18]/60 p-4 sm:p-5">
+            <PaymentElement
+              options={paymentElementOptions}
+              onReady={() => {
+                setMountExpress(true);
+              }}
+            />
+          </div>
+        </div>
 
-      <p className="text-center text-xs text-[#64748b]">
-        Card details are encrypted. Payments processed securely by Stripe.
-      </p>
-    </form>
+        {message ? (
+          <p className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-200">
+            {message}
+          </p>
+        ) : null}
+
+        <button
+          type="submit"
+          disabled={submitting}
+          className="lf-btn-primary inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl px-6 py-3 font-bold text-white disabled:opacity-60"
+        >
+          {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+          {payLabel}
+        </button>
+
+        <p className="text-center text-xs text-[#64748b]">
+          Card details are encrypted. Payments processed securely by Stripe.
+        </p>
+      </form>
+    </div>
   );
 }
 

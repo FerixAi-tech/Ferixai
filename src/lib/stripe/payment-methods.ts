@@ -1,15 +1,31 @@
-import type { StripeCheckoutPaymentElementOptions } from "@stripe/stripe-js";
+import type {
+  StripeCheckoutExpressCheckoutElementOptions,
+  StripeCheckoutPaymentElementOptions,
+} from "@stripe/stripe-js";
 
-/** Wallets + card in one Payment Element (no separate Express iframe). */
+/** Minimal express options — Stripe defaults + block unwanted wallets. */
+export const expressCheckoutOptions: StripeCheckoutExpressCheckoutElementOptions =
+  {
+    paymentMethods: {
+      applePay: "auto",
+      googlePay: "auto",
+      amazonPay: "never",
+      link: "never",
+      paypal: "never",
+      klarna: "never",
+    },
+  };
+
+/** Card form — wallets render via ExpressCheckoutElement above. */
 export const paymentElementOptions: StripeCheckoutPaymentElementOptions = {
   layout: {
-    type: "accordion",
+    type: "tabs",
     defaultCollapsed: false,
-    radios: "always",
   },
+  paymentMethodOrder: ["card"],
   wallets: {
-    applePay: "auto",
-    googlePay: "auto",
+    applePay: "never",
+    googlePay: "never",
     link: "never",
   },
   fields: {
@@ -21,5 +37,5 @@ export const paymentElementOptions: StripeCheckoutPaymentElementOptions = {
   },
 };
 
-/** Server-side: card enables Apple Pay / Google Pay wallets client-side. */
+/** Server-side: card enables Apple Pay / Google Pay client-side. */
 export const checkoutSessionPaymentMethodTypes = ["card"] as const;
