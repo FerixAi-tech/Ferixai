@@ -3,21 +3,9 @@ import type {
   StripeCheckoutPaymentElementOptions,
 } from "@stripe/stripe-js";
 
-function isApplePayBrowser(userAgent: string): boolean {
-  const ua = userAgent.toLowerCase();
-  const isIos = /iphone|ipad|ipod/.test(ua);
-  const isSafari =
-    /safari/.test(ua) && !/chrome|chromium|crios|fxios|edg\//.test(ua);
-  return isIos || isSafari;
-}
-
-/** Express wallets — Safari gets Apple Pay always; Chrome gets Google Pay always. */
-export function getExpressCheckoutOptions(
-  userAgent: string,
-): StripeCheckoutExpressCheckoutElementOptions {
-  const applePayBrowser = isApplePayBrowser(userAgent);
-
-  return {
+/** Both wallets requested — Stripe shows each button only where the OS/browser allows. */
+export const expressCheckoutOptions: StripeCheckoutExpressCheckoutElementOptions =
+  {
     buttonHeight: 48,
     buttonTheme: {
       applePay: "white-outline",
@@ -32,19 +20,16 @@ export function getExpressCheckoutOptions(
       maxRows: 1,
       overflow: "auto",
     },
-    paymentMethodOrder: applePayBrowser
-      ? ["applePay", "googlePay"]
-      : ["googlePay", "applePay"],
+    paymentMethodOrder: ["applePay", "googlePay"],
     paymentMethods: {
-      applePay: applePayBrowser ? "always" : "auto",
-      googlePay: applePayBrowser ? "auto" : "always",
+      applePay: "always",
+      googlePay: "always",
       amazonPay: "never",
       link: "never",
       paypal: "never",
       klarna: "never",
     },
   };
-}
 
 /** Card form — wallets render via ExpressCheckoutElement above. */
 export const paymentElementOptions: StripeCheckoutPaymentElementOptions = {

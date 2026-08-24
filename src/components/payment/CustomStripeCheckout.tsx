@@ -19,7 +19,7 @@ import type { StripeExpressCheckoutElementConfirmEvent } from "@stripe/stripe-js
 import { Loader2 } from "lucide-react";
 import { getStripeCheckoutAppearance } from "@/lib/stripe/appearance";
 import {
-  getExpressCheckoutOptions,
+  expressCheckoutOptions,
   paymentElementOptions,
 } from "@/lib/stripe/payment-methods";
 import {
@@ -57,11 +57,6 @@ function CheckoutPaymentForm({
   const [submitting, setSubmitting] = useState(false);
   const [walletLabel, setWalletLabel] = useState("Apple Pay · Google Pay");
   const [mountExpress, setMountExpress] = useState(false);
-
-  const expressOptions = useMemo(
-    () => getExpressCheckoutOptions(typeof window !== "undefined" ? window.navigator.userAgent : ""),
-    [],
-  );
 
   if (checkoutState.type === "loading") {
     return (
@@ -126,7 +121,7 @@ function CheckoutPaymentForm({
             </p>
             <div className="min-h-[48px]">
               <ExpressCheckoutElement
-                options={expressOptions}
+                options={expressCheckoutOptions}
                 onReady={(event) => {
                   const methods = event.availablePaymentMethods;
                   if (!methods) return;
