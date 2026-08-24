@@ -6,7 +6,7 @@ export async function trackPaidPurchaseWithMetaCapi(
   order: {
     id: string;
     user_id: string;
-    amount_gbp: number | string;
+    amount_gbp?: number | string | null;
     currency?: string | null;
     client_ip?: string | null;
     client_user_agent?: string | null;
@@ -16,6 +16,33 @@ export async function trackPaidPurchaseWithMetaCapi(
 ): Promise<void> {
   try {
     const admin = createAdminClient();
+
+    let amount = Number(order.amount_gbp);
+    let currency = order.currency;
+    let clientIp = order.client_ip;
+    let clientUserAgent = order.client_user_agent;
+    let metaFbp = order.meta_fbp;
+    let metaFbc = order.meta_fbc;
+
+    if (!(amount > 0) || metaFbp === undefined) {
+      const { data: stored } = await admin
+        .from("payment_orders")
+        .select(
+          "amount_gbp, currency, client_ip, client_user_agent, meta_fbp, meta_fbc",
+        )
+        .eq("id", order.id)
+        .maybeSingle();
+
+      if (stored) {
+        if (!(amount > 0)) amount = Number(stored.amount_gbp);
+        currency = currency ?? stored.currency;
+        clientIp = clientIp ?? stored.client_ip;
+        clientUserAgent = clientUserAgent ?? stored.client_user_agent;
+        metaFbp = metaFbp ?? stored.meta_fbp;
+        metaFbc = metaFbc ?? stored.meta_fbc;
+      }
+    }
+
     const [{ data: profile }, authUserResult] = await Promise.all([
       admin
         .from("profiles")
@@ -28,7 +55,6 @@ export async function trackPaidPurchaseWithMetaCapi(
     const authUser = authUserResult.data.user;
     const email = profile?.email || authUser?.email || null;
     const phone = authUser?.phone || null;
-    const amount = Number(order.amount_gbp);
 
     if (!(amount > 0)) return;
 
@@ -36,19 +62,23 @@ export async function trackPaidPurchaseWithMetaCapi(
       eventName: "Purchase",
       eventId: order.id,
       value: amount,
-      currency: order.currency || "GBP",
+      currency: currency || "GBP",
       contentName: "FerixAI Subscription",
       eventSourceUrl: `${baseUrl}/dashboard`,
       email,
       phone,
-      ip: order.client_ip,
-      userAgent: order.client_user_agent,
-      fbp: order.meta_fbp,
-      fbc: order.meta_fbc,
+      ip: clientIp,
+      userAgent: clientUserAgent,
+      fbp: metaFbp,
+      fbc: metaFbc,
     });
 
-    if (!result.ok && !result.skipped) {
-      console.error("Meta CAPI Purchase failed:", result.error);
+    if (!result.ok) {
+      if (result.skipped) {
+        console.warn("Meta CAPI Purchase skipped:", result.error);
+      } else {
+        console.error("Meta CAPI Purchase failed:", result.error);
+      }
     }
   } catch (err) {
     console.error("Meta CAPI Purchase error:", err);

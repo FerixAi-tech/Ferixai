@@ -1,4 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
+import { getAppBaseUrl } from "@/lib/constants/urls";
+import { trackPaidPurchaseWithMetaCapi } from "@/lib/payments/meta-purchase";
 import Link from "next/link";
 import { Plus, Calendar, FileText } from "lucide-react";
 import { formatCurrency, getCampaignContentPlanForPlan } from "@/lib/constants/metrics";
@@ -15,6 +17,8 @@ import MetaPaymentSuccessTracker from "@/components/meta/MetaPaymentSuccessTrack
 import AppNav from "@/components/layout/AppNav";
 import SupportContact from "@/components/layout/SupportContact";
 import DashboardAiPreviewCard from "@/components/dashboard/DashboardAiPreviewCard";
+
+export const dynamic = "force-dynamic";
 
 export default async function DashboardPage({
   searchParams,
@@ -36,45 +40,64 @@ export default async function DashboardPage({
         .order("created_at", { ascending: false })
     : { data: [] };
 
-  const createdCampaign = params.created
-    ? campaigns?.find((c) => c.content_slug === params.created)
+  const createdSlug = params.created?.trim() || null;
+
+  let createdCampaign = createdSlug
+    ? campaigns?.find((c) => c.content_slug === createdSlug) ?? null
     : null;
 
   const paymentOkRequested = params.payment === "ok";
   const paymentProcessing = params.payment === "processing";
 
-  // Meta + success UI only when a real paid order matches this campaign slug.
+  // Meta + success UI only when a real paid order matches the URL slug.
   let verifiedPaidOrder: {
     id: string;
     amount_gbp: number;
     campaign_slug: string | null;
   } | null = null;
 
-  if (paymentOkRequested && createdCampaign?.content_slug && user) {
+  if (paymentOkRequested && createdSlug && user) {
     const { data: paidOrder } = await supabase
       .from("payment_orders")
-      .select("id, amount_gbp, campaign_slug, status")
+      .select("id, amount_gbp, campaign_slug, status, currency")
       .eq("user_id", user.id)
       .eq("status", "paid")
-      .eq("campaign_slug", createdCampaign.content_slug)
+      .eq("campaign_slug", createdSlug)
       .order("updated_at", { ascending: false })
       .limit(1)
       .maybeSingle();
 
-    if (paidOrder?.id) {
+    const amountGbp = Number(paidOrder?.amount_gbp) || 0;
+
+    if (paidOrder?.id && amountGbp > 0) {
       verifiedPaidOrder = {
         id: paidOrder.id,
-        amount_gbp: Number(paidOrder.amount_gbp) || 0,
+        amount_gbp: amountGbp,
         campaign_slug: paidOrder.campaign_slug,
       };
+
+      // Backup server-side Purchase (Meta dedupes by event_id = order id).
+      void trackPaidPurchaseWithMetaCapi(getAppBaseUrl(), {
+        id: paidOrder.id,
+        user_id: user.id,
+        amount_gbp: paidOrder.amount_gbp,
+        currency: paidOrder.currency,
+      });
     }
   }
 
+  if (!createdCampaign && createdSlug && user) {
+    const { data: campaignRow } = await supabase
+      .from("campaigns")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("content_slug", createdSlug)
+      .maybeSingle();
+    createdCampaign = campaignRow ?? null;
+  }
+
   const paymentConfirmed = Boolean(
-    paymentOkRequested &&
-      createdCampaign &&
-      verifiedPaidOrder &&
-      verifiedPaidOrder.amount_gbp > 0,
+    paymentOkRequested && verifiedPaidOrder && verifiedPaidOrder.amount_gbp > 0,
   );
 
   const { data: publishedRow } =

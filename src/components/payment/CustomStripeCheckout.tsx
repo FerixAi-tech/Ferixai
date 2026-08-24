@@ -4,17 +4,12 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import {
   CheckoutElementsProvider,
-  ExpressCheckoutElement,
   PaymentElement,
   useCheckoutElements,
 } from "@stripe/react-stripe-js/checkout";
-import type { StripeCheckoutExpressCheckoutElementOptions } from "@stripe/stripe-js";
 import { Loader2 } from "lucide-react";
 import { getStripeCheckoutAppearance } from "@/lib/stripe/appearance";
-import {
-  expressCheckoutOptions,
-  paymentElementOptions,
-} from "@/lib/stripe/payment-methods";
+import { paymentElementOptions } from "@/lib/stripe/payment-methods";
 import {
   fetchStripeCheckoutClientSecret,
   type StripeCheckoutPayload,
@@ -22,14 +17,16 @@ import {
 
 export type { StripeCheckoutPayload };
 
-function CheckoutPaymentForm({ payLabel }: { payLabel: string }) {
+function CheckoutPaymentForm({
+  payLabel,
+  onRetry,
+}: {
+  payLabel: string;
+  onRetry: () => void;
+}) {
   const checkoutState = useCheckoutElements();
   const [message, setMessage] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [walletLabel, setWalletLabel] = useState<string | null>(
-    "Apple Pay · Google Pay",
-  );
-  const [showExpressWallets, setShowExpressWallets] = useState(true);
 
   if (checkoutState.type === "loading") {
     return (
@@ -42,9 +39,16 @@ function CheckoutPaymentForm({ payLabel }: { payLabel: string }) {
 
   if (checkoutState.type === "error") {
     return (
-      <p className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-200">
-        {checkoutState.error.message}
-      </p>
+      <div className="space-y-3 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-200">
+        <p>{checkoutState.error.message}</p>
+        <button
+          type="button"
+          onClick={onRetry}
+          className="rounded-lg border border-red-400/40 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-red-100 hover:bg-red-500/10"
+        >
+          Reload payment form
+        </button>
+      </div>
     );
   }
 
@@ -71,41 +75,6 @@ function CheckoutPaymentForm({ payLabel }: { payLabel: string }) {
         void confirmPayment();
       }}
     >
-      {showExpressWallets ? (
-        <div className="space-y-3">
-          {walletLabel ? (
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#64748b]">
-              {walletLabel}
-            </p>
-          ) : null}
-          <ExpressCheckoutElement
-            options={
-              expressCheckoutOptions as unknown as StripeCheckoutExpressCheckoutElementOptions
-            }
-            onReady={(event) => {
-              const methods = event.availablePaymentMethods;
-              if (!methods) {
-                setShowExpressWallets(false);
-                return;
-              }
-
-              const labels: string[] = [];
-              if (methods.applePay) labels.push("Apple Pay");
-              if (methods.googlePay) labels.push("Google Pay");
-              if (labels.length === 0) {
-                setShowExpressWallets(false);
-                return;
-              }
-
-              setWalletLabel(labels.join(" · "));
-            }}
-            onConfirm={async () => {
-              await confirmPayment();
-            }}
-          />
-        </div>
-      ) : null}
-
       <div className="space-y-3">
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#64748b]">
           Debit or credit card
@@ -146,6 +115,7 @@ export default function CustomStripeCheckout({
 }) {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [loadAttempt, setLoadAttempt] = useState(0);
   const clientSecretCacheRef = useRef<Map<string, Promise<string>>>(new Map());
 
   const publishableKey =
@@ -156,7 +126,14 @@ export default function CustomStripeCheckout({
     [publishableKey],
   );
 
-  const payloadKey = JSON.stringify(payload);
+  const payloadKey = `${JSON.stringify(payload)}:${loadAttempt}`;
+
+  function retryCheckout() {
+    clientSecretCacheRef.current.delete(payloadKey);
+    setClientSecret(null);
+    setError(null);
+    setLoadAttempt((attempt) => attempt + 1);
+  }
 
   useEffect(() => {
     if (!publishableKey) {
@@ -201,10 +178,21 @@ export default function CustomStripeCheckout({
 
   if (!publishableKey || error) {
     return (
-      <p className="mt-6 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-200">
-        {error ||
-          "Stripe is not configured. Set NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY."}
-      </p>
+      <div className="mt-6 space-y-3">
+        <p className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-200">
+          {error ||
+            "Stripe is not configured. Set NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY."}
+        </p>
+        {error ? (
+          <button
+            type="button"
+            onClick={retryCheckout}
+            className="rounded-lg border border-white/15 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-[#94a3b8] hover:bg-white/5"
+          >
+            Try again
+          </button>
+        ) : null}
+      </div>
     );
   }
 
@@ -220,6 +208,7 @@ export default function CustomStripeCheckout({
   return (
     <div className="mt-6 border-t border-white/10 pt-5">
       <CheckoutElementsProvider
+        key={clientSecret}
         stripe={stripePromise}
         options={{
           clientSecret,
@@ -233,7 +222,7 @@ export default function CustomStripeCheckout({
           },
         }}
       >
-        <CheckoutPaymentForm payLabel={payLabel} />
+        <CheckoutPaymentForm payLabel={payLabel} onRetry={retryCheckout} />
       </CheckoutElementsProvider>
     </div>
   );
