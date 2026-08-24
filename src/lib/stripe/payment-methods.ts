@@ -1,24 +1,24 @@
 import type { StripeCheckoutPaymentElementOptions } from "@stripe/stripe-js";
 
-/** Express wallet row: Apple Pay + Google Pay when available. */
+/** Express wallet row — Google Pay always on supported browsers; Apple Pay when available. */
 export const expressCheckoutOptions = {
   business: { name: "FerixAI" },
   paymentMethods: {
     applePay: "auto",
-    googlePay: "auto",
+    googlePay: "always",
     amazonPay: "never",
     link: "never",
     paypal: "never",
     klarna: "never",
   },
-  paymentMethodOrder: ["applePay", "googlePay"],
+  paymentMethodOrder: ["googlePay", "applePay"],
   layout: {
     maxColumns: 2,
     maxRows: 1,
   },
 };
 
-/** Card form — hide wallets when Express Checkout row is active. */
+/** Card form — wallets render above via ExpressCheckoutElement. */
 export const paymentElementOptions: StripeCheckoutPaymentElementOptions = {
   layout: {
     type: "tabs",
@@ -38,17 +38,6 @@ export const paymentElementOptions: StripeCheckoutPaymentElementOptions = {
     },
   },
 };
-
-/** Fallback when Express Checkout is unavailable on this device/browser. */
-export const paymentElementWalletFallbackOptions: StripeCheckoutPaymentElementOptions =
-  {
-    ...paymentElementOptions,
-    wallets: {
-      applePay: "auto",
-      googlePay: "auto",
-      link: "never",
-    },
-  };
 
 /** Server-side: card only (Apple/Google Pay use wallet buttons client-side). */
 export const checkoutSessionPaymentMethodTypes = ["card"] as const;
