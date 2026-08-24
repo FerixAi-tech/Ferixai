@@ -65,6 +65,19 @@ function CheckoutPaymentForm({
   const [showExpressRow, setShowExpressRow] = useState(false);
   const [useWalletFallback, setUseWalletFallback] = useState(false);
 
+  useEffect(() => {
+    if (checkoutState.type !== "success") return;
+    if (!mountExpress || useWalletFallback || showExpressRow) return;
+
+    const timeout = window.setTimeout(() => {
+      setMountExpress(false);
+      setShowExpressRow(false);
+      setUseWalletFallback(true);
+    }, 3000);
+
+    return () => window.clearTimeout(timeout);
+  }, [checkoutState.type, mountExpress, useWalletFallback, showExpressRow]);
+
   if (checkoutState.type === "loading") {
     return (
       <div className="flex items-center justify-center gap-2 py-10 text-sm text-[#94a3b8]">
@@ -148,16 +161,6 @@ function CheckoutPaymentForm({
   const paymentOptions = useWalletFallback
     ? paymentElementWalletFallbackOptions
     : paymentElementOptions;
-
-  useEffect(() => {
-    if (!mountExpress || useWalletFallback || showExpressRow) return;
-
-    const timeout = window.setTimeout(() => {
-      enableWalletFallback();
-    }, 3000);
-
-    return () => window.clearTimeout(timeout);
-  }, [mountExpress, useWalletFallback, showExpressRow]);
 
   return (
     <div className="space-y-5">
