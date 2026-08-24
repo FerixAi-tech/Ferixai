@@ -10,7 +10,7 @@ export async function createStripeCheckoutSession(options: {
   input: CampaignInput;
   conversationId: string;
   orderId: string;
-}): Promise<{ sessionId: string; checkoutUrl: string }> {
+}): Promise<{ sessionId: string; clientSecret: string }> {
   const { userId, email, input, conversationId, orderId } = options;
   const plan = getPricingPlan(input.planSlug);
   const charge = getCheckoutCharge(input.totalCostGbp);
@@ -18,6 +18,7 @@ export async function createStripeCheckoutSession(options: {
   const stripe = getStripe();
 
   const session = await stripe.checkout.sessions.create({
+    ui_mode: "embedded",
     mode: "payment",
     customer_email: email,
     client_reference_id: conversationId,
@@ -41,16 +42,15 @@ export async function createStripeCheckoutSession(options: {
       conversation_id: conversationId,
       plan_slug: input.planSlug,
     },
-    success_url: `${baseUrl}/api/payments/stripe/success?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${baseUrl}/dashboard/new?payment=cancelled`,
+    return_url: `${baseUrl}/api/payments/stripe/success?session_id={CHECKOUT_SESSION_ID}`,
   });
 
-  if (!session.url || !session.id) {
-    throw new Error("Stripe did not return a checkout session URL");
+  if (!session.client_secret || !session.id) {
+    throw new Error("Stripe did not return an embedded checkout session");
   }
 
   return {
     sessionId: session.id,
-    checkoutUrl: session.url,
+    clientSecret: session.client_secret,
   };
 }

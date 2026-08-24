@@ -26,7 +26,7 @@ Open [http://localhost:3000](http://localhost:3000).
 ## Product notes
 
 - Paid plans use **Stripe Checkout** in production.
-- Set `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` in Vercel env.
+- Set `STRIPE_SECRET_KEY`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, and `STRIPE_WEBHOOK_SECRET` in Vercel env.
 - Stripe webhook endpoint: `https://www.ferixai.com/api/payments/stripe/webhook`
 - Set `NEXT_PUBLIC_APP_URL=https://www.ferixai.com` so Stripe success/cancel URLs are correct.
 - Local-only bypass: `FERIXAI_PAYMENT_REQUIRED=false` (ignored outside development).

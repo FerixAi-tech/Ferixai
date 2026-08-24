@@ -112,7 +112,7 @@ export async function POST(request: Request) {
       throw new Error(insertError?.message || "Could not create payment order");
     }
 
-    let checkout: { sessionId: string; checkoutUrl: string };
+    let checkout: { sessionId: string; clientSecret: string };
     try {
       checkout = await createStripeCheckoutSession({
         userId: user.id,
@@ -147,7 +147,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       requiresPayment: true,
-      checkoutUrl: checkout.checkoutUrl,
+      clientSecret: checkout.clientSecret,
       sessionId: checkout.sessionId,
       amountGbp: input.totalCostGbp,
       chargedAmount: charge.amount,

@@ -48,6 +48,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import PaymentMethodLogos from "@/components/payment/PaymentMethodLogos";
+import EmbeddedStripeCheckout from "@/components/payment/EmbeddedStripeCheckout";
 import { useRouter } from "next/navigation";
 import DarkSelect from "@/components/ui/DarkSelect";
 
@@ -77,9 +78,9 @@ export default function CampaignWizard({
   const [fieldErrors, setFieldErrors] = useState<string[]>([]);
   const [draftRestored, setDraftRestored] = useState(false);
   const [signupOpen, setSignupOpen] = useState(false);
-  const [pendingAfterSignup, setPendingAfterSignup] = useState<
-    "step3" | "launch" | null
-  >(null);
+  const [pendingAfterSignup, setPendingAfterSignup] = useState<"step3" | null>(
+    null,
+  );
 
   const [businessName, setBusinessName] = useState(initialBusinessName);
   const [category, setCategory] = useState("");
@@ -161,6 +162,16 @@ export default function CampaignWizard({
 
   const resolvedCategory = resolvedCategoryName();
   const isManufacturer = isManufacturerCategory(resolvedCategory);
+
+  const embeddedCheckoutPayload = {
+    businessName: businessName.trim(),
+    category: resolvedCategory,
+    city,
+    planSlug,
+    promoApplied: false as const,
+    productDescription: isManufacturer ? productDescription.trim() : undefined,
+    keyFeatures: keyFeatures.map((f) => f.trim()),
+  };
 
   async function persistCategoryToSupabase(name: string): Promise<void> {
     try {
@@ -313,7 +324,7 @@ export default function CampaignWizard({
     });
   }
 
-  async function launchCampaign() {
+  async function launchFreeCampaign() {
     if (launchLockRef.current || loading) return;
     launchLockRef.current = true;
 
@@ -327,7 +338,7 @@ export default function CampaignWizard({
 
     if (!user) {
       launchLockRef.current = false;
-      setPendingAfterSignup("launch");
+      setPendingAfterSignup("step3");
       setSignupOpen(true);
       setLoading(false);
       return;
@@ -339,7 +350,7 @@ export default function CampaignWizard({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           businessName: businessName.trim(),
-          category: resolvedCategoryName(),
+          category: resolvedCategory,
           city,
           planSlug,
           promoApplied: false,
@@ -354,35 +365,11 @@ export default function CampaignWizard({
 
       const data = (await res.json().catch(() => ({}))) as {
         error?: string;
-        checkoutUrl?: string;
-        requiresPayment?: boolean;
         slug?: string;
-        paid?: boolean;
-        sessionId?: string;
       };
 
       if (!res.ok) {
-        throw new Error(data.error || `Checkout failed (${res.status})`);
-      }
-
-      if (data.checkoutUrl) {
-        window.location.assign(data.checkoutUrl);
-        return;
-      }
-
-      if (data.requiresPayment) {
-        throw new Error(
-          data.error ||
-            "Payment page URL was missing. Please try again or contact support.",
-        );
-      }
-
-      // Free / local bypass only
-      if (listPrice > 0) {
-        throw new Error(
-          data.error ||
-            "Payment is required for this plan, but checkout did not start. Please try again or contact support.",
-        );
+        throw new Error(data.error || `Launch failed (${res.status})`);
       }
 
       if (data.slug) {
@@ -408,12 +395,8 @@ export default function CampaignWizard({
         redirectTo="/dashboard/new"
         onSuccess={() => {
           setSignupOpen(false);
-          if (pendingAfterSignup === "launch") {
-            void launchCampaign();
-          } else {
-            persistDraft(3);
-            setStep(3);
-          }
+          persistDraft(3);
+          setStep(3);
           setPendingAfterSignup(null);
         }}
       />
@@ -660,8 +643,8 @@ export default function CampaignWizard({
           <div className="rounded-[18px] border border-violet-950/70 bg-[linear-gradient(165deg,#120c1e_0%,#0e0a18_45%,#090610_100%)] p-6">
             <h3 className="text-lg font-bold text-white">Checkout</h3>
             <div className="mt-4 rounded-xl border border-teal-400/25 bg-teal-500/5 px-4 py-3 text-sm text-[#cbd5e1]">
-              Secure Stripe checkout. You will be redirected to complete your
-              payment securely. Amount due:{" "}
+              Secure Stripe checkout. Complete your payment below without leaving
+              this page. Amount due:{" "}
               <span className="font-semibold text-white">{checkoutLabel}</span> /
               month.
             </div>
@@ -677,6 +660,10 @@ export default function CampaignWizard({
                 </p>
               </div>
             </div>
+
+            {listPrice > 0 ? (
+              <EmbeddedStripeCheckout payload={embeddedCheckoutPayload} />
+            ) : null}
           </div>
 
           <div className="flex flex-col gap-3">
@@ -689,17 +676,17 @@ export default function CampaignWizard({
               >
                 <ArrowLeft className="h-4 w-4" /> Back
               </button>
-              <button
-                type="button"
-                onClick={launchCampaign}
-                disabled={loading}
-                className="lf-btn-primary inline-flex min-h-[48px] items-center gap-2 rounded-xl px-6 py-3 font-bold text-white disabled:opacity-60"
-              >
-                {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-                {listPrice > 0
-                  ? `Pay ${checkoutLabel} & launch`
-                  : "Launch campaign"}
-              </button>
+              {listPrice === 0 ? (
+                <button
+                  type="button"
+                  onClick={launchFreeCampaign}
+                  disabled={loading}
+                  className="lf-btn-primary inline-flex min-h-[48px] items-center gap-2 rounded-xl px-6 py-3 font-bold text-white disabled:opacity-60"
+                >
+                  {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+                  Launch campaign
+                </button>
+              ) : null}
             </div>
           </div>
         </div>
