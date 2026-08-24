@@ -31,8 +31,62 @@ import {
 
 export type { StripeCheckoutPayload };
 
+const CHECKOUT_STORAGE_KEY = "ferix_stripe_checkout_v1";
+const CHECKOUT_STORAGE_TTL_MS = 30 * 60 * 1000;
+
 function getUserAgent(): string {
   return typeof window !== "undefined" ? window.navigator.userAgent : "";
+}
+
+function readStoredClientSecret(payloadKey: string): string | null {
+  if (typeof sessionStorage === "undefined") return null;
+  try {
+    const raw = sessionStorage.getItem(CHECKOUT_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as {
+      key?: string;
+      secret?: string;
+      savedAt?: number;
+    };
+    if (
+      parsed.key !== payloadKey ||
+      typeof parsed.secret !== "string" ||
+      !parsed.secret.trim()
+    ) {
+      return null;
+    }
+    if (
+      typeof parsed.savedAt === "number" &&
+      Date.now() - parsed.savedAt > CHECKOUT_STORAGE_TTL_MS
+    ) {
+      sessionStorage.removeItem(CHECKOUT_STORAGE_KEY);
+      return null;
+    }
+    return parsed.secret.trim();
+  } catch {
+    return null;
+  }
+}
+
+function writeStoredClientSecret(payloadKey: string, secret: string): void {
+  if (typeof sessionStorage === "undefined") return;
+  try {
+    sessionStorage.setItem(
+      CHECKOUT_STORAGE_KEY,
+      JSON.stringify({ key: payloadKey, secret, savedAt: Date.now() }),
+    );
+  } catch {
+    // Ignore quota / private mode errors.
+  }
+}
+
+function clearStoredClientSecret(): void {
+  if (typeof sessionStorage === "undefined") return;
+  try {
+    sessionStorage.removeItem(CHECKOUT_STORAGE_KEY);
+  } catch {
+    // Ignore storage errors.
+  }
 }
 
 class ExpressCheckoutBoundary extends Component<
@@ -66,7 +120,6 @@ function CheckoutPaymentForm({
   const [message, setMessage] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [walletLabel, setWalletLabel] = useState("Apple Pay · Google Pay");
-  const [mountExpress, setMountExpress] = useState(false);
   const [expressEnabled, setExpressEnabled] = useState(true);
 
   const userAgent = useMemo(() => getUserAgent(), []);
@@ -144,7 +197,7 @@ function CheckoutPaymentForm({
 
   return (
     <div className="space-y-5">
-      {useExpress && mountExpress && expressEnabled ? (
+      {useExpress && expressEnabled ? (
         <ExpressCheckoutBoundary onFailure={() => setExpressEnabled(false)}>
           <div className="space-y-3">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#64748b]">
@@ -184,14 +237,7 @@ function CheckoutPaymentForm({
             {paymentSectionLabel}
           </p>
           <div className="rounded-xl border border-white/10 bg-[#0e0a18]/60 p-4 sm:p-5">
-            <PaymentElement
-              options={paymentOptions}
-              onReady={() => {
-                if (useExpress) {
-                  setMountExpress(true);
-                }
-              }}
-            />
+            <PaymentElement options={paymentOptions} />
           </div>
         </div>
 
@@ -238,10 +284,29 @@ export default function CustomStripeCheckout({
     [publishableKey],
   );
 
-  const payloadKey = `${JSON.stringify(payload)}:${loadAttempt}`;
+  const payloadFingerprint = useMemo(() => JSON.stringify(payload), [payload]);
+  const payloadKey = `${payloadFingerprint}:${loadAttempt}`;
+
+  const appearance = useMemo(() => getStripeCheckoutAppearance(), []);
+
+  const elementsProviderOptions = useMemo(() => {
+    if (!clientSecret) return null;
+    return {
+      clientSecret,
+      defaultValues: {
+        billingAddress: {
+          address: { country: "GB" as const },
+        },
+      },
+      elementsOptions: {
+        appearance,
+      },
+    };
+  }, [appearance, clientSecret]);
 
   function retryCheckout() {
     clientSecretCacheRef.current.delete(payloadKey);
+    clearStoredClientSecret();
     setClientSecret(null);
     setError(null);
     setLoadAttempt((attempt) => attempt + 1);
@@ -252,6 +317,13 @@ export default function CustomStripeCheckout({
       setError(
         "Stripe is not configured. Set NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY.",
       );
+      return;
+    }
+
+    const storedSecret = readStoredClientSecret(payloadFingerprint);
+    if (storedSecret) {
+      setClientSecret(storedSecret);
+      setError(null);
       return;
     }
 
@@ -270,6 +342,7 @@ export default function CustomStripeCheckout({
     void pending
       .then((secret) => {
         if (!cancelled) {
+          writeStoredClientSecret(payloadFingerprint, secret);
           setClientSecret(secret);
           setError(null);
         }
@@ -286,7 +359,7 @@ export default function CustomStripeCheckout({
     return () => {
       cancelled = true;
     };
-  }, [payloadKey, payload, publishableKey]);
+  }, [payloadFingerprint, payloadKey, publishableKey]);
 
   if (!publishableKey || error) {
     return (
@@ -308,7 +381,7 @@ export default function CustomStripeCheckout({
     );
   }
 
-  if (!clientSecret || !stripePromise) {
+  if (!clientSecret || !stripePromise || !elementsProviderOptions) {
     return (
       <div className="mt-6 flex items-center justify-center gap-2 border-t border-white/10 py-10 text-sm text-[#94a3b8]">
         <Loader2 className="h-5 w-5 animate-spin" />
@@ -322,20 +395,14 @@ export default function CustomStripeCheckout({
       <CheckoutElementsProvider
         key={clientSecret}
         stripe={stripePromise}
-        options={{
-          clientSecret,
-          defaultValues: {
-            billingAddress: {
-              address: { country: "GB" },
-            },
-          },
-          elementsOptions: {
-            appearance: getStripeCheckoutAppearance(),
-          },
-        }}
+        options={elementsProviderOptions}
       >
         <CheckoutPaymentForm payLabel={payLabel} onRetry={retryCheckout} />
       </CheckoutElementsProvider>
+      <p className="mt-3 text-center text-xs text-[#64748b]">
+        If payment options fail to load, wait 10 minutes before refreshing — too
+        many reloads can temporarily block Stripe security checks.
+      </p>
     </div>
   );
 }

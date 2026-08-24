@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { UK_CITIES } from "@/lib/constants/cities";
 import {
   CUSTOM_CATEGORY_OPTION_VALUE,
@@ -163,15 +163,26 @@ export default function CampaignWizard({
   const resolvedCategory = resolvedCategoryName();
   const isManufacturer = isManufacturerCategory(resolvedCategory);
 
-  const embeddedCheckoutPayload = {
-    businessName: businessName.trim(),
-    category: resolvedCategory,
-    city,
-    planSlug,
-    promoApplied: false as const,
-    productDescription: isManufacturer ? productDescription.trim() : undefined,
-    keyFeatures: keyFeatures.map((f) => f.trim()),
-  };
+  const embeddedCheckoutPayload = useMemo(
+    () => ({
+      businessName: businessName.trim(),
+      category: resolvedCategory,
+      city,
+      planSlug,
+      promoApplied: false as const,
+      productDescription: isManufacturer ? productDescription.trim() : undefined,
+      keyFeatures: keyFeatures.map((f) => f.trim()),
+    }),
+    [
+      businessName,
+      resolvedCategory,
+      city,
+      planSlug,
+      isManufacturer,
+      productDescription,
+      keyFeatures,
+    ],
+  );
 
   async function persistCategoryToSupabase(name: string): Promise<void> {
     try {
