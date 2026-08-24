@@ -3,7 +3,7 @@ import type {
   StripeCheckoutPaymentElementOptions,
 } from "@stripe/stripe-js";
 
-/** Express wallets — full Checkout-mode options (partial config crashes the iframe). */
+/** Express wallets — Google Pay forced visible on Chrome when domain is verified. */
 export const expressCheckoutOptions: StripeCheckoutExpressCheckoutElementOptions =
   {
     buttonHeight: 48,
@@ -20,10 +20,10 @@ export const expressCheckoutOptions: StripeCheckoutExpressCheckoutElementOptions
       maxRows: 1,
       overflow: "never",
     },
-    paymentMethodOrder: ["applePay", "googlePay"],
+    paymentMethodOrder: ["googlePay", "applePay"],
     paymentMethods: {
       applePay: "auto",
-      googlePay: "auto",
+      googlePay: "always",
       amazonPay: "never",
       link: "never",
       paypal: "never",
@@ -52,7 +52,7 @@ export const paymentElementOptions: StripeCheckoutPaymentElementOptions = {
   },
 };
 
-/** Fallback if Express iframe fails — wallets inside Payment Element. */
+/** Shown when Express renders no wallet buttons. */
 export const paymentElementWalletFallbackOptions: StripeCheckoutPaymentElementOptions =
   {
     layout: {
@@ -60,6 +60,7 @@ export const paymentElementWalletFallbackOptions: StripeCheckoutPaymentElementOp
       defaultCollapsed: false,
       radios: "always",
     },
+    paymentMethodOrder: ["google_pay", "apple_pay", "card"],
     wallets: {
       applePay: "auto",
       googlePay: "auto",
