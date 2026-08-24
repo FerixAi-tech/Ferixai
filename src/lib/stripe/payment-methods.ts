@@ -1,42 +1,28 @@
-import type {
-  StripeCheckoutExpressCheckoutElementOptions,
-  StripeCheckoutPaymentElementOptions,
-} from "@stripe/stripe-js";
+import type { StripeCheckoutPaymentElementOptions } from "@stripe/stripe-js";
 
-/** Express wallet buttons — force render when domain is verified. */
-export const expressCheckoutOptions: StripeCheckoutExpressCheckoutElementOptions =
-  {
-    buttonHeight: 48,
-    buttonTheme: {
-      applePay: "white-outline",
-      googlePay: "white",
-    },
-    buttonType: {
-      applePay: "check-out",
-      googlePay: "checkout",
-    },
-    layout: {
-      maxColumns: 2,
-      maxRows: 1,
-      overflow: "never",
-    },
-    paymentMethodOrder: ["applePay", "googlePay"],
-    paymentMethods: {
-      applePay: "always",
-      googlePay: "always",
-      amazonPay: "never",
-      link: "never",
-      paypal: "never",
-      klarna: "never",
-    },
-  };
+/** Express wallet row — Google Pay always on supported browsers; Apple Pay when available. */
+export const expressCheckoutOptions = {
+  business: { name: "FerixAI" },
+  paymentMethods: {
+    applePay: "auto",
+    googlePay: "always",
+    amazonPay: "never",
+    link: "never",
+    paypal: "never",
+    klarna: "never",
+  },
+  paymentMethodOrder: ["googlePay", "applePay"],
+  layout: {
+    maxColumns: 2,
+    maxRows: 1,
+  },
+};
 
-/** Card form — wallets render via ExpressCheckoutElement above. */
+/** Card form — wallets render above via ExpressCheckoutElement. */
 export const paymentElementOptions: StripeCheckoutPaymentElementOptions = {
   layout: {
-    type: "accordion",
+    type: "tabs",
     defaultCollapsed: false,
-    radios: "never",
   },
   paymentMethodOrder: ["card"],
   wallets: {
@@ -53,5 +39,5 @@ export const paymentElementOptions: StripeCheckoutPaymentElementOptions = {
   },
 };
 
-/** Server-side: card enables Apple Pay / Google Pay client-side. */
+/** Server-side: card only (Apple/Google Pay use wallet buttons client-side). */
 export const checkoutSessionPaymentMethodTypes = ["card"] as const;

@@ -8,7 +8,10 @@ import {
   PaymentElement,
   useCheckoutElements,
 } from "@stripe/react-stripe-js/checkout";
-import type { StripeExpressCheckoutElementConfirmEvent } from "@stripe/stripe-js";
+import type {
+  StripeCheckoutExpressCheckoutElementOptions,
+  StripeExpressCheckoutElementConfirmEvent,
+} from "@stripe/stripe-js";
 import { Loader2 } from "lucide-react";
 import { getStripeCheckoutAppearance } from "@/lib/stripe/appearance";
 import {
@@ -32,7 +35,7 @@ function CheckoutPaymentForm({
   const checkoutState = useCheckoutElements();
   const [message, setMessage] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [expressFailed, setExpressFailed] = useState(false);
+  const [walletLabel, setWalletLabel] = useState("Apple Pay · Google Pay");
 
   if (checkoutState.type === "loading") {
     return (
@@ -89,22 +92,28 @@ function CheckoutPaymentForm({
 
   return (
     <div className="space-y-5">
-      {!expressFailed ? (
-        <div className="space-y-3">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#64748b]">
-            Apple Pay · Google Pay
-          </p>
-          <div className="min-h-[48px]">
-            <ExpressCheckoutElement
-              options={expressCheckoutOptions}
-              onLoadError={() => {
-                setExpressFailed(true);
-              }}
-              onConfirm={handleExpressConfirm}
-            />
-          </div>
-        </div>
-      ) : null}
+      <div className="space-y-3">
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#64748b]">
+          {walletLabel}
+        </p>
+        <ExpressCheckoutElement
+          options={
+            expressCheckoutOptions as unknown as StripeCheckoutExpressCheckoutElementOptions
+          }
+          onReady={(event) => {
+            const methods = event.availablePaymentMethods;
+            if (!methods) return;
+
+            const labels: string[] = [];
+            if (methods.googlePay) labels.push("Google Pay");
+            if (methods.applePay) labels.push("Apple Pay");
+            if (labels.length > 0) {
+              setWalletLabel(labels.join(" · "));
+            }
+          }}
+          onConfirm={handleExpressConfirm}
+        />
+      </div>
 
       <form
         className="space-y-5"
