@@ -3,6 +3,7 @@ import type { CampaignInput } from "@/lib/campaign/validate-input";
 import { getCheckoutCharge } from "@/lib/constants/checkout";
 import { getPricingPlan } from "@/lib/constants/pricing-plans";
 import { getStripe } from "@/lib/stripe/server";
+import { ensurePaymentMethodDomains } from "@/lib/stripe/payment-method-domains";
 import { checkoutSessionPaymentMethodTypes } from "@/lib/stripe/payment-methods";
 
 export async function createStripeCheckoutSession(options: {
@@ -17,6 +18,7 @@ export async function createStripeCheckoutSession(options: {
   const charge = getCheckoutCharge(input.totalCostGbp);
   const baseUrl = getAppBaseUrl();
   const stripe = getStripe();
+  await ensurePaymentMethodDomains(stripe);
 
   const session = await stripe.checkout.sessions.create({
     ui_mode: "elements",

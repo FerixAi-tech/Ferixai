@@ -2,7 +2,8 @@ import type { StripeCheckoutPaymentElementOptions } from "@stripe/stripe-js";
 
 /** Express wallet row: Apple Pay + Google Pay only. */
 export const expressCheckoutOptions = {
-    paymentMethods: {
+  business: { name: "FerixAI" },
+  paymentMethods: {
       applePay: "always",
       googlePay: "always",
       amazonPay: "never",
@@ -25,7 +26,7 @@ export const paymentElementOptions: StripeCheckoutPaymentElementOptions = {
   },
   paymentMethodOrder: ["card"],
   wallets: {
-    applePay: "never",
+    applePay: "auto",
     googlePay: "never",
     link: "never",
   },

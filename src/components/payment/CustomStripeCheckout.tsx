@@ -26,6 +26,10 @@ function CheckoutPaymentForm({ payLabel }: { payLabel: string }) {
   const checkoutState = useCheckoutElements();
   const [message, setMessage] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [walletLabel, setWalletLabel] = useState<string | null>(
+    "Apple Pay · Google Pay",
+  );
+  const [showExpressWallets, setShowExpressWallets] = useState(true);
 
   if (checkoutState.type === "loading") {
     return (
@@ -67,19 +71,40 @@ function CheckoutPaymentForm({ payLabel }: { payLabel: string }) {
         void confirmPayment();
       }}
     >
-      <div className="space-y-3">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#64748b]">
-          Apple Pay · Google Pay
-        </p>
-        <ExpressCheckoutElement
-          options={
-            expressCheckoutOptions as StripeCheckoutExpressCheckoutElementOptions
-          }
-          onConfirm={async () => {
-            await confirmPayment();
-          }}
-        />
-      </div>
+      {showExpressWallets ? (
+        <div className="space-y-3">
+          {walletLabel ? (
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#64748b]">
+              {walletLabel}
+            </p>
+          ) : null}
+          <ExpressCheckoutElement
+            options={
+              expressCheckoutOptions as unknown as StripeCheckoutExpressCheckoutElementOptions
+            }
+            onReady={(event) => {
+              const methods = event.availablePaymentMethods;
+              if (!methods) {
+                setShowExpressWallets(false);
+                return;
+              }
+
+              const labels: string[] = [];
+              if (methods.applePay) labels.push("Apple Pay");
+              if (methods.googlePay) labels.push("Google Pay");
+              if (labels.length === 0) {
+                setShowExpressWallets(false);
+                return;
+              }
+
+              setWalletLabel(labels.join(" · "));
+            }}
+            onConfirm={async () => {
+              await confirmPayment();
+            }}
+          />
+        </div>
+      ) : null}
 
       <div className="space-y-3">
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#64748b]">
