@@ -55,7 +55,7 @@ export async function createCampaignForUser(
     }) => Promise<void>;
     /**
      * Return after the campaign row exists; generate/publish content in
-     * `after()`. Required for iyzico callbacks so the browser redirects
+     * `after()`. Required for Stripe success redirects so the browser returns quickly.
      * before OpenAI work hits the serverless timeout.
      */
     deferContent?: boolean;
@@ -382,7 +382,7 @@ export async function createCampaignForUser(
   };
 
   // Paid checkout must redirect before OpenAI / channel publishing finishes,
-  // otherwise Vercel timeouts leave the user stuck and iyzico may retry.
+  // otherwise Vercel timeouts leave the user stuck while fulfillment completes.
   if (options?.deferContent) {
     after(async () => {
       try {

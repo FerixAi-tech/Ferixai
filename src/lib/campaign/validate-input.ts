@@ -156,10 +156,8 @@ export function isPaymentRequired(amountGbp: number): boolean {
   return !isPaymentBypassEnabled();
 }
 
-export function isIyzicoConfigured(): boolean {
-  return Boolean(
-    process.env.IYZICO_API_KEY?.trim() && process.env.IYZICO_SECRET_KEY?.trim(),
-  );
+export function isStripeConfigured(): boolean {
+  return Boolean(process.env.STRIPE_SECRET_KEY?.trim());
 }
 
 export { BILLING_CYCLE_DAYS };

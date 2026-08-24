@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect } from "react";
-import { getIyzicoCheckoutCharge } from "@/lib/constants/checkout";
 import { trackPurchase } from "@/lib/meta/pixel";
 
 /**
@@ -14,6 +13,7 @@ export default function MetaPaymentSuccessTracker({
   eventID,
   /** Actual charged amount (from payment_orders / campaign total). */
   payableGbp = 0,
+  currency = "GBP",
 }: {
   active: boolean;
   /** Must be a stable paid-order key (e.g. campaign slug + order id). */
@@ -21,23 +21,21 @@ export default function MetaPaymentSuccessTracker({
   /** Same id sent to Meta CAPI for deduplication. */
   eventID?: string;
   payableGbp?: number;
+  currency?: string;
 }) {
   useEffect(() => {
     if (!active || typeof window === "undefined") return;
     if (!dedupeKey || !eventID) return;
     if (!(payableGbp > 0)) return;
 
-    const charge = getIyzicoCheckoutCharge(payableGbp);
-    if (!(charge.amount > 0)) return;
-
     trackPurchase({
-      value: charge.amount,
-      currency: charge.currency,
+      value: payableGbp,
+      currency,
       content_name: "FerixAI Subscription",
       dedupeKey: `ferixai_meta_purchase:${dedupeKey}`,
       eventID,
     });
-  }, [active, dedupeKey, eventID, payableGbp]);
+  }, [active, dedupeKey, eventID, payableGbp, currency]);
 
   return null;
 }

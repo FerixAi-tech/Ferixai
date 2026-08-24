@@ -5,7 +5,7 @@ import { Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 /**
- * Shown while iyzico confirmed payment but campaign fulfillment is still running.
+ * Shown while Stripe confirmed payment but campaign fulfillment is still running.
  * Polls for a paid order with campaign_slug, then redirects to the real success URL.
  */
 export default function PaymentProcessingBanner() {

@@ -25,8 +25,9 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Product notes
 
-- Paid plans always require **iyzico Checkout Form** in production.
-- Set `IYZICO_API_KEY`, `IYZICO_SECRET_KEY`, and `IYZICO_BASE_URL` in Vercel env.
-- Set `NEXT_PUBLIC_APP_URL=https://www.ferixai.com` so the payment callback URL is correct.
+- Paid plans use **Stripe Checkout** in production.
+- Set `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` in Vercel env.
+- Stripe webhook endpoint: `https://www.ferixai.com/api/payments/stripe/webhook`
+- Set `NEXT_PUBLIC_APP_URL=https://www.ferixai.com` so Stripe success/cancel URLs are correct.
 - Local-only bypass: `FERIXAI_PAYMENT_REQUIRED=false` (ignored outside development).
 - There is no community forum in this product.

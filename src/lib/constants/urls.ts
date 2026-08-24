@@ -21,7 +21,6 @@ function isLocalhostUrl(url: string): boolean {
 
 /**
  * Public site origin for redirects, SEO, and payment callbacks.
- * Never returns localhost in production — that breaks iyzico 3DS return URLs.
  */
 export function getAppBaseUrl(): string {
   const fromEnv = process.env.NEXT_PUBLIC_APP_URL?.trim().replace(/\/$/, "");
@@ -51,8 +50,7 @@ export function getAppBaseUrl(): string {
 }
 
 /**
- * Prefer the host that actually received the request (iyzico callback),
- * falling back to getAppBaseUrl() when the request looks local/misrouted.
+ * Prefer the host that actually received the request, falling back to getAppBaseUrl().
  */
 export function getRequestBaseUrl(request: Request): string {
   const forwardedHost = request.headers.get("x-forwarded-host");

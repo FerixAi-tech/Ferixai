@@ -27,9 +27,13 @@ export default async function NewCampaignPage({
   const payment = params.payment;
 
   const paymentMessage =
-    payment === "failed"
+    payment === "cancelled"
+      ? "Checkout was cancelled. You can try again when you are ready."
+      : payment === "failed"
       ? "Payment was not completed. You can try again when you are ready."
-      : payment === "error" || payment === "missing_token" || payment === "order_not_found"
+      : payment === "error" ||
+          payment === "missing_session" ||
+          payment === "order_not_found"
         ? "Something went wrong while confirming payment. Please try again or contact support."
         : null;
 

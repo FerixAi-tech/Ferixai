@@ -1,14 +1,14 @@
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import {
-  isIyzicoConfigured,
   isPaymentRequired,
+  isStripeConfigured,
   validateCampaignInput,
 } from "@/lib/campaign/validate-input";
 import { createCampaignForUser } from "@/lib/campaign/create-campaign";
 import { assertPromoCodeAvailable } from "@/lib/promo/codes";
-import { getIyzicoCheckoutCharge } from "@/lib/constants/checkout";
-import { initializeIyzicoCheckout } from "@/lib/iyzico/checkout";
+import { getCheckoutCharge } from "@/lib/constants/checkout";
+import { createStripeCheckoutSession } from "@/lib/stripe/checkout";
 import {
   getClientIpFromHeaders,
   parseMetaCookies,
@@ -51,7 +51,6 @@ export async function POST(request: Request) {
       await assertPromoCodeAvailable(input.promoCode, user.id);
     }
 
-    // Only fully free first-month (or explicit FERIXAI_PAYMENT_REQUIRED=false) skips checkout
     if (!isPaymentRequired(input.totalCostGbp)) {
       const result = await createCampaignForUser(user.id, input);
       return NextResponse.json({
@@ -63,11 +62,11 @@ export async function POST(request: Request) {
       });
     }
 
-    if (!isIyzicoConfigured()) {
+    if (!isStripeConfigured()) {
       return NextResponse.json(
         {
           error:
-            "Payment is required but iyzico is not configured. Set IYZICO_API_KEY and IYZICO_SECRET_KEY.",
+            "Payment is required but Stripe is not configured. Set STRIPE_SECRET_KEY.",
         },
         { status: 503 },
       );
@@ -75,7 +74,7 @@ export async function POST(request: Request) {
 
     const conversationId = `fx-${randomUUID()}`;
     const admin = createAdminClient();
-    const charge = getIyzicoCheckoutCharge(input.totalCostGbp);
+    const charge = getCheckoutCharge(input.totalCostGbp);
 
     const { data: profile } = await admin
       .from("profiles")
@@ -91,33 +90,36 @@ export async function POST(request: Request) {
       );
     }
 
-    const { error: insertError } = await admin.from("payment_orders").insert({
-      user_id: user.id,
-      conversation_id: conversationId,
-      plan_slug: input.planSlug,
-      amount_gbp: charge.amount,
-      currency: charge.currency,
-      status: "pending",
-      campaign_payload: input,
-      client_ip: clientIp,
-      client_user_agent: clientUserAgent,
-      meta_fbp: metaFbp,
-      meta_fbc: metaFbc,
-    });
+    const { data: orderRow, error: insertError } = await admin
+      .from("payment_orders")
+      .insert({
+        user_id: user.id,
+        conversation_id: conversationId,
+        plan_slug: input.planSlug,
+        amount_gbp: charge.amount,
+        currency: charge.currency,
+        status: "pending",
+        campaign_payload: input,
+        client_ip: clientIp,
+        client_user_agent: clientUserAgent,
+        meta_fbp: metaFbp,
+        meta_fbc: metaFbc,
+      })
+      .select("id")
+      .single();
 
-    if (insertError) {
-      throw new Error(insertError.message || "Could not create payment order");
+    if (insertError || !orderRow?.id) {
+      throw new Error(insertError?.message || "Could not create payment order");
     }
 
-    let checkout: { token: string; paymentPageUrl: string };
+    let checkout: { sessionId: string; checkoutUrl: string };
     try {
-      checkout = await initializeIyzicoCheckout({
+      checkout = await createStripeCheckoutSession({
         userId: user.id,
         email,
-        fullName: profile?.full_name,
         input,
         conversationId,
-        clientIp: clientIp || undefined,
+        orderId: orderRow.id,
       });
     } catch (checkoutErr) {
       await admin
@@ -130,29 +132,29 @@ export async function POST(request: Request) {
               : "Checkout init failed",
           updated_at: new Date().toISOString(),
         })
-        .eq("conversation_id", conversationId);
+        .eq("id", orderRow.id);
       throw checkoutErr;
     }
 
     await admin
       .from("payment_orders")
       .update({
-        iyzico_token: checkout.token,
+        stripe_session_id: checkout.sessionId,
         updated_at: new Date().toISOString(),
       })
-      .eq("conversation_id", conversationId);
+      .eq("id", orderRow.id);
 
     return NextResponse.json({
       success: true,
       requiresPayment: true,
-      paymentPageUrl: checkout.paymentPageUrl,
-      token: checkout.token,
+      checkoutUrl: checkout.checkoutUrl,
+      sessionId: checkout.sessionId,
       amountGbp: input.totalCostGbp,
       chargedAmount: charge.amount,
       chargedCurrency: charge.currency,
     });
   } catch (err) {
-    console.error("iyzico initialize error:", err);
+    console.error("Stripe initialize error:", err);
     return NextResponse.json(
       {
         error:

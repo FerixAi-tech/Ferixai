@@ -17,7 +17,7 @@ import {
 } from "@/lib/constants/metrics";
 import {
   formatCheckoutCharge,
-  getIyzicoCheckoutCharge,
+  getCheckoutCharge,
 } from "@/lib/constants/checkout";
 import { trackCompleteRegistration, trackInitiateCheckout } from "@/lib/meta/pixel";
 import {
@@ -142,7 +142,7 @@ export default function CampaignWizard({
 
   const pricingPlan = getPricingPlan(planSlug);
   const listPrice = pricingPlan.priceMonthlyGbp;
-  const checkoutCharge = getIyzicoCheckoutCharge(listPrice);
+  const checkoutCharge = getCheckoutCharge(listPrice);
   const checkoutLabel = formatCheckoutCharge(
     checkoutCharge.amount,
     checkoutCharge.currency,
@@ -334,7 +334,7 @@ export default function CampaignWizard({
     }
 
     try {
-      const res = await fetch("/api/payments/iyzico/initialize", {
+      const res = await fetch("/api/payments/stripe/initialize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -354,19 +354,19 @@ export default function CampaignWizard({
 
       const data = (await res.json().catch(() => ({}))) as {
         error?: string;
-        paymentPageUrl?: string;
+        checkoutUrl?: string;
         requiresPayment?: boolean;
         slug?: string;
         paid?: boolean;
-        token?: string;
+        sessionId?: string;
       };
 
       if (!res.ok) {
         throw new Error(data.error || `Checkout failed (${res.status})`);
       }
 
-      if (data.paymentPageUrl) {
-        window.location.assign(data.paymentPageUrl);
+      if (data.checkoutUrl) {
+        window.location.assign(data.checkoutUrl);
         return;
       }
 
@@ -659,49 +659,22 @@ export default function CampaignWizard({
 
           <div className="rounded-[18px] border border-violet-950/70 bg-[linear-gradient(165deg,#120c1e_0%,#0e0a18_45%,#090610_100%)] p-6">
             <h3 className="text-lg font-bold text-white">Checkout</h3>
-            {checkoutCharge.isTemporaryTryTest ? (
-              <div className="mt-4 rounded-xl border border-amber-400/40 bg-amber-500/10 px-4 py-3 text-sm font-semibold text-amber-100">
-                Temporary test checkout: you will be charged {checkoutLabel}{" "}
-                (TRY). Plan list prices remain in GBP.
-              </div>
-            ) : null}
             <div className="mt-4 rounded-xl border border-teal-400/25 bg-teal-500/5 px-4 py-3 text-sm text-[#cbd5e1]">
-              Secure 256-bit encrypted checkout. You will be redirected to
-              complete your payment securely.
-              {checkoutCharge.isTemporaryTryTest ? null : (
-                <>
-                  {" "}
-                  Amount due:{" "}
-                  <span className="font-semibold text-white">{checkoutLabel}</span>
-                  {" "}
-                  / month.
-                </>
-              )}
+              Secure Stripe checkout. You will be redirected to complete your
+              payment securely. Amount due:{" "}
+              <span className="font-semibold text-white">{checkoutLabel}</span> /
+              month.
             </div>
 
             <div className="mt-6 flex items-end justify-between gap-4 border-t border-white/10 pt-5">
               <div>
                 <p className="text-sm text-[#94a3b8]">Total payable</p>
-                {checkoutCharge.isTemporaryTryTest ? (
-                  <>
-                    <p className="lf-orbitron mt-1 text-3xl font-bold text-emerald-300">
-                      {checkoutLabel}
-                    </p>
-                    <p className="mt-1 text-xs text-[#64748b]">
-                      test charge · plan list {formatCurrency(listPrice)}
-                      /month GBP
-                    </p>
-                  </>
-                ) : (
-                  <>
-                    <p className="lf-orbitron mt-1 text-3xl font-bold text-white">
-                      {formatCurrency(listPrice)}
-                    </p>
-                    <p className="mt-1 text-xs text-[#64748b]">
-                      {pricingPlan.name} · billed monthly
-                    </p>
-                  </>
-                )}
+                <p className="lf-orbitron mt-1 text-3xl font-bold text-white">
+                  {formatCurrency(listPrice)}
+                </p>
+                <p className="mt-1 text-xs text-[#64748b]">
+                  {pricingPlan.name} · billed monthly
+                </p>
               </div>
             </div>
           </div>

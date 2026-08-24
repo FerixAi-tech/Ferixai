@@ -8,7 +8,7 @@ import { createClient } from "@/lib/supabase/client";
 const COUNTDOWN_SECONDS = 5;
 
 /**
- * Full-screen gate after iyzico success: gives content ~5s to publish,
+ * Full-screen gate after Stripe success: gives content ~5s to publish,
  * then unlocks a single Continue button into the dashboard (no manual refresh).
  */
 export default function PaymentSuccessModal({

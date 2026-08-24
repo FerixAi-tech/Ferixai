@@ -16,7 +16,7 @@ export const runtime = "nodejs";
 /**
  * Direct campaign create — only allowed when payment bypass is explicitly
  * enabled (FERIXAI_PAYMENT_REQUIRED=false) or the payable amount is £0.
- * Paid launches must go through /api/payments/iyzico/initialize.
+ * Paid launches must go through /api/payments/stripe/initialize.
  */
 export async function POST(request: Request) {
   try {
