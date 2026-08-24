@@ -8,8 +8,13 @@ import {
   PaymentElement,
   useCheckoutElements,
 } from "@stripe/react-stripe-js/checkout";
+import type { StripeCheckoutExpressCheckoutElementOptions } from "@stripe/stripe-js";
 import { Loader2 } from "lucide-react";
 import { getStripeCheckoutAppearance } from "@/lib/stripe/appearance";
+import {
+  expressCheckoutOptions,
+  paymentElementOptions,
+} from "@/lib/stripe/payment-methods";
 import {
   fetchStripeCheckoutClientSecret,
   type StripeCheckoutPayload,
@@ -62,28 +67,27 @@ function CheckoutPaymentForm({ payLabel }: { payLabel: string }) {
         void confirmPayment();
       }}
     >
-      <ExpressCheckoutElement
-        onConfirm={async () => {
-          await confirmPayment();
-        }}
-      />
-
-      <div className="rounded-xl border border-white/10 bg-[#0e0a18]/60 p-4 sm:p-5">
-        <PaymentElement
-          options={{
-            layout: {
-              type: "tabs",
-              defaultCollapsed: false,
-            },
-            fields: {
-              billingDetails: {
-                address: {
-                  country: "never",
-                },
-              },
-            },
+      <div className="space-y-3">
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#64748b]">
+          Apple Pay · Google Pay
+        </p>
+        <ExpressCheckoutElement
+          options={
+            expressCheckoutOptions as StripeCheckoutExpressCheckoutElementOptions
+          }
+          onConfirm={async () => {
+            await confirmPayment();
           }}
         />
+      </div>
+
+      <div className="space-y-3">
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#64748b]">
+          Debit or credit card
+        </p>
+        <div className="rounded-xl border border-white/10 bg-[#0e0a18]/60 p-4 sm:p-5">
+          <PaymentElement options={paymentElementOptions} />
+        </div>
       </div>
 
       {message ? (
