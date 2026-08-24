@@ -3,7 +3,17 @@ import type {
   StripeCheckoutPaymentElementOptions,
 } from "@stripe/stripe-js";
 
-function isApplePayPlatform(userAgent: string): boolean {
+const billingFields: StripeCheckoutPaymentElementOptions["fields"] = {
+  billingDetails: {
+    name: "always",
+    address: {
+      country: "never",
+    },
+  },
+};
+
+/** Safari / iOS — Express Checkout is stable here. */
+export function isApplePayPlatform(userAgent: string): boolean {
   const ua = userAgent.toLowerCase();
   const isIos = /iphone|ipad|ipod/.test(ua);
   const isSafari =
@@ -11,20 +21,13 @@ function isApplePayPlatform(userAgent: string): boolean {
   return isIos || isSafari;
 }
 
-function isAndroid(userAgent: string): boolean {
-  return /android/i.test(userAgent);
+/** Chrome / Android / desktop — skip Express; use Payment Element wallets. */
+export function shouldMountExpressCheckout(userAgent: string): boolean {
+  return isApplePayPlatform(userAgent);
 }
 
-/**
- * Platform-safe Express options — Apple Pay "always" crashes Android Chrome.
- * Safari/iOS: both wallets. Android/desktop Chrome: Google Pay only.
- */
-export function getExpressCheckoutOptions(
-  userAgent: string,
-): StripeCheckoutExpressCheckoutElementOptions {
-  const applePlatform = isApplePayPlatform(userAgent);
-  const android = isAndroid(userAgent);
-
+/** Safari Express row — Apple Pay + Google Pay when available. */
+export function getSafariExpressCheckoutOptions(): StripeCheckoutExpressCheckoutElementOptions {
   return {
     buttonHeight: 48,
     buttonTheme: {
@@ -36,16 +39,14 @@ export function getExpressCheckoutOptions(
       googlePay: "checkout",
     },
     layout: {
-      maxColumns: applePlatform ? 2 : 1,
+      maxColumns: 2,
       maxRows: 1,
       overflow: "auto",
     },
-    paymentMethodOrder: applePlatform
-      ? ["applePay", "googlePay"]
-      : ["googlePay"],
+    paymentMethodOrder: ["applePay", "googlePay"],
     paymentMethods: {
-      applePay: applePlatform ? "always" : "never",
-      googlePay: android || !applePlatform ? "always" : "auto",
+      applePay: "always",
+      googlePay: "auto",
       amazonPay: "never",
       link: "never",
       paypal: "never",
@@ -54,32 +55,51 @@ export function getExpressCheckoutOptions(
   };
 }
 
-export function getWalletSectionLabel(userAgent: string): string {
-  return isApplePayPlatform(userAgent)
-    ? "Apple Pay · Google Pay"
-    : "Google Pay";
+/** Safari — card only below Express (wallets are in Express row). */
+export const safariPaymentElementOptions: StripeCheckoutPaymentElementOptions =
+  {
+    layout: {
+      type: "tabs",
+      defaultCollapsed: false,
+    },
+    paymentMethodOrder: ["card"],
+    wallets: {
+      applePay: "never",
+      googlePay: "never",
+      link: "never",
+    },
+    fields: billingFields,
+  };
+
+/** Chrome / Android — no Express; Google Pay + card in one element. */
+export const chromePaymentElementOptions: StripeCheckoutPaymentElementOptions =
+  {
+    layout: {
+      type: "accordion",
+      defaultCollapsed: false,
+      radios: "always",
+    },
+    paymentMethodOrder: ["google_pay", "card"],
+    wallets: {
+      applePay: "never",
+      googlePay: "auto",
+      link: "never",
+    },
+    fields: billingFields,
+  };
+
+export function getPaymentElementOptions(
+  userAgent: string,
+): StripeCheckoutPaymentElementOptions {
+  return shouldMountExpressCheckout(userAgent)
+    ? safariPaymentElementOptions
+    : chromePaymentElementOptions;
 }
 
-/** Card form — wallets render via ExpressCheckoutElement above. */
-export const paymentElementOptions: StripeCheckoutPaymentElementOptions = {
-  layout: {
-    type: "tabs",
-    defaultCollapsed: false,
-  },
-  paymentMethodOrder: ["card"],
-  wallets: {
-    applePay: "never",
-    googlePay: "never",
-    link: "never",
-  },
-  fields: {
-    billingDetails: {
-      name: "always",
-      address: {
-        country: "never",
-      },
-    },
-  },
-};
+export function getPaymentSectionLabel(userAgent: string): string {
+  return shouldMountExpressCheckout(userAgent)
+    ? "Debit or credit card"
+    : "Pay with Google Pay or card";
+}
 
 export const checkoutSessionPaymentMethodTypes = ["card"] as const;

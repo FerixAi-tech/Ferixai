@@ -19,9 +19,10 @@ import type { StripeExpressCheckoutElementConfirmEvent } from "@stripe/stripe-js
 import { Loader2 } from "lucide-react";
 import { getStripeCheckoutAppearance } from "@/lib/stripe/appearance";
 import {
-  getExpressCheckoutOptions,
-  getWalletSectionLabel,
-  paymentElementOptions,
+  getPaymentElementOptions,
+  getPaymentSectionLabel,
+  getSafariExpressCheckoutOptions,
+  shouldMountExpressCheckout,
 } from "@/lib/stripe/payment-methods";
 import {
   fetchStripeCheckoutClientSecret,
@@ -29,6 +30,10 @@ import {
 } from "@/lib/stripe/fetch-client-secret";
 
 export type { StripeCheckoutPayload };
+
+function getUserAgent(): string {
+  return typeof window !== "undefined" ? window.navigator.userAgent : "";
+}
 
 class ExpressCheckoutBoundary extends Component<
   { children: ReactNode; onFailure: () => void },
@@ -64,17 +69,25 @@ function CheckoutPaymentForm({
   const [mountExpress, setMountExpress] = useState(false);
   const [expressEnabled, setExpressEnabled] = useState(true);
 
-  const expressOptions = useMemo(() => {
-    if (typeof window === "undefined") {
-      return getExpressCheckoutOptions("");
-    }
-    return getExpressCheckoutOptions(window.navigator.userAgent);
-  }, []);
+  const userAgent = useMemo(() => getUserAgent(), []);
+  const useExpress = useMemo(
+    () => shouldMountExpressCheckout(userAgent),
+    [userAgent],
+  );
+  const paymentOptions = useMemo(
+    () => getPaymentElementOptions(userAgent),
+    [userAgent],
+  );
+  const paymentSectionLabel = useMemo(
+    () => getPaymentSectionLabel(userAgent),
+    [userAgent],
+  );
+  const expressOptions = useMemo(() => getSafariExpressCheckoutOptions(), []);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    setWalletLabel(getWalletSectionLabel(window.navigator.userAgent));
-  }, []);
+    if (!useExpress) return;
+    setWalletLabel("Apple Pay · Google Pay");
+  }, [useExpress]);
 
   if (checkoutState.type === "loading") {
     return (
@@ -131,7 +144,7 @@ function CheckoutPaymentForm({
 
   return (
     <div className="space-y-5">
-      {mountExpress && expressEnabled ? (
+      {useExpress && mountExpress && expressEnabled ? (
         <ExpressCheckoutBoundary onFailure={() => setExpressEnabled(false)}>
           <div className="space-y-3">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#64748b]">
@@ -168,13 +181,15 @@ function CheckoutPaymentForm({
       >
         <div className="space-y-3">
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#64748b]">
-            Debit or credit card
+            {paymentSectionLabel}
           </p>
           <div className="rounded-xl border border-white/10 bg-[#0e0a18]/60 p-4 sm:p-5">
             <PaymentElement
-              options={paymentElementOptions}
+              options={paymentOptions}
               onReady={() => {
-                setMountExpress(true);
+                if (useExpress) {
+                  setMountExpress(true);
+                }
               }}
             />
           </div>
