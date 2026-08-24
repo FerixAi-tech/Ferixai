@@ -3,9 +3,24 @@ import type {
   StripeCheckoutPaymentElementOptions,
 } from "@stripe/stripe-js";
 
-/** Minimal express options — Stripe defaults + block unwanted wallets. */
+/** Express wallet buttons — dark checkout theme. */
 export const expressCheckoutOptions: StripeCheckoutExpressCheckoutElementOptions =
   {
+    buttonHeight: 48,
+    buttonTheme: {
+      applePay: "white-outline",
+      googlePay: "white",
+    },
+    buttonType: {
+      applePay: "check-out",
+      googlePay: "checkout",
+    },
+    layout: {
+      maxColumns: 2,
+      maxRows: 1,
+      overflow: "never",
+    },
+    paymentMethodOrder: ["applePay", "googlePay"],
     paymentMethods: {
       applePay: "auto",
       googlePay: "auto",
