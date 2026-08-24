@@ -1,20 +1,15 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { loadStripe } from "@stripe/stripe-js";
+import { loadStripe } from "@stripe/stripe-js/pure";
 import {
   CheckoutElementsProvider,
-  ExpressCheckoutElement,
   PaymentElement,
   useCheckoutElements,
 } from "@stripe/react-stripe-js/checkout";
-import type { StripeCheckoutExpressCheckoutElementOptions } from "@stripe/stripe-js";
 import { Loader2 } from "lucide-react";
 import { getStripeCheckoutAppearance } from "@/lib/stripe/appearance";
-import {
-  expressCheckoutOptions,
-  paymentElementOptions,
-} from "@/lib/stripe/payment-methods";
+import { paymentElementOptions } from "@/lib/stripe/payment-methods";
 import {
   fetchStripeCheckoutClientSecret,
   type StripeCheckoutPayload,
@@ -32,7 +27,6 @@ function CheckoutPaymentForm({
   const checkoutState = useCheckoutElements();
   const [message, setMessage] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [walletLabel, setWalletLabel] = useState("Apple Pay · Google Pay");
 
   if (checkoutState.type === "loading") {
     return (
@@ -83,32 +77,7 @@ function CheckoutPaymentForm({
     >
       <div className="space-y-3">
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#64748b]">
-          {walletLabel}
-        </p>
-        <ExpressCheckoutElement
-          options={
-            expressCheckoutOptions as unknown as StripeCheckoutExpressCheckoutElementOptions
-          }
-          onReady={(event) => {
-            const methods = event.availablePaymentMethods;
-            if (!methods) return;
-
-            const labels: string[] = [];
-            if (methods.googlePay) labels.push("Google Pay");
-            if (methods.applePay) labels.push("Apple Pay");
-            if (labels.length > 0) {
-              setWalletLabel(labels.join(" · "));
-            }
-          }}
-          onConfirm={async () => {
-            await confirmPayment();
-          }}
-        />
-      </div>
-
-      <div className="space-y-3">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#64748b]">
-          Debit or credit card
+          Pay with card, Apple Pay, or Google Pay
         </p>
         <div className="rounded-xl border border-white/10 bg-[#0e0a18]/60 p-4 sm:p-5">
           <PaymentElement options={paymentElementOptions} />
