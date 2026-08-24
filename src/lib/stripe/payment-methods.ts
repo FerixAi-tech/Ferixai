@@ -38,13 +38,5 @@ export const paymentElementOptions: StripeCheckoutPaymentElementOptions = {
   },
 };
 
-/** Server-side session restrictions for Checkout Sessions. */
-export const checkoutSessionPaymentMethods = {
-  payment_method_types: ["card"] as const,
-  excluded_payment_method_types: [
-    "amazon_pay",
-    "link",
-    "paypal",
-    "klarna",
-  ] as const,
-};
+/** Server-side: card only (Apple/Google Pay use wallet buttons client-side). */
+export const checkoutSessionPaymentMethodTypes = ["card"] as const;

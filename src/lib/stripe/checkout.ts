@@ -3,7 +3,7 @@ import type { CampaignInput } from "@/lib/campaign/validate-input";
 import { getCheckoutCharge } from "@/lib/constants/checkout";
 import { getPricingPlan } from "@/lib/constants/pricing-plans";
 import { getStripe } from "@/lib/stripe/server";
-import { checkoutSessionPaymentMethods } from "@/lib/stripe/payment-methods";
+import { checkoutSessionPaymentMethodTypes } from "@/lib/stripe/payment-methods";
 
 export async function createStripeCheckoutSession(options: {
   userId: string;
@@ -23,10 +23,7 @@ export async function createStripeCheckoutSession(options: {
     mode: "payment",
     locale: "en-GB",
     billing_address_collection: "auto",
-    payment_method_types: [...checkoutSessionPaymentMethods.payment_method_types],
-    excluded_payment_method_types: [
-      ...checkoutSessionPaymentMethods.excluded_payment_method_types,
-    ],
+    payment_method_types: [...checkoutSessionPaymentMethodTypes],
     customer_email: email,
     client_reference_id: conversationId,
     line_items: [
