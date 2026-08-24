@@ -12,7 +12,7 @@ const billingFields: StripeCheckoutPaymentElementOptions["fields"] = {
   },
 };
 
-/** Safari / iOS — Express Checkout is stable here. */
+/** Safari / iOS — Apple Pay lives here; Express is stable on these browsers. */
 export function isApplePayPlatform(userAgent: string): boolean {
   const ua = userAgent.toLowerCase();
   const isIos = /iphone|ipad|ipod/.test(ua);
@@ -21,10 +21,21 @@ export function isApplePayPlatform(userAgent: string): boolean {
   return isIos || isSafari;
 }
 
-/** Chrome / Android / desktop — skip Express; use Payment Element wallets. */
-export function shouldMountExpressCheckout(userAgent: string): boolean {
-  return isApplePayPlatform(userAgent);
-}
+/** Card form below Express — wallets render in Express row only. */
+export const cardOnlyPaymentElementOptions: StripeCheckoutPaymentElementOptions =
+  {
+    layout: {
+      type: "tabs",
+      defaultCollapsed: false,
+    },
+    paymentMethodOrder: ["card"],
+    wallets: {
+      applePay: "never",
+      googlePay: "never",
+      link: "never",
+    },
+    fields: billingFields,
+  };
 
 /** Safari Express row — Apple Pay + Google Pay when available. */
 export function getSafariExpressCheckoutOptions(): StripeCheckoutExpressCheckoutElementOptions {
@@ -55,51 +66,58 @@ export function getSafariExpressCheckoutOptions(): StripeCheckoutExpressCheckout
   };
 }
 
-/** Safari — card only below Express (wallets are in Express row). */
-export const safariPaymentElementOptions: StripeCheckoutPaymentElementOptions =
-  {
+/**
+ * Chrome / Android / desktop — Google Pay via Express only.
+ * Apple Pay must stay "never" here; forcing it crashes non-Safari browsers.
+ */
+export function getChromeExpressCheckoutOptions(): StripeCheckoutExpressCheckoutElementOptions {
+  return {
+    buttonHeight: 48,
+    buttonTheme: {
+      googlePay: "white",
+    },
+    buttonType: {
+      googlePay: "checkout",
+    },
     layout: {
-      type: "tabs",
-      defaultCollapsed: false,
+      maxColumns: 1,
+      maxRows: 1,
+      overflow: "auto",
     },
-    paymentMethodOrder: ["card"],
-    wallets: {
+    paymentMethodOrder: ["googlePay"],
+    paymentMethods: {
       applePay: "never",
-      googlePay: "never",
+      googlePay: "always",
+      amazonPay: "never",
       link: "never",
+      paypal: "never",
+      klarna: "never",
     },
-    fields: billingFields,
   };
+}
 
-/** Chrome / Android — no Express; Google Pay + card in one element. */
-export const chromePaymentElementOptions: StripeCheckoutPaymentElementOptions =
-  {
-    layout: {
-      type: "accordion",
-      defaultCollapsed: false,
-      radios: "always",
-    },
-    paymentMethodOrder: ["google_pay", "card"],
-    wallets: {
-      applePay: "never",
-      googlePay: "auto",
-      link: "never",
-    },
-    fields: billingFields,
-  };
+export function getExpressCheckoutOptions(
+  userAgent: string,
+): StripeCheckoutExpressCheckoutElementOptions {
+  return isApplePayPlatform(userAgent)
+    ? getSafariExpressCheckoutOptions()
+    : getChromeExpressCheckoutOptions();
+}
+
+export function getExpressSectionLabel(userAgent: string): string {
+  return isApplePayPlatform(userAgent) ? "Apple Pay · Google Pay" : "Google Pay";
+}
 
 export function getPaymentElementOptions(
   userAgent: string,
 ): StripeCheckoutPaymentElementOptions {
-  return shouldMountExpressCheckout(userAgent)
-    ? safariPaymentElementOptions
-    : chromePaymentElementOptions;
+  void userAgent;
+  return cardOnlyPaymentElementOptions;
 }
 
 export function getPaymentSectionLabel(userAgent: string): string {
-  return shouldMountExpressCheckout(userAgent)
-    ? "Debit or credit card"
-    : "Pay with Google Pay or card";
+  void userAgent;
+  return "Debit or credit card";
 }
 
 export const checkoutSessionPaymentMethodTypes = ["card"] as const;

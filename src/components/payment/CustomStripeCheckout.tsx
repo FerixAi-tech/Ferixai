@@ -19,10 +19,10 @@ import type { StripeExpressCheckoutElementConfirmEvent } from "@stripe/stripe-js
 import { Loader2 } from "lucide-react";
 import { getStripeCheckoutAppearance } from "@/lib/stripe/appearance";
 import {
+  getExpressCheckoutOptions,
+  getExpressSectionLabel,
   getPaymentElementOptions,
   getPaymentSectionLabel,
-  getSafariExpressCheckoutOptions,
-  shouldMountExpressCheckout,
 } from "@/lib/stripe/payment-methods";
 import {
   fetchStripeCheckoutClientSecret,
@@ -119,14 +119,12 @@ function CheckoutPaymentForm({
   const checkoutState = useCheckoutElements();
   const [message, setMessage] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [walletLabel, setWalletLabel] = useState("Apple Pay · Google Pay");
+  const [walletLabel, setWalletLabel] = useState(() =>
+    getExpressSectionLabel(getUserAgent()),
+  );
   const [expressEnabled, setExpressEnabled] = useState(true);
 
   const userAgent = useMemo(() => getUserAgent(), []);
-  const useExpress = useMemo(
-    () => shouldMountExpressCheckout(userAgent),
-    [userAgent],
-  );
   const paymentOptions = useMemo(
     () => getPaymentElementOptions(userAgent),
     [userAgent],
@@ -135,12 +133,14 @@ function CheckoutPaymentForm({
     () => getPaymentSectionLabel(userAgent),
     [userAgent],
   );
-  const expressOptions = useMemo(() => getSafariExpressCheckoutOptions(), []);
+  const expressOptions = useMemo(
+    () => getExpressCheckoutOptions(userAgent),
+    [userAgent],
+  );
 
   useEffect(() => {
-    if (!useExpress) return;
-    setWalletLabel("Apple Pay · Google Pay");
-  }, [useExpress]);
+    setWalletLabel(getExpressSectionLabel(userAgent));
+  }, [userAgent]);
 
   if (checkoutState.type === "loading") {
     return (
@@ -197,7 +197,7 @@ function CheckoutPaymentForm({
 
   return (
     <div className="space-y-5">
-      {useExpress && expressEnabled ? (
+      {expressEnabled ? (
         <ExpressCheckoutBoundary onFailure={() => setExpressEnabled(false)}>
           <div className="space-y-3">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#64748b]">
