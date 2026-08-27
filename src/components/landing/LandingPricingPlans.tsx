@@ -2,9 +2,14 @@
 
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
+import BillingCycleToggle from "@/components/pricing/BillingCycleToggle";
 import PaymentMethodLogos from "@/components/payment/PaymentMethodLogos";
 import {
+  DEFAULT_BILLING_CYCLE,
+  getBillingPeriodLabel,
+  getPlanListPrice,
   listPricingPlans,
+  type BillingCycle,
   type PricingPlanSlug,
 } from "@/lib/constants/pricing-plans";
 import { formatCurrency } from "@/lib/constants/metrics";
@@ -19,7 +24,10 @@ export default function LandingPricingPlans({
   onClaim?: () => void;
 }) {
   const plans = listPricingPlans();
-  const fromPrice = plans[0]?.priceMonthlyGbp ?? 479;
+  const [billingCycle, setBillingCycle] =
+    useState<BillingCycle>(DEFAULT_BILLING_CYCLE);
+  const fromPrice = getPlanListPrice(plans[0]!, billingCycle);
+  const periodLabel = getBillingPeriodLabel(billingCycle);
   const [expandedSlug, setExpandedSlug] = useState<PricingPlanSlug | null>(
     null,
   );
@@ -31,12 +39,18 @@ export default function LandingPricingPlans({
           Pricing
         </p>
         <h2 className="lf-orbitron mt-3 text-2xl font-bold text-white sm:text-3xl">
-          Plans from {formatCurrency(fromPrice)}/month
+          Plans from {formatCurrency(fromPrice)}/{periodLabel}
         </h2>
         <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-[#94a3b8]">
           Every plan indexes your business across ChatGPT, Gemini, and Claude
           for local recommendation queries.
         </p>
+        <div className="mt-6 flex justify-center">
+          <BillingCycleToggle
+            value={billingCycle}
+            onChange={setBillingCycle}
+          />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -44,6 +58,7 @@ export default function LandingPricingPlans({
           const popular = plan.badge === "Most Popular";
           const open = expandedSlug === plan.slug;
           const details = getPlanDetails(plan.slug);
+          const price = getPlanListPrice(plan, billingCycle);
           const accentBorder = popular
             ? "border-teal-500/30 bg-teal-500/10 text-teal-200"
             : "border-violet-500/30 bg-violet-500/10 text-violet-200";
@@ -69,9 +84,9 @@ export default function LandingPricingPlans({
 
               <div className="mt-4">
                 <p className="lf-orbitron text-3xl font-bold text-white">
-                  {formatCurrency(plan.priceMonthlyGbp)}
+                  {formatCurrency(price)}
                   <span className="ml-1 text-sm font-semibold text-[#94a3b8]">
-                    /month
+                    /{periodLabel}
                   </span>
                 </p>
               </div>

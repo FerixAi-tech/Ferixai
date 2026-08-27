@@ -1,25 +1,45 @@
 "use client";
 
-import { listPricingPlans, type PricingPlanSlug } from "@/lib/constants/pricing-plans";
+import BillingCycleToggle from "@/components/pricing/BillingCycleToggle";
+import {
+  getBillingPeriodLabel,
+  getPlanListPrice,
+  listPricingPlans,
+  type BillingCycle,
+  type PricingPlanSlug,
+} from "@/lib/constants/pricing-plans";
 import { formatCurrency } from "@/lib/constants/metrics";
 import PaymentMethodLogos from "@/components/payment/PaymentMethodLogos";
 import { Check } from "lucide-react";
 
 export default function PricingPlanCards({
   selectedSlug,
+  billingCycle,
+  onBillingCycleChange,
   onSelect,
 }: {
   selectedSlug: PricingPlanSlug;
+  billingCycle: BillingCycle;
+  onBillingCycleChange: (cycle: BillingCycle) => void;
   onSelect: (slug: PricingPlanSlug) => void;
 }) {
   const plans = listPricingPlans();
+  const periodLabel = getBillingPeriodLabel(billingCycle);
 
   return (
     <div className="space-y-8">
+      <div className="flex justify-center">
+        <BillingCycleToggle
+          value={billingCycle}
+          onChange={onBillingCycleChange}
+        />
+      </div>
+
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
       {plans.map((plan) => {
         const selected = plan.slug === selectedSlug;
         const popular = plan.badge === "Most Popular";
+        const price = getPlanListPrice(plan, billingCycle);
 
         return (
           <button
@@ -56,9 +76,9 @@ export default function PricingPlanCards({
 
             <div className="mt-4">
               <p className="lf-orbitron text-3xl font-bold text-white">
-                {formatCurrency(plan.priceMonthlyGbp)}
+                {formatCurrency(price)}
                 <span className="ml-1 text-sm font-semibold text-[#94a3b8]">
-                  /month
+                  /{periodLabel}
                 </span>
               </p>
             </div>

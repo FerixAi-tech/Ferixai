@@ -2,16 +2,19 @@ import type { AggressivenessLevel } from "@/lib/campaign/content-plan";
 
 export const PROMO_DISCOUNT_GBP = 30;
 export const BILLING_CYCLE_DAYS = 30;
+export const BILLING_CYCLE_YEARLY_DAYS = 365;
 export const DEFAULT_BILLING_CYCLE = "monthly" as const;
 export const DEFAULT_PLAN_SLUG = "growth" as const;
 
-export type BillingCycle = typeof DEFAULT_BILLING_CYCLE;
+export type BillingCycle = "monthly" | "yearly";
+
 export type PricingPlanSlug = "starter" | "growth" | "premium";
 
 export interface PricingPlan {
   slug: PricingPlanSlug;
   name: string;
   priceMonthlyGbp: number;
+  priceYearlyAed: number;
   description: string;
   badge?: "Most Popular";
   aggressiveness: AggressivenessLevel;
@@ -28,6 +31,7 @@ export const PRICING_PLANS: readonly PricingPlan[] = [
     slug: "starter",
     name: "Starter Plan",
     priceMonthlyGbp: 479,
+    priceYearlyAed: 4449,
     description:
       "Index your business for ChatGPT, Gemini & Claude local recommendation queries.",
     aggressiveness: "Steady",
@@ -41,6 +45,7 @@ export const PRICING_PLANS: readonly PricingPlan[] = [
     slug: "growth",
     name: "Growth Plan",
     priceMonthlyGbp: 949,
+    priceYearlyAed: 9299,
     description:
       "3× more AI visibility across ChatGPT, Gemini & Claude for local searches.",
     badge: "Most Popular",
@@ -55,6 +60,7 @@ export const PRICING_PLANS: readonly PricingPlan[] = [
     slug: "premium",
     name: "Domination Plan",
     priceMonthlyGbp: 1849,
+    priceYearlyAed: 17999,
     description:
       "Aggressive ChatGPT, Gemini & Claude coverage for maximum market dominance.",
     aggressiveness: "Intensive",
@@ -65,6 +71,25 @@ export const PRICING_PLANS: readonly PricingPlan[] = [
     boneQuestionDepth: 12,
   },
 ] as const;
+
+export function isBillingCycle(value: unknown): value is BillingCycle {
+  return value === "monthly" || value === "yearly";
+}
+
+export function getBillingCycleDays(cycle: BillingCycle): number {
+  return cycle === "yearly" ? BILLING_CYCLE_YEARLY_DAYS : BILLING_CYCLE_DAYS;
+}
+
+export function getPlanListPrice(
+  plan: PricingPlan,
+  cycle: BillingCycle,
+): number {
+  return cycle === "yearly" ? plan.priceYearlyAed : plan.priceMonthlyGbp;
+}
+
+export function getBillingPeriodLabel(cycle: BillingCycle): string {
+  return cycle === "yearly" ? "year" : "month";
+}
 
 export function listPricingPlans(): readonly PricingPlan[] {
   return PRICING_PLANS;
@@ -86,8 +111,7 @@ export function isPricingPlanSlug(value: unknown): value is PricingPlanSlug {
 }
 
 export function getPricingPlan(slug: string): PricingPlan {
-  const normalized =
-    slug === "agency" ? "premium" : slug;
+  const normalized = slug === "agency" ? "premium" : slug;
   const plan = PRICING_PLANS.find((p) => p.slug === normalized);
   if (!plan) {
     throw new Error(`Unknown pricing plan: ${slug}`);

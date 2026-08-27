@@ -2,7 +2,10 @@ import {
   applyPromoDiscount,
   BILLING_CYCLE_DAYS,
   DEFAULT_BILLING_CYCLE,
+  getBillingCycleDays,
+  getPlanListPrice,
   getPricingPlan,
+  isBillingCycle,
   isPricingPlanSlug,
   PROMO_DISCOUNT_GBP,
   type BillingCycle,
@@ -68,6 +71,7 @@ export function validateCampaignInput(body: unknown): CampaignInput {
     category,
     city,
     planSlug,
+    billingCycle: billingCycleRaw,
     promoApplied,
     promoCode,
     productDescription,
@@ -88,6 +92,9 @@ export function validateCampaignInput(body: unknown): CampaignInput {
   }
 
   const plan = getPricingPlan(planSlug);
+  const billingCycle: BillingCycle = isBillingCycle(billingCycleRaw)
+    ? billingCycleRaw
+    : DEFAULT_BILLING_CYCLE;
   const applied = promoApplied === true;
   const normalizedPromo =
     typeof promoCode === "string" ? promoCode.trim().toUpperCase() : "";
@@ -98,7 +105,7 @@ export function validateCampaignInput(body: unknown): CampaignInput {
 
   const discountGbp = applied ? PROMO_DISCOUNT_GBP : 0;
   const { listPrice, payable } = applyPromoDiscount(
-    plan.priceMonthlyGbp,
+    getPlanListPrice(plan, billingCycle),
     discountGbp,
   );
 
@@ -128,7 +135,7 @@ export function validateCampaignInput(body: unknown): CampaignInput {
     category: categoryName,
     city: String(city),
     planSlug,
-    billingCycle: DEFAULT_BILLING_CYCLE,
+    billingCycle,
     listPriceGbp: listPrice,
     totalCostGbp: payable,
     promoApplied: applied,
@@ -160,4 +167,4 @@ export function isStripeConfigured(): boolean {
   return Boolean(process.env.STRIPE_SECRET_KEY?.trim());
 }
 
-export { BILLING_CYCLE_DAYS };
+export { BILLING_CYCLE_DAYS, getBillingCycleDays };

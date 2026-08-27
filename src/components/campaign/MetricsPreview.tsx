@@ -1,16 +1,27 @@
 "use client";
 
-import { getPricingPlan, type PricingPlanSlug } from "@/lib/constants/pricing-plans";
+import {
+  getBillingPeriodLabel,
+  getPlanListPrice,
+  getPricingPlan,
+  type BillingCycle,
+  type PricingPlanSlug,
+} from "@/lib/constants/pricing-plans";
 import { getPlanDetails } from "@/lib/constants/plan-details";
 import { formatCurrency } from "@/lib/constants/metrics";
 
 interface MetricsPreviewProps {
   planSlug: PricingPlanSlug;
+  billingCycle: BillingCycle;
 }
 
-export default function MetricsPreview({ planSlug }: MetricsPreviewProps) {
+export default function MetricsPreview({
+  planSlug,
+  billingCycle,
+}: MetricsPreviewProps) {
   const pricing = getPricingPlan(planSlug);
-  const listPrice = pricing.priceMonthlyGbp;
+  const listPrice = getPlanListPrice(pricing, billingCycle);
+  const periodLabel = getBillingPeriodLabel(billingCycle);
   const details = getPlanDetails(planSlug);
 
   return (
@@ -20,7 +31,7 @@ export default function MetricsPreview({ planSlug }: MetricsPreviewProps) {
         <p className="lf-orbitron mt-1 text-3xl font-bold text-white">
           {formatCurrency(listPrice)}
           <span className="ml-1 text-base font-semibold text-[#94a3b8]">
-            /month
+            /{periodLabel}
           </span>
         </p>
       </div>

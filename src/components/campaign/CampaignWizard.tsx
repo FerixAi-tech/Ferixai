@@ -21,10 +21,15 @@ import {
 } from "@/lib/constants/checkout";
 import { trackCompleteRegistration, trackInitiateCheckout } from "@/lib/meta/pixel";
 import {
+  DEFAULT_BILLING_CYCLE,
   DEFAULT_PLAN_SLUG,
+  getPlanListPrice,
+  getBillingPeriodLabel,
   getPricingPlan,
+  isBillingCycle,
   isPricingPlanSlug,
   resolvePricingPlanSlug,
+  type BillingCycle,
   type PricingPlanSlug,
 } from "@/lib/constants/pricing-plans";
 import MetricsPreview from "@/components/campaign/MetricsPreview";
@@ -92,6 +97,8 @@ export default function CampaignWizard({
   const [city, setCity] = useState("");
   const [planSlug, setPlanSlug] =
     useState<PricingPlanSlug>(DEFAULT_PLAN_SLUG);
+  const [billingCycle, setBillingCycle] =
+    useState<BillingCycle>(DEFAULT_BILLING_CYCLE);
   const launchLockRef = useRef(false);
   const checkoutTrackedRef = useRef(false);
 
@@ -107,6 +114,7 @@ export default function CampaignWizard({
       setKeyFeatures(emptyKeyFeatures());
       setCity("");
       setPlanSlug(DEFAULT_PLAN_SLUG);
+      setBillingCycle(DEFAULT_BILLING_CYCLE);
       if (initialBusinessName.trim()) {
         setBusinessName(initialBusinessName.trim());
       } else {
@@ -137,12 +145,18 @@ export default function CampaignWizard({
     setPlanSlug(
       resolvePricingPlanSlug(draft.planSlug) ?? DEFAULT_PLAN_SLUG,
     );
+    setBillingCycle(
+      isBillingCycle(draft.billingCycle)
+        ? draft.billingCycle
+        : DEFAULT_BILLING_CYCLE,
+    );
     setStep(draft.step || 1);
     setDraftRestored(true);
   }, [draftRestored, initialBusinessName]);
 
   const pricingPlan = getPricingPlan(planSlug);
-  const listPrice = pricingPlan.priceMonthlyGbp;
+  const listPrice = getPlanListPrice(pricingPlan, billingCycle);
+  const periodLabel = getBillingPeriodLabel(billingCycle);
   const checkoutCharge = getCheckoutCharge(listPrice);
   const checkoutLabel = formatCheckoutCharge(
     checkoutCharge.amount,
@@ -169,6 +183,7 @@ export default function CampaignWizard({
       category: resolvedCategory,
       city,
       planSlug,
+      billingCycle,
       promoApplied: false as const,
       productDescription: isManufacturer ? productDescription.trim() : undefined,
       keyFeatures: keyFeatures.map((f) => f.trim()),
@@ -178,6 +193,7 @@ export default function CampaignWizard({
       resolvedCategory,
       city,
       planSlug,
+      billingCycle,
       isManufacturer,
       productDescription,
       keyFeatures,
@@ -215,6 +231,7 @@ export default function CampaignWizard({
       keyFeatures,
       city,
       planSlug,
+      billingCycle,
       step: nextStep,
       updatedAt: Date.now(),
     });
@@ -234,6 +251,7 @@ export default function CampaignWizard({
     keyFeatures,
     city,
     planSlug,
+    billingCycle,
     step,
   ]);
 
@@ -283,10 +301,10 @@ export default function CampaignWizard({
     checkoutTrackedRef.current = true;
     const plan = getPricingPlan(slug);
     trackInitiateCheckout({
-      value: plan.priceMonthlyGbp,
+      value: getPlanListPrice(plan, billingCycle),
       currency: "AED",
-      content_name: plan.name,
-      dedupeKey: `ferixai_meta_initiate_checkout:${slug}`,
+      content_name: `${plan.name} (${billingCycle})`,
+      dedupeKey: `ferixai_meta_initiate_checkout:${slug}:${billingCycle}`,
     });
   }
 
@@ -364,6 +382,7 @@ export default function CampaignWizard({
           category: resolvedCategory,
           city,
           planSlug,
+          billingCycle,
           promoApplied: false,
           productDescription: isManufacturer
             ? productDescription.trim()
@@ -579,6 +598,8 @@ export default function CampaignWizard({
             <div className="mt-5">
               <PricingPlanCards
                 selectedSlug={planSlug}
+                billingCycle={billingCycle}
+                onBillingCycleChange={setBillingCycle}
                 onSelect={selectPlan}
               />
             </div>
@@ -602,7 +623,7 @@ export default function CampaignWizard({
               </button>
             </div>
 
-            <MetricsPreview planSlug={planSlug} />
+            <MetricsPreview planSlug={planSlug} billingCycle={billingCycle} />
           </div>
         </div>
       )}
@@ -641,7 +662,7 @@ export default function CampaignWizard({
                 <dt className="text-[#64748b]">Plan</dt>
                 <dd className="text-white">
                   {pricingPlan.name} · {formatCurrency(listPrice)}
-                  /month
+                  /{periodLabel}
                 </dd>
               </div>
               <div>
@@ -657,7 +678,7 @@ export default function CampaignWizard({
               Enter your payment details below to launch your campaign. Amount
               due:{" "}
               <span className="font-semibold text-white">{checkoutLabel}</span> /
-              month.
+              {periodLabel}.
             </div>
 
             <div className="mt-6 flex items-end justify-between gap-4 border-t border-white/10 pt-5">
@@ -667,7 +688,7 @@ export default function CampaignWizard({
                   {formatCurrency(listPrice)}
                 </p>
                 <p className="mt-1 text-xs text-[#64748b]">
-                  {pricingPlan.name} · billed monthly
+                  {pricingPlan.name} · billed {billingCycle}
                 </p>
               </div>
             </div>

@@ -14,7 +14,7 @@ import {
   calculateVisibilityMetricsForPlan,
   getCampaignContentPlanForPlan,
 } from "@/lib/constants/metrics";
-import { getPricingPlan, BILLING_CYCLE_DAYS } from "@/lib/constants/pricing-plans";
+import { getPricingPlan, getBillingCycleDays } from "@/lib/constants/pricing-plans";
 import { publishToDevTo } from "@/lib/devto/publish-article";
 import { redeemPromoCode } from "@/lib/promo/codes";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -79,7 +79,7 @@ export async function createCampaignForUser(
   const contentPlan = getCampaignContentPlanForPlan(pricingPlan, totalCostGbp);
   const now = new Date();
   const endsAt = new Date(now);
-  endsAt.setDate(endsAt.getDate() + BILLING_CYCLE_DAYS);
+  endsAt.setDate(endsAt.getDate() + getBillingCycleDays(billingCycle));
 
   const categoryId = await ensureCategorySaved(category);
 

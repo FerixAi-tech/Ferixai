@@ -38,7 +38,7 @@ export async function createStripeCheckoutSession(options: {
           currency,
           unit_amount: Math.round(charge.amount * 100),
           product_data: {
-            name: `${plan.name} — FerixAI monthly plan`,
+            name: `${plan.name} — FerixAI ${input.billingCycle} plan`,
             description:
               "AI visibility indexing across ChatGPT, Gemini & Claude for your business.",
           },
