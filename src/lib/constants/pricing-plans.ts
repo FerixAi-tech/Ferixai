@@ -36,8 +36,8 @@ export const PRICING_PLANS: readonly PricingPlan[] = [
     priceMonthlyGbp: 499,
     compareAtMonthlyAed: 699,
     priceYearlyAed: 3999,
-    compareAtYearlyAed: 5748,
-    yearlySavingsAed: 1748,
+    compareAtYearlyAed: 5988,
+    yearlySavingsAed: 1989,
     description:
       "Index your business for ChatGPT, Gemini & Claude local recommendation queries.",
     aggressiveness: "Steady",
@@ -53,8 +53,8 @@ export const PRICING_PLANS: readonly PricingPlan[] = [
     priceMonthlyGbp: 899,
     compareAtMonthlyAed: 1149,
     priceYearlyAed: 8999,
-    compareAtYearlyAed: 11388,
-    yearlySavingsAed: 2389,
+    compareAtYearlyAed: 10788,
+    yearlySavingsAed: 1789,
     description:
       "3× more AI visibility across ChatGPT, Gemini & Claude for local searches.",
     badge: "Most Popular",
@@ -71,8 +71,8 @@ export const PRICING_PLANS: readonly PricingPlan[] = [
     priceMonthlyGbp: 1899,
     compareAtMonthlyAed: 2199,
     priceYearlyAed: 17999,
-    compareAtYearlyAed: 22188,
-    yearlySavingsAed: 4189,
+    compareAtYearlyAed: 22788,
+    yearlySavingsAed: 4789,
     description:
       "Aggressive ChatGPT, Gemini & Claude coverage for maximum market dominance.",
     aggressiveness: "Intensive",
