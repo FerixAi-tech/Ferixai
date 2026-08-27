@@ -28,11 +28,16 @@ import {
   fetchStripeCheckoutClientSecret,
   type StripeCheckoutPayload,
 } from "@/lib/stripe/fetch-client-secret";
+import { CHECKOUT_CURRENCY } from "@/lib/constants/checkout";
 
 export type { StripeCheckoutPayload };
 
-const CHECKOUT_STORAGE_KEY = "ferix_stripe_checkout_v1";
+const CHECKOUT_STORAGE_KEY = "ferix_stripe_checkout_v2_aed";
 const CHECKOUT_STORAGE_TTL_MS = 30 * 60 * 1000;
+
+function checkoutStoragePayloadKey(payloadKey: string): string {
+  return `${payloadKey}:${CHECKOUT_CURRENCY}`;
+}
 
 function getUserAgent(): string {
   return typeof window !== "undefined" ? window.navigator.userAgent : "";
@@ -47,12 +52,18 @@ function readStoredClientSecret(payloadKey: string): string | null {
       key?: string;
       secret?: string;
       savedAt?: number;
+      currency?: string;
     };
+    const storageKey = checkoutStoragePayloadKey(payloadKey);
     if (
-      parsed.key !== payloadKey ||
+      parsed.key !== storageKey ||
       typeof parsed.secret !== "string" ||
       !parsed.secret.trim()
     ) {
+      return null;
+    }
+    if (parsed.currency && parsed.currency !== CHECKOUT_CURRENCY) {
+      sessionStorage.removeItem(CHECKOUT_STORAGE_KEY);
       return null;
     }
     if (
@@ -73,7 +84,12 @@ function writeStoredClientSecret(payloadKey: string, secret: string): void {
   try {
     sessionStorage.setItem(
       CHECKOUT_STORAGE_KEY,
-      JSON.stringify({ key: payloadKey, secret, savedAt: Date.now() }),
+      JSON.stringify({
+        key: checkoutStoragePayloadKey(payloadKey),
+        secret,
+        currency: CHECKOUT_CURRENCY,
+        savedAt: Date.now(),
+      }),
     );
   } catch {
     // Ignore quota / private mode errors.

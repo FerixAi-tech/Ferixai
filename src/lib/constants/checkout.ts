@@ -1,12 +1,14 @@
 export type CheckoutCurrency = "AED";
 
-export function getCheckoutCharge(payableGbp: number): {
+export const CHECKOUT_CURRENCY: CheckoutCurrency = "AED";
+
+export function getCheckoutCharge(payableAmount: number): {
   amount: number;
   currency: CheckoutCurrency;
 } {
   return {
-    amount: payableGbp,
-    currency: "AED",
+    amount: payableAmount,
+    currency: CHECKOUT_CURRENCY,
   };
 }
 

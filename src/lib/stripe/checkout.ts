@@ -1,6 +1,6 @@
 import { getAppBaseUrl } from "@/lib/constants/urls";
 import type { CampaignInput } from "@/lib/campaign/validate-input";
-import { getCheckoutCharge } from "@/lib/constants/checkout";
+import { getCheckoutCharge, CHECKOUT_CURRENCY } from "@/lib/constants/checkout";
 import { getPricingPlan } from "@/lib/constants/pricing-plans";
 import { getStripe } from "@/lib/stripe/server";
 import { ensurePaymentMethodDomains } from "@/lib/stripe/payment-method-domains";
@@ -16,6 +16,7 @@ export async function createStripeCheckoutSession(options: {
   const { userId, email, input, conversationId, orderId } = options;
   const plan = getPricingPlan(input.planSlug);
   const charge = getCheckoutCharge(input.totalCostGbp);
+  const currency = charge.currency.toLowerCase();
   const baseUrl = getAppBaseUrl();
   const stripe = getStripe();
   await ensurePaymentMethodDomains(stripe);
@@ -23,7 +24,9 @@ export async function createStripeCheckoutSession(options: {
   const session = await stripe.checkout.sessions.create({
     ui_mode: "elements",
     mode: "payment",
-    locale: "en",
+    locale: "auto",
+    currency,
+    adaptive_pricing: { enabled: false },
     billing_address_collection: "auto",
     payment_method_types: [...checkoutSessionPaymentMethodTypes],
     customer_email: email,
@@ -32,7 +35,7 @@ export async function createStripeCheckoutSession(options: {
       {
         quantity: 1,
         price_data: {
-          currency: charge.currency.toLowerCase(),
+          currency,
           unit_amount: Math.round(charge.amount * 100),
           product_data: {
             name: `${plan.name} — FerixAI monthly plan`,
@@ -42,11 +45,18 @@ export async function createStripeCheckoutSession(options: {
         },
       },
     ],
+    payment_intent_data: {
+      metadata: {
+        order_id: orderId,
+        charge_currency: CHECKOUT_CURRENCY,
+      },
+    },
     metadata: {
       order_id: orderId,
       user_id: userId,
       conversation_id: conversationId,
       plan_slug: input.planSlug,
+      charge_currency: CHECKOUT_CURRENCY,
     },
     return_url: `${baseUrl}/api/payments/stripe/success?session_id={CHECKOUT_SESSION_ID}`,
   });

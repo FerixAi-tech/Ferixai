@@ -4,6 +4,7 @@ import {
   type PaymentOrderRow,
 } from "@/lib/payments/fulfill-paid-order";
 import { getAppBaseUrl } from "@/lib/constants/urls";
+import { CHECKOUT_CURRENCY } from "@/lib/constants/checkout";
 import { getStripe } from "@/lib/stripe/server";
 import { NextResponse } from "next/server";
 
@@ -32,6 +33,16 @@ export async function GET(request: Request) {
     const session = await stripe.checkout.sessions.retrieve(sessionId);
 
     if (session.payment_status !== "paid") {
+      return NextResponse.redirect(`${baseUrl}/dashboard/new?payment=failed`);
+    }
+
+    const sessionCurrency = session.currency?.toLowerCase();
+    if (sessionCurrency && sessionCurrency !== CHECKOUT_CURRENCY.toLowerCase()) {
+      console.error(
+        "Stripe success: unexpected session currency",
+        sessionCurrency,
+        sessionId,
+      );
       return NextResponse.redirect(`${baseUrl}/dashboard/new?payment=failed`);
     }
 
