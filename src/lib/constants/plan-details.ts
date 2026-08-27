@@ -35,7 +35,7 @@ export const PLAN_DETAILS: Record<PricingPlanSlug, PlanDetails> = {
       },
     ],
     summary:
-      "The Starter Plan gives your business an active, verified presence across top AI platforms. It ensures that when nearby customers ask ChatGPT, Gemini, or Claude for essential services in your category, your business is indexed and recommended in standard local search queries within 7–10 days.",
+      'The Starter Plan establishes a verified, district-level AI presence for your business. It ensures that when nearby customers ask ChatGPT, Gemini, or Claude for top-rated services in your specific neighborhood (e.g. "Best clinic in Business Bay" or "Top cafe in Downtown"), your business is indexed and recommended within 7–10 days.',
   },
   growth: {
     metrics: [
@@ -61,7 +61,7 @@ export const PLAN_DETAILS: Record<PricingPlanSlug, PlanDetails> = {
       },
     ],
     summary:
-      "Designed for businesses ready to scale their lead flow. Growth accelerates your indexing to just 4–6 days and expands your footprint to thousands of specific customer search variations (pricing, top-rated, best alternatives), delivering nearly 5× more exposure to high-intent buyers in your region.",
+      'The Growth Plan expands your reach across high-volume, city-wide recommendation queries. It positions your business as the premier authority when potential clients search across the entire city (e.g. "Best real estate agency in Dubai" or "Top dental clinic in Abu Dhabi"), delivering priority indexing and competitor displacement within 3–5 days.',
   },
   premium: {
     metrics: [
@@ -87,7 +87,7 @@ export const PLAN_DETAILS: Record<PricingPlanSlug, PlanDetails> = {
       },
     ],
     summary:
-      "Built for market leaders who want to outrank local competitors instantly. With priority indexing in under 48 hours and aggressive network distribution, your business becomes the #1 go-to recommendation across 10,000+ monthly AI queries across your entire city and surrounding areas.",
+      'The Domination Plan delivers complete nationwide AI visibility across all Emirates. It guarantees top-tier recommendation authority for high-stakes, country-wide queries (e.g. "Best investment advisory in UAE"), backed by bespoke entity structuring and fast-track priority indexing within 24–48 hours.',
   },
 };
 
