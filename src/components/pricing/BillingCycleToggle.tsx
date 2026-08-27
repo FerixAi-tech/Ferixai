@@ -1,6 +1,7 @@
 "use client";
 
-import type { BillingCycle } from "@/lib/constants/pricing-plans";
+import { MAX_YEARLY_SAVINGS_AED, type BillingCycle } from "@/lib/constants/pricing-plans";
+import { formatCurrency } from "@/lib/constants/metrics";
 
 export default function BillingCycleToggle({
   value,
@@ -11,6 +12,8 @@ export default function BillingCycleToggle({
   onChange: (cycle: BillingCycle) => void;
   className?: string;
 }) {
+  const yearlySelected = value === "yearly";
+
   return (
     <div
       className={`inline-flex rounded-xl border border-white/10 bg-[#0e0a18]/80 p-1 ${className}`}
@@ -21,7 +24,7 @@ export default function BillingCycleToggle({
         type="button"
         onClick={() => onChange("monthly")}
         aria-pressed={value === "monthly"}
-        className={`min-h-[40px] rounded-lg px-5 py-2 text-sm font-semibold transition ${
+        className={`min-h-[44px] rounded-lg px-5 py-2 text-sm font-semibold transition ${
           value === "monthly"
             ? "bg-emerald-500/20 text-emerald-200 shadow-[0_0_16px_rgba(16,185,129,0.15)]"
             : "text-[#94a3b8] hover:text-white"
@@ -32,14 +35,25 @@ export default function BillingCycleToggle({
       <button
         type="button"
         onClick={() => onChange("yearly")}
-        aria-pressed={value === "yearly"}
-        className={`min-h-[40px] rounded-lg px-5 py-2 text-sm font-semibold transition ${
-          value === "yearly"
-            ? "bg-emerald-500/20 text-emerald-200 shadow-[0_0_16px_rgba(16,185,129,0.15)]"
-            : "text-[#94a3b8] hover:text-white"
+        aria-pressed={yearlySelected}
+        className={`relative min-h-[44px] rounded-lg px-4 py-2 transition sm:px-5 ${
+          yearlySelected
+            ? "bg-emerald-500/25 text-emerald-100 shadow-[0_0_20px_rgba(16,185,129,0.28)] ring-1 ring-emerald-400/40"
+            : "text-[#94a3b8] ring-1 ring-emerald-500/25 hover:bg-emerald-500/10 hover:text-emerald-100"
         }`}
       >
-        Yearly
+        <span className="flex flex-col items-center gap-1">
+          <span className="text-sm font-semibold">Yearly</span>
+          <span
+            className={`rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] sm:text-[10px] ${
+              yearlySelected
+                ? "bg-emerald-400 text-[#052e1f] shadow-[0_0_14px_rgba(52,211,153,0.55)]"
+                : "animate-pulse bg-emerald-500 text-white shadow-[0_0_12px_rgba(16,185,129,0.45)]"
+            }`}
+          >
+            Save up to {formatCurrency(MAX_YEARLY_SAVINGS_AED)}
+          </span>
+        </span>
       </button>
     </div>
   );

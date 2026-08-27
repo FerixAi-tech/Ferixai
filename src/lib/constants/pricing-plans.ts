@@ -84,6 +84,10 @@ export const PRICING_PLANS: readonly PricingPlan[] = [
   },
 ] as const;
 
+export const MAX_YEARLY_SAVINGS_AED = Math.max(
+  ...PRICING_PLANS.map((plan) => plan.yearlySavingsAed),
+);
+
 export function isBillingCycle(value: unknown): value is BillingCycle {
   return value === "monthly" || value === "yearly";
 }
