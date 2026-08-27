@@ -1,7 +1,6 @@
 "use client";
 
 import type { BillingCycle, PricingPlanSlug } from "@/lib/constants/pricing-plans";
-import type { InvoiceDetailsInput } from "@/lib/campaign/validate-invoice";
 
 export type StripeCheckoutPayload = {
   businessName: string;
@@ -12,7 +11,11 @@ export type StripeCheckoutPayload = {
   promoApplied: false;
   productDescription?: string;
   keyFeatures: string[];
-  invoice: InvoiceDetailsInput;
+};
+
+export type StripeCheckoutSession = {
+  clientSecret: string;
+  sessionId: string;
 };
 
 function readBrowserCookie(name: string): string | undefined {
@@ -25,7 +28,7 @@ function readBrowserCookie(name: string): string | undefined {
 
 export async function fetchStripeCheckoutClientSecret(
   payload: StripeCheckoutPayload,
-): Promise<string> {
+): Promise<StripeCheckoutSession> {
   const res = await fetch("/api/payments/stripe/initialize", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -39,6 +42,7 @@ export async function fetchStripeCheckoutClientSecret(
   const data = (await res.json().catch(() => ({}))) as {
     error?: string;
     clientSecret?: string;
+    sessionId?: string;
     requiresPayment?: boolean;
     slug?: string;
   };
@@ -55,9 +59,10 @@ export async function fetchStripeCheckoutClientSecret(
   }
 
   const clientSecret = data.clientSecret?.trim();
-  if (!clientSecret) {
+  const sessionId = data.sessionId?.trim();
+  if (!clientSecret || !sessionId) {
     throw new Error(data.error || "Could not start checkout.");
   }
 
-  return clientSecret;
+  return { clientSecret, sessionId };
 }

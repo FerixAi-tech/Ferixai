@@ -183,7 +183,6 @@ export default function CampaignWizard({
 
   const resolvedCategory = resolvedCategoryName();
   const isManufacturer = isManufacturerCategory(resolvedCategory);
-  const invoiceReady = Boolean(accountEmail.trim() && streetArea.trim() && city);
 
   useEffect(() => {
     if (step !== 3) return;
@@ -199,9 +198,8 @@ export default function CampaignWizard({
     }
   }, [city, streetArea]);
 
-  const embeddedCheckoutPayload = useMemo(() => {
-    if (!invoiceReady) return null;
-    return {
+  const embeddedCheckoutPayload = useMemo(
+    () => ({
       businessName: businessName.trim(),
       category: resolvedCategory,
       city,
@@ -210,28 +208,47 @@ export default function CampaignWizard({
       promoApplied: false as const,
       productDescription: isManufacturer ? productDescription.trim() : undefined,
       keyFeatures: keyFeatures.map((f) => f.trim()),
-      invoice: {
-        businessName: businessName.trim(),
-        email: accountEmail.trim(),
-        emirateCity: city,
-        streetArea: streetArea.trim(),
-        trnNumber: trnNumber.trim() || null,
-      },
-    };
-  }, [
-    invoiceReady,
-    businessName,
-    resolvedCategory,
-    city,
-    planSlug,
-    billingCycle,
-    isManufacturer,
-    productDescription,
-    keyFeatures,
-    accountEmail,
-    streetArea,
-    trnNumber,
-  ]);
+    }),
+    [
+      businessName,
+      resolvedCategory,
+      city,
+      planSlug,
+      billingCycle,
+      isManufacturer,
+      productDescription,
+      keyFeatures,
+    ],
+  );
+
+  async function saveInvoiceForCheckout(sessionId: string): Promise<void> {
+    if (!streetArea.trim()) {
+      throw new Error("Please select a street or area address.");
+    }
+    if (!accountEmail.trim()) {
+      throw new Error("Account email is required for your invoice.");
+    }
+
+    const res = await fetch("/api/payments/stripe/invoice", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        sessionId,
+        invoice: {
+          businessName: businessName.trim(),
+          email: accountEmail.trim(),
+          emirateCity: city,
+          streetArea: streetArea.trim(),
+          trnNumber: trnNumber.trim() || null,
+        },
+      }),
+    });
+
+    const data = (await res.json().catch(() => ({}))) as { error?: string };
+    if (!res.ok) {
+      throw new Error(data.error || "Could not save invoice details.");
+    }
+  }
 
   async function persistCategoryToSupabase(name: string): Promise<void> {
     try {
@@ -744,10 +761,11 @@ export default function CampaignWizard({
               </div>
             </div>
 
-            {listPrice > 0 && invoiceReady && embeddedCheckoutPayload ? (
+            {listPrice > 0 ? (
               <CustomStripeCheckout
                 payload={embeddedCheckoutPayload}
                 payLabel={`Pay ${checkoutLabel} & launch`}
+                onBeforePay={saveInvoiceForCheckout}
                 invoiceSection={
                   <CheckoutInvoiceForm
                     businessName={businessName.trim()}
@@ -761,21 +779,6 @@ export default function CampaignWizard({
                   />
                 }
               />
-            ) : listPrice > 0 ? (
-              <>
-                <CheckoutInvoiceForm
-                  businessName={businessName.trim()}
-                  email={accountEmail}
-                  emirateCity={city}
-                  streetArea={streetArea}
-                  trnNumber={trnNumber}
-                  onStreetAreaChange={setStreetArea}
-                  onTrnNumberChange={setTrnNumber}
-                />
-                <p className="mt-4 rounded-xl border border-amber-500/25 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
-                  Select your street or area above to continue to payment.
-                </p>
-              </>
             ) : (
               <CheckoutInvoiceForm
                 businessName={businessName.trim()}

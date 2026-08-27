@@ -3,6 +3,7 @@
 import {
   Component,
   type ReactNode,
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -32,7 +33,7 @@ import { CHECKOUT_CURRENCY } from "@/lib/constants/checkout";
 
 export type { StripeCheckoutPayload };
 
-const CHECKOUT_STORAGE_KEY = "ferix_stripe_checkout_v3_en";
+const CHECKOUT_STORAGE_KEY = "ferix_stripe_checkout_v4_en";
 const CHECKOUT_STORAGE_TTL_MS = 30 * 60 * 1000;
 
 function checkoutStoragePayloadKey(payloadKey: string): string {
@@ -43,7 +44,9 @@ function getUserAgent(): string {
   return typeof window !== "undefined" ? window.navigator.userAgent : "";
 }
 
-function readStoredClientSecret(payloadKey: string): string | null {
+function readStoredCheckoutSession(
+  payloadKey: string,
+): { clientSecret: string; sessionId: string } | null {
   if (typeof sessionStorage === "undefined") return null;
   try {
     const raw = sessionStorage.getItem(CHECKOUT_STORAGE_KEY);
@@ -51,6 +54,7 @@ function readStoredClientSecret(payloadKey: string): string | null {
     const parsed = JSON.parse(raw) as {
       key?: string;
       secret?: string;
+      sessionId?: string;
       savedAt?: number;
       currency?: string;
     };
@@ -58,7 +62,9 @@ function readStoredClientSecret(payloadKey: string): string | null {
     if (
       parsed.key !== storageKey ||
       typeof parsed.secret !== "string" ||
-      !parsed.secret.trim()
+      !parsed.secret.trim() ||
+      typeof parsed.sessionId !== "string" ||
+      !parsed.sessionId.trim()
     ) {
       return null;
     }
@@ -73,20 +79,27 @@ function readStoredClientSecret(payloadKey: string): string | null {
       sessionStorage.removeItem(CHECKOUT_STORAGE_KEY);
       return null;
     }
-    return parsed.secret.trim();
+    return {
+      clientSecret: parsed.secret.trim(),
+      sessionId: parsed.sessionId.trim(),
+    };
   } catch {
     return null;
   }
 }
 
-function writeStoredClientSecret(payloadKey: string, secret: string): void {
+function writeStoredCheckoutSession(
+  payloadKey: string,
+  session: { clientSecret: string; sessionId: string },
+): void {
   if (typeof sessionStorage === "undefined") return;
   try {
     sessionStorage.setItem(
       CHECKOUT_STORAGE_KEY,
       JSON.stringify({
         key: checkoutStoragePayloadKey(payloadKey),
-        secret,
+        secret: session.clientSecret,
+        sessionId: session.sessionId,
         currency: CHECKOUT_CURRENCY,
         savedAt: Date.now(),
       }),
@@ -129,10 +142,12 @@ function CheckoutPaymentForm({
   payLabel,
   onRetry,
   invoiceSection,
+  onBeforePay,
 }: {
   payLabel: string;
   onRetry: () => void;
   invoiceSection?: ReactNode;
+  onBeforePay?: () => Promise<void>;
 }) {
   const checkoutState = useCheckoutElements();
   const [message, setMessage] = useState<string | null>(null);
@@ -190,10 +205,20 @@ function CheckoutPaymentForm({
     setSubmitting(true);
     setMessage(null);
 
-    const confirmResult = await checkout.confirm();
+    try {
+      if (onBeforePay) {
+        await onBeforePay();
+      }
 
-    if (confirmResult.type === "error") {
-      setMessage(confirmResult.error.message);
+      const confirmResult = await checkout.confirm();
+
+      if (confirmResult.type === "error") {
+        setMessage(confirmResult.error.message);
+      }
+    } catch (err) {
+      setMessage(
+        err instanceof Error ? err.message : "Could not complete payment.",
+      );
     }
 
     setSubmitting(false);
@@ -203,14 +228,27 @@ function CheckoutPaymentForm({
     setSubmitting(true);
     setMessage(null);
 
-    void checkout
-      .confirm({ expressCheckoutConfirmEvent: event })
-      .then((confirmResult) => {
+    void (async () => {
+      try {
+        if (onBeforePay) {
+          await onBeforePay();
+        }
+
+        const confirmResult = await checkout.confirm({
+          expressCheckoutConfirmEvent: event,
+        });
+
         if (confirmResult.type === "error") {
           setMessage(confirmResult.error.message);
         }
+      } catch (err) {
+        setMessage(
+          err instanceof Error ? err.message : "Could not complete payment.",
+        );
+      } finally {
         setSubmitting(false);
-      });
+      }
+    })();
   }
 
   return (
@@ -288,12 +326,17 @@ export default function CustomStripeCheckout({
   payload,
   payLabel,
   invoiceSection,
+  onBeforePay,
 }: {
   payload: StripeCheckoutPayload;
   payLabel: string;
   invoiceSection?: ReactNode;
+  onBeforePay?: (sessionId: string) => Promise<void>;
 }) {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [checkoutSessionId, setCheckoutSessionId] = useState<string | null>(
+    null,
+  );
   const [error, setError] = useState<string | null>(null);
   const [loadAttempt, setLoadAttempt] = useState(0);
   const clientSecretCacheRef = useRef<Map<string, Promise<string>>>(new Map());
@@ -342,9 +385,10 @@ export default function CustomStripeCheckout({
       return;
     }
 
-    const storedSecret = readStoredClientSecret(payloadFingerprint);
-    if (storedSecret) {
-      setClientSecret(storedSecret);
+    const storedSession = readStoredCheckoutSession(payloadFingerprint);
+    if (storedSession) {
+      setClientSecret(storedSession.clientSecret);
+      setCheckoutSessionId(storedSession.sessionId);
       setError(null);
       return;
     }
@@ -362,10 +406,11 @@ export default function CustomStripeCheckout({
     }
 
     void pending
-      .then((secret) => {
+      .then((session) => {
         if (!cancelled) {
-          writeStoredClientSecret(payloadFingerprint, secret);
-          setClientSecret(secret);
+          writeStoredCheckoutSession(payloadFingerprint, session);
+          setClientSecret(session.clientSecret);
+          setCheckoutSessionId(session.sessionId);
           setError(null);
         }
       })
@@ -382,6 +427,15 @@ export default function CustomStripeCheckout({
       cancelled = true;
     };
   }, [payloadFingerprint, payloadKey, publishableKey]);
+
+  const handleBeforePay = useCallback(async () => {
+    if (!checkoutSessionId) {
+      throw new Error("Payment form is still loading.");
+    }
+    if (onBeforePay) {
+      await onBeforePay(checkoutSessionId);
+    }
+  }, [checkoutSessionId, onBeforePay]);
 
   if (!publishableKey || error) {
     return (
@@ -423,6 +477,7 @@ export default function CustomStripeCheckout({
           payLabel={payLabel}
           onRetry={retryCheckout}
           invoiceSection={invoiceSection}
+          onBeforePay={handleBeforePay}
         />
       </CheckoutElementsProvider>
       <p className="mt-3 text-center text-xs text-[#64748b]">

@@ -38,7 +38,6 @@ export async function POST(request: Request) {
 
     const body = await request.json();
     const input = validateCampaignInput(body);
-    const invoice = validateInvoiceDetails(body.invoice);
     const cookieHeader = request.headers.get("cookie");
     const fromCookies = parseMetaCookies(cookieHeader);
     const metaFbp =
@@ -56,6 +55,7 @@ export async function POST(request: Request) {
     const admin = createAdminClient();
 
     if (!isPaymentRequired(input.totalCostGbp)) {
+      const invoice = validateInvoiceDetails(body.invoice);
       const result = await createCampaignForUser(user.id, input);
       const { error: invoiceError } = await admin.from("invoice_details").insert({
         user_id: user.id,
@@ -125,19 +125,6 @@ export async function POST(request: Request) {
 
     if (insertError || !orderRow?.id) {
       throw new Error(insertError?.message || "Could not create payment order");
-    }
-
-    const { error: invoiceError } = await admin.from("invoice_details").insert({
-      user_id: user.id,
-      payment_order_id: orderRow.id,
-      business_name: invoice.businessName,
-      email: invoice.email,
-      emirate_city: invoice.emirateCity,
-      street_area: invoice.streetArea,
-      trn_number: invoice.trnNumber,
-    });
-    if (invoiceError) {
-      throw new Error(invoiceError.message);
     }
 
     let checkout: { sessionId: string; clientSecret: string };
