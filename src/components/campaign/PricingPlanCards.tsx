@@ -1,14 +1,15 @@
 "use client";
 
 import BillingCycleToggle from "@/components/pricing/BillingCycleToggle";
+import PlanPriceDisplay from "@/components/pricing/PlanPriceDisplay";
 import {
   getBillingPeriodLabel,
+  getPlanCompareAtPrice,
   getPlanListPrice,
   listPricingPlans,
   type BillingCycle,
   type PricingPlanSlug,
 } from "@/lib/constants/pricing-plans";
-import { formatCurrency } from "@/lib/constants/metrics";
 import PaymentMethodLogos from "@/components/payment/PaymentMethodLogos";
 import { Check } from "lucide-react";
 
@@ -40,6 +41,7 @@ export default function PricingPlanCards({
         const selected = plan.slug === selectedSlug;
         const popular = plan.badge === "Most Popular";
         const price = getPlanListPrice(plan, billingCycle);
+        const compareAtPrice = getPlanCompareAtPrice(plan, billingCycle);
 
         return (
           <button
@@ -75,12 +77,11 @@ export default function PricingPlanCards({
             </div>
 
             <div className="mt-4">
-              <p className="lf-orbitron text-3xl font-bold text-white">
-                {formatCurrency(price)}
-                <span className="ml-1 text-sm font-semibold text-[#94a3b8]">
-                  /{periodLabel}
-                </span>
-              </p>
+              <PlanPriceDisplay
+                price={price}
+                compareAtPrice={compareAtPrice}
+                periodLabel={periodLabel}
+              />
             </div>
 
             <p className="mt-3 flex-1 text-sm leading-relaxed text-[#94a3b8]">

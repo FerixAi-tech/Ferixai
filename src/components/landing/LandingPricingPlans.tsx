@@ -3,10 +3,12 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import BillingCycleToggle from "@/components/pricing/BillingCycleToggle";
+import PlanPriceDisplay from "@/components/pricing/PlanPriceDisplay";
 import PaymentMethodLogos from "@/components/payment/PaymentMethodLogos";
 import {
   DEFAULT_BILLING_CYCLE,
   getBillingPeriodLabel,
+  getPlanCompareAtPrice,
   getPlanListPrice,
   listPricingPlans,
   type BillingCycle,
@@ -59,6 +61,7 @@ export default function LandingPricingPlans({
           const open = expandedSlug === plan.slug;
           const details = getPlanDetails(plan.slug);
           const price = getPlanListPrice(plan, billingCycle);
+          const compareAtPrice = getPlanCompareAtPrice(plan, billingCycle);
           const accentBorder = popular
             ? "border-teal-500/30 bg-teal-500/10 text-teal-200"
             : "border-violet-500/30 bg-violet-500/10 text-violet-200";
@@ -83,12 +86,11 @@ export default function LandingPricingPlans({
               </h3>
 
               <div className="mt-4">
-                <p className="lf-orbitron text-3xl font-bold text-white">
-                  {formatCurrency(price)}
-                  <span className="ml-1 text-sm font-semibold text-[#94a3b8]">
-                    /{periodLabel}
-                  </span>
-                </p>
+                <PlanPriceDisplay
+                  price={price}
+                  compareAtPrice={compareAtPrice}
+                  periodLabel={periodLabel}
+                />
               </div>
 
               <p className="mt-3 text-sm leading-relaxed text-[#94a3b8]">

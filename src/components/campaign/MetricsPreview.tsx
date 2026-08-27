@@ -1,14 +1,15 @@
 "use client";
 
+import PlanPriceDisplay from "@/components/pricing/PlanPriceDisplay";
 import {
   getBillingPeriodLabel,
+  getPlanCompareAtPrice,
   getPlanListPrice,
   getPricingPlan,
   type BillingCycle,
   type PricingPlanSlug,
 } from "@/lib/constants/pricing-plans";
 import { getPlanDetails } from "@/lib/constants/plan-details";
-import { formatCurrency } from "@/lib/constants/metrics";
 
 interface MetricsPreviewProps {
   planSlug: PricingPlanSlug;
@@ -21,6 +22,7 @@ export default function MetricsPreview({
 }: MetricsPreviewProps) {
   const pricing = getPricingPlan(planSlug);
   const listPrice = getPlanListPrice(pricing, billingCycle);
+  const compareAtPrice = getPlanCompareAtPrice(pricing, billingCycle);
   const periodLabel = getBillingPeriodLabel(billingCycle);
   const details = getPlanDetails(planSlug);
 
@@ -28,12 +30,14 @@ export default function MetricsPreview({
     <div className="space-y-6">
       <div className="rounded-[18px] border border-violet-950/70 bg-[linear-gradient(165deg,#120c1e_0%,#0e0a18_45%,#090610_100%)] p-6">
         <p className="text-sm text-[#94a3b8]">{pricing.name}</p>
-        <p className="lf-orbitron mt-1 text-3xl font-bold text-white">
-          {formatCurrency(listPrice)}
-          <span className="ml-1 text-base font-semibold text-[#94a3b8]">
-            /{periodLabel}
-          </span>
-        </p>
+        <div className="mt-1">
+          <PlanPriceDisplay
+            price={listPrice}
+            compareAtPrice={compareAtPrice}
+            periodLabel={periodLabel}
+            size="md"
+          />
+        </div>
       </div>
 
       <div className="rounded-[18px] border border-violet-950/70 bg-[linear-gradient(165deg,#120c1e_0%,#0e0a18_45%,#090610_100%)] p-5">

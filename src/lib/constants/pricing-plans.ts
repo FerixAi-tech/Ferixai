@@ -14,7 +14,9 @@ export interface PricingPlan {
   slug: PricingPlanSlug;
   name: string;
   priceMonthlyGbp: number;
+  compareAtMonthlyAed: number;
   priceYearlyAed: number;
+  compareAtYearlyAed: number;
   description: string;
   badge?: "Most Popular";
   aggressiveness: AggressivenessLevel;
@@ -31,7 +33,9 @@ export const PRICING_PLANS: readonly PricingPlan[] = [
     slug: "starter",
     name: "Starter Plan",
     priceMonthlyGbp: 479,
+    compareAtMonthlyAed: 679,
     priceYearlyAed: 3999,
+    compareAtYearlyAed: 5748,
     description:
       "Index your business for ChatGPT, Gemini & Claude local recommendation queries.",
     aggressiveness: "Steady",
@@ -45,7 +49,9 @@ export const PRICING_PLANS: readonly PricingPlan[] = [
     slug: "growth",
     name: "Growth Plan",
     priceMonthlyGbp: 949,
+    compareAtMonthlyAed: 1200,
     priceYearlyAed: 8999,
+    compareAtYearlyAed: 11388,
     description:
       "3× more AI visibility across ChatGPT, Gemini & Claude for local searches.",
     badge: "Most Popular",
@@ -60,7 +66,9 @@ export const PRICING_PLANS: readonly PricingPlan[] = [
     slug: "premium",
     name: "Domination Plan",
     priceMonthlyGbp: 1849,
+    compareAtMonthlyAed: 2100,
     priceYearlyAed: 17999,
+    compareAtYearlyAed: 22188,
     description:
       "Aggressive ChatGPT, Gemini & Claude coverage for maximum market dominance.",
     aggressiveness: "Intensive",
@@ -85,6 +93,13 @@ export function getPlanListPrice(
   cycle: BillingCycle,
 ): number {
   return cycle === "yearly" ? plan.priceYearlyAed : plan.priceMonthlyGbp;
+}
+
+export function getPlanCompareAtPrice(
+  plan: PricingPlan,
+  cycle: BillingCycle,
+): number {
+  return cycle === "yearly" ? plan.compareAtYearlyAed : plan.compareAtMonthlyAed;
 }
 
 export function getBillingPeriodLabel(cycle: BillingCycle): string {
