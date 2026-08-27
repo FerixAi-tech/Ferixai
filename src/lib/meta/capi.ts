@@ -93,7 +93,7 @@ export async function sendMetaCAPIEvent(
     event_source_url: input.eventSourceUrl || undefined,
     user_data: buildUserData(input),
     custom_data: {
-      currency: (input.currency || "GBP").toUpperCase(),
+      currency: (input.currency || "USD").toUpperCase(),
       value: Number(input.value),
       content_name: input.contentName || DEFAULT_CONTENT_NAME,
     },

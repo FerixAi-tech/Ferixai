@@ -23,7 +23,7 @@ export async function createStripeCheckoutSession(options: {
   const session = await stripe.checkout.sessions.create({
     ui_mode: "elements",
     mode: "payment",
-    locale: "en-GB",
+    locale: "en",
     billing_address_collection: "auto",
     payment_method_types: [...checkoutSessionPaymentMethodTypes],
     customer_email: email,

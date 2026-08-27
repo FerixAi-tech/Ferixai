@@ -62,7 +62,7 @@ export async function trackPaidPurchaseWithMetaCapi(
       eventName: "Purchase",
       eventId: order.id,
       value: amount,
-      currency: currency || "GBP",
+      currency: currency || "USD",
       contentName: "FerixAI Subscription",
       eventSourceUrl: `${baseUrl}/dashboard`,
       email,
