@@ -31,7 +31,7 @@ export const PRICING_PLANS: readonly PricingPlan[] = [
     slug: "starter",
     name: "Starter Plan",
     priceMonthlyGbp: 479,
-    priceYearlyAed: 4449,
+    priceYearlyAed: 3999,
     description:
       "Index your business for ChatGPT, Gemini & Claude local recommendation queries.",
     aggressiveness: "Steady",
@@ -45,7 +45,7 @@ export const PRICING_PLANS: readonly PricingPlan[] = [
     slug: "growth",
     name: "Growth Plan",
     priceMonthlyGbp: 949,
-    priceYearlyAed: 9299,
+    priceYearlyAed: 8999,
     description:
       "3× more AI visibility across ChatGPT, Gemini & Claude for local searches.",
     badge: "Most Popular",
