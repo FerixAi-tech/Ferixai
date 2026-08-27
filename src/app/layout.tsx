@@ -17,12 +17,12 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL(APP_URL),
-  title: "FerixAI — Visibility for UK businesses",
+  title: "FerixAI — Visibility for UAE businesses",
   description:
-    "FerixAI helps UK local businesses become easier to find when people ask AI assistants for recommendations.",
+    "FerixAI helps UAE local businesses become easier to find when people ask AI assistants for recommendations.",
   keywords: [
     "FerixAI",
-    "UK business visibility",
+    "UAE business visibility",
     "AI recommendations",
     "local business marketing",
     "content publishing",
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
     locale: "en_GB",
     url: APP_URL,
     siteName: "FerixAI",
-    title: "FerixAI — Visibility for UK businesses",
+    title: "FerixAI — Visibility for UAE businesses",
     description:
       "Tell us about your business. We’ll prepare and publish clear local content designed to help people find you.",
     images: [

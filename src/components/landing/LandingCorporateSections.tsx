@@ -86,7 +86,7 @@ export default function LandingCorporateSections() {
               </h2>
               <p className="mt-4 text-sm leading-relaxed text-[#94a3b8]">
                 From clinics and cafes to trades and professional services —
-                FerixAI adapts content to your category and town.
+                FerixAI adapts content to your category and city.
               </p>
             </div>
             <div className="flex flex-wrap gap-2">

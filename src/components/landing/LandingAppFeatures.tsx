@@ -8,7 +8,7 @@ const FEATURES = [
     id: "content",
     title: "Content prepared for you",
     description:
-      "We draft professional articles shaped around your business, town and category.",
+      "We draft professional articles shaped around your business, city and category.",
     detail:
       "Your plan determines how many pieces we prepare. You can see the expected output before you launch.",
   },

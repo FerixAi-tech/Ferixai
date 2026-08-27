@@ -8,7 +8,7 @@ const organizationSchema = {
   url: APP_URL,
   logo: `${APP_URL}/logo.png`,
   description:
-    "FerixAI helps UK local businesses become easier to find when people ask AI assistants for recommendations.",
+    "FerixAI helps UAE local businesses become easier to find when people ask AI assistants for recommendations.",
 };
 
 export default async function Home({

@@ -30,7 +30,7 @@ const STEPS = [
     step: "01",
     title: "Tell us about your business",
     description:
-      "Add your business name, category and town. No technical setup required.",
+      "Add your business name, category and city. No technical setup required.",
   },
   {
     step: "02",
@@ -47,9 +47,9 @@ const STEPS = [
 ] as const;
 
 const TRUST = [
-  "Join 500+ UK local businesses automating their local SEO.",
+  "Join 500+ UAE local businesses automating their AI visibility.",
   "Dominate local searches on Google, Google Maps, and ChatGPT.",
-  "Active across all major UK cities: London, Manchester, Bristol & more.",
+  "Active across all major UAE cities: Dubai, Abu Dhabi, Sharjah & more.",
   "100% Risk-Free. 14-Day Money-Back Guarantee. Cancel anytime with one click.",
 ] as const;
 
@@ -87,7 +87,7 @@ export default function HomeLanding({
         <section className="grid min-h-0 items-center gap-10 pb-12 pt-2 sm:gap-12 sm:pb-16 lg:grid-cols-2">
           <div className="min-w-0 max-w-xl">
             <div className="lf-animate-in lf-animate-in-1 mb-6 inline-flex items-center gap-2 rounded-full border border-emerald-500/35 bg-emerald-500/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-emerald-300">
-              Local visibility for UK businesses
+              Local visibility for UAE businesses
             </div>
 
             <h1 className="lf-animate-in lf-animate-in-2 lf-orbitron text-2xl font-extrabold leading-tight tracking-tight sm:text-3xl lg:text-4xl xl:text-[2.75rem]">
@@ -100,9 +100,9 @@ export default function HomeLanding({
 
             <div className="lf-animate-in lf-animate-in-3 mt-5 space-y-4 text-base leading-relaxed text-[#94a3b8] sm:text-lg">
               <p>
-                When local UK customers ask AI engines like{" "}
+                When local UAE customers ask AI engines like{" "}
                 <em className="text-[#e2e8f0]">
-                  &quot;Who is the best dentist in Manchester?&quot;
+                  &quot;Who is the best dentist in Dubai?&quot;
                 </em>
                 , Ferixai forces AI to recommend{" "}
                 <strong className="font-semibold text-white">YOUR</strong>{" "}
@@ -234,7 +234,7 @@ export default function HomeLanding({
             </Link>
           </div>
           <p className="mt-6">
-            © {new Date().getFullYear()} FerixAI · Visibility for UK businesses
+            © {new Date().getFullYear()} FerixAI · Visibility for UAE businesses
           </p>
         </footer>
       </div>
