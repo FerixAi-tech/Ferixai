@@ -33,8 +33,8 @@ export const PRICING_PLANS: readonly PricingPlan[] = [
   {
     slug: "starter",
     name: "Starter Plan",
-    priceMonthlyGbp: 479,
-    compareAtMonthlyAed: 679,
+    priceMonthlyGbp: 459,
+    compareAtMonthlyAed: 659,
     priceYearlyAed: 3999,
     compareAtYearlyAed: 5748,
     yearlySavingsAed: 1748,
@@ -50,8 +50,8 @@ export const PRICING_PLANS: readonly PricingPlan[] = [
   {
     slug: "growth",
     name: "Growth Plan",
-    priceMonthlyGbp: 949,
-    compareAtMonthlyAed: 1200,
+    priceMonthlyGbp: 959,
+    compareAtMonthlyAed: 1199,
     priceYearlyAed: 8999,
     compareAtYearlyAed: 11388,
     yearlySavingsAed: 2389,
@@ -68,8 +68,8 @@ export const PRICING_PLANS: readonly PricingPlan[] = [
   {
     slug: "premium",
     name: "Domination Plan",
-    priceMonthlyGbp: 1849,
-    compareAtMonthlyAed: 2100,
+    priceMonthlyGbp: 1859,
+    compareAtMonthlyAed: 2159,
     priceYearlyAed: 17999,
     compareAtYearlyAed: 22188,
     yearlySavingsAed: 4189,
