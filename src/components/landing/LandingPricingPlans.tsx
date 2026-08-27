@@ -16,7 +16,7 @@ import {
   type PricingPlanSlug,
 } from "@/lib/constants/pricing-plans";
 import { formatCurrency } from "@/lib/constants/metrics";
-import { getPlanDetails } from "@/lib/constants/plan-details";
+import { getPlanDetails, getPlanDetailsSummary } from "@/lib/constants/plan-details";
 import LandingSignupCtaLabel, {
   landingSignupButtonClassName,
 } from "@/components/landing/LandingSignupCtaLabel";
@@ -61,6 +61,7 @@ export default function LandingPricingPlans({
           const popular = plan.badge === "Most Popular";
           const open = expandedSlug === plan.slug;
           const details = getPlanDetails(plan.slug);
+          const detailsSummary = getPlanDetailsSummary(plan.slug, billingCycle);
           const price = getPlanListPrice(plan, billingCycle);
           const compareAtPrice = getPlanCompareAtPrice(plan, billingCycle);
           const yearlySavings =
@@ -137,7 +138,7 @@ export default function LandingPricingPlans({
                       ))}
                     </dl>
                     <p className="mt-4 border-t border-white/10 pt-4 text-sm leading-relaxed text-[#cbd5e1]">
-                      {details.summary}
+                      {detailsSummary}
                     </p>
                   </div>
                 </div>

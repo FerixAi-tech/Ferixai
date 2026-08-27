@@ -10,7 +10,7 @@ import {
   type BillingCycle,
   type PricingPlanSlug,
 } from "@/lib/constants/pricing-plans";
-import { getPlanDetails } from "@/lib/constants/plan-details";
+import { getPlanDetails, getPlanDetailsSummary } from "@/lib/constants/plan-details";
 
 interface MetricsPreviewProps {
   planSlug: PricingPlanSlug;
@@ -28,6 +28,7 @@ export default function MetricsPreview({
     billingCycle === "yearly" ? getPlanYearlySavings(pricing) : undefined;
   const periodLabel = getBillingPeriodLabel(billingCycle);
   const details = getPlanDetails(planSlug);
+  const detailsSummary = getPlanDetailsSummary(planSlug, billingCycle);
 
   return (
     <div className="space-y-6">
@@ -58,7 +59,7 @@ export default function MetricsPreview({
           ))}
         </dl>
         <p className="mt-4 border-t border-white/10 pt-4 text-sm leading-relaxed text-[#cbd5e1]">
-          {details.summary}
+          {detailsSummary}
         </p>
       </div>
     </div>
