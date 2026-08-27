@@ -1,4 +1,4 @@
-export type CheckoutCurrency = "USD";
+export type CheckoutCurrency = "AED";
 
 export function getCheckoutCharge(payableGbp: number): {
   amount: number;
@@ -6,15 +6,15 @@ export function getCheckoutCharge(payableGbp: number): {
 } {
   return {
     amount: payableGbp,
-    currency: "USD",
+    currency: "AED",
   };
 }
 
 export function formatCheckoutCharge(
   amount: number,
-  currency: CheckoutCurrency = "USD",
+  currency: CheckoutCurrency = "AED",
 ): string {
-  return new Intl.NumberFormat("en-US", {
+  return new Intl.NumberFormat("en-AE", {
     style: "currency",
     currency,
     maximumFractionDigits: 0,

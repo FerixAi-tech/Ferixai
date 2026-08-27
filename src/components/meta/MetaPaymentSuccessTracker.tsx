@@ -13,7 +13,7 @@ export default function MetaPaymentSuccessTracker({
   eventID,
   /** Actual charged amount (from payment_orders / campaign total). */
   payableGbp = 0,
-  currency = "USD",
+  currency = "AED",
 }: {
   active: boolean;
   /** Must be a stable paid-order key (e.g. campaign slug + order id). */

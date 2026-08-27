@@ -284,7 +284,7 @@ export default function CampaignWizard({
     const plan = getPricingPlan(slug);
     trackInitiateCheckout({
       value: plan.priceMonthlyGbp,
-      currency: "USD",
+      currency: "AED",
       content_name: plan.name,
       dedupeKey: `ferixai_meta_initiate_checkout:${slug}`,
     });

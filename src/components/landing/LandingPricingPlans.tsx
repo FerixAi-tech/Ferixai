@@ -19,7 +19,7 @@ export default function LandingPricingPlans({
   onClaim?: () => void;
 }) {
   const plans = listPricingPlans();
-  const fromPrice = plans[0]?.priceMonthlyGbp ?? 129;
+  const fromPrice = plans[0]?.priceMonthlyGbp ?? 479;
   const [expandedSlug, setExpandedSlug] = useState<PricingPlanSlug | null>(
     null,
   );

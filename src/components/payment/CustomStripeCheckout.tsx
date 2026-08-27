@@ -295,7 +295,7 @@ export default function CustomStripeCheckout({
       clientSecret,
       defaultValues: {
         billingAddress: {
-          address: { country: "US" as const },
+          address: { country: "AE" as const },
         },
       },
       elementsOptions: {
