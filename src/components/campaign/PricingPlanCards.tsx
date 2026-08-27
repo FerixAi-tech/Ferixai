@@ -6,6 +6,7 @@ import {
   getBillingPeriodLabel,
   getPlanCompareAtPrice,
   getPlanListPrice,
+  getPlanYearlySavings,
   listPricingPlans,
   type BillingCycle,
   type PricingPlanSlug,
@@ -42,6 +43,8 @@ export default function PricingPlanCards({
         const popular = plan.badge === "Most Popular";
         const price = getPlanListPrice(plan, billingCycle);
         const compareAtPrice = getPlanCompareAtPrice(plan, billingCycle);
+        const yearlySavings =
+          billingCycle === "yearly" ? getPlanYearlySavings(plan) : undefined;
 
         return (
           <button
@@ -81,6 +84,7 @@ export default function PricingPlanCards({
                 price={price}
                 compareAtPrice={compareAtPrice}
                 periodLabel={periodLabel}
+                savingsAmount={yearlySavings}
               />
             </div>
 

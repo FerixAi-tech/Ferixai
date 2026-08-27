@@ -10,6 +10,7 @@ import {
   getBillingPeriodLabel,
   getPlanCompareAtPrice,
   getPlanListPrice,
+  getPlanYearlySavings,
   listPricingPlans,
   type BillingCycle,
   type PricingPlanSlug,
@@ -62,6 +63,8 @@ export default function LandingPricingPlans({
           const details = getPlanDetails(plan.slug);
           const price = getPlanListPrice(plan, billingCycle);
           const compareAtPrice = getPlanCompareAtPrice(plan, billingCycle);
+          const yearlySavings =
+            billingCycle === "yearly" ? getPlanYearlySavings(plan) : undefined;
           const accentBorder = popular
             ? "border-teal-500/30 bg-teal-500/10 text-teal-200"
             : "border-violet-500/30 bg-violet-500/10 text-violet-200";
@@ -90,6 +93,7 @@ export default function LandingPricingPlans({
                   price={price}
                   compareAtPrice={compareAtPrice}
                   periodLabel={periodLabel}
+                  savingsAmount={yearlySavings}
                 />
               </div>
 

@@ -5,6 +5,7 @@ import {
   getBillingPeriodLabel,
   getPlanCompareAtPrice,
   getPlanListPrice,
+  getPlanYearlySavings,
   getPricingPlan,
   type BillingCycle,
   type PricingPlanSlug,
@@ -23,6 +24,8 @@ export default function MetricsPreview({
   const pricing = getPricingPlan(planSlug);
   const listPrice = getPlanListPrice(pricing, billingCycle);
   const compareAtPrice = getPlanCompareAtPrice(pricing, billingCycle);
+  const yearlySavings =
+    billingCycle === "yearly" ? getPlanYearlySavings(pricing) : undefined;
   const periodLabel = getBillingPeriodLabel(billingCycle);
   const details = getPlanDetails(planSlug);
 
@@ -35,6 +38,7 @@ export default function MetricsPreview({
             price={listPrice}
             compareAtPrice={compareAtPrice}
             periodLabel={periodLabel}
+            savingsAmount={yearlySavings}
             size="md"
           />
         </div>

@@ -17,6 +17,7 @@ export interface PricingPlan {
   compareAtMonthlyAed: number;
   priceYearlyAed: number;
   compareAtYearlyAed: number;
+  yearlySavingsAed: number;
   description: string;
   badge?: "Most Popular";
   aggressiveness: AggressivenessLevel;
@@ -36,6 +37,7 @@ export const PRICING_PLANS: readonly PricingPlan[] = [
     compareAtMonthlyAed: 679,
     priceYearlyAed: 3999,
     compareAtYearlyAed: 5748,
+    yearlySavingsAed: 1748,
     description:
       "Index your business for ChatGPT, Gemini & Claude local recommendation queries.",
     aggressiveness: "Steady",
@@ -52,6 +54,7 @@ export const PRICING_PLANS: readonly PricingPlan[] = [
     compareAtMonthlyAed: 1200,
     priceYearlyAed: 8999,
     compareAtYearlyAed: 11388,
+    yearlySavingsAed: 2389,
     description:
       "3× more AI visibility across ChatGPT, Gemini & Claude for local searches.",
     badge: "Most Popular",
@@ -69,6 +72,7 @@ export const PRICING_PLANS: readonly PricingPlan[] = [
     compareAtMonthlyAed: 2100,
     priceYearlyAed: 17999,
     compareAtYearlyAed: 22188,
+    yearlySavingsAed: 4189,
     description:
       "Aggressive ChatGPT, Gemini & Claude coverage for maximum market dominance.",
     aggressiveness: "Intensive",
@@ -100,6 +104,10 @@ export function getPlanCompareAtPrice(
   cycle: BillingCycle,
 ): number {
   return cycle === "yearly" ? plan.compareAtYearlyAed : plan.compareAtMonthlyAed;
+}
+
+export function getPlanYearlySavings(plan: PricingPlan): number {
+  return plan.yearlySavingsAed;
 }
 
 export function getBillingPeriodLabel(cycle: BillingCycle): string {
