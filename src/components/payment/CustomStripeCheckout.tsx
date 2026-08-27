@@ -128,9 +128,11 @@ class ExpressCheckoutBoundary extends Component<
 function CheckoutPaymentForm({
   payLabel,
   onRetry,
+  invoiceSection,
 }: {
   payLabel: string;
   onRetry: () => void;
+  invoiceSection?: ReactNode;
 }) {
   const checkoutState = useCheckoutElements();
   const [message, setMessage] = useState<string | null>(null);
@@ -263,6 +265,8 @@ function CheckoutPaymentForm({
           </p>
         ) : null}
 
+        {invoiceSection}
+
         <button
           type="submit"
           disabled={submitting}
@@ -283,9 +287,11 @@ function CheckoutPaymentForm({
 export default function CustomStripeCheckout({
   payload,
   payLabel,
+  invoiceSection,
 }: {
   payload: StripeCheckoutPayload;
   payLabel: string;
+  invoiceSection?: ReactNode;
 }) {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -413,7 +419,11 @@ export default function CustomStripeCheckout({
         stripe={stripePromise}
         options={elementsProviderOptions}
       >
-        <CheckoutPaymentForm payLabel={payLabel} onRetry={retryCheckout} />
+        <CheckoutPaymentForm
+          payLabel={payLabel}
+          onRetry={retryCheckout}
+          invoiceSection={invoiceSection}
+        />
       </CheckoutElementsProvider>
       <p className="mt-3 text-center text-xs text-[#64748b]">
         If payment options fail to load, wait 10 minutes before refreshing — too

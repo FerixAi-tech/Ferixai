@@ -6,6 +6,7 @@ import {
   validateCampaignInput,
 } from "@/lib/campaign/validate-input";
 import { createCampaignForUser } from "@/lib/campaign/create-campaign";
+import { validateInvoiceDetails } from "@/lib/campaign/validate-invoice";
 import { assertPromoCodeAvailable } from "@/lib/promo/codes";
 import { getCheckoutCharge } from "@/lib/constants/checkout";
 import { createStripeCheckoutSession } from "@/lib/stripe/checkout";
@@ -37,6 +38,7 @@ export async function POST(request: Request) {
 
     const body = await request.json();
     const input = validateCampaignInput(body);
+    const invoice = validateInvoiceDetails(body.invoice);
     const cookieHeader = request.headers.get("cookie");
     const fromCookies = parseMetaCookies(cookieHeader);
     const metaFbp =
@@ -51,8 +53,22 @@ export async function POST(request: Request) {
       await assertPromoCodeAvailable(input.promoCode, user.id);
     }
 
+    const admin = createAdminClient();
+
     if (!isPaymentRequired(input.totalCostGbp)) {
       const result = await createCampaignForUser(user.id, input);
+      const { error: invoiceError } = await admin.from("invoice_details").insert({
+        user_id: user.id,
+        payment_order_id: null,
+        business_name: invoice.businessName,
+        email: invoice.email,
+        emirate_city: invoice.emirateCity,
+        street_area: invoice.streetArea,
+        trn_number: invoice.trnNumber,
+      });
+      if (invoiceError) {
+        throw new Error(invoiceError.message);
+      }
       return NextResponse.json({
         success: true,
         paid: false,
@@ -73,7 +89,6 @@ export async function POST(request: Request) {
     }
 
     const conversationId = `fx-${randomUUID()}`;
-    const admin = createAdminClient();
     const charge = getCheckoutCharge(input.totalCostGbp);
 
     const { data: profile } = await admin
@@ -110,6 +125,19 @@ export async function POST(request: Request) {
 
     if (insertError || !orderRow?.id) {
       throw new Error(insertError?.message || "Could not create payment order");
+    }
+
+    const { error: invoiceError } = await admin.from("invoice_details").insert({
+      user_id: user.id,
+      payment_order_id: orderRow.id,
+      business_name: invoice.businessName,
+      email: invoice.email,
+      emirate_city: invoice.emirateCity,
+      street_area: invoice.streetArea,
+      trn_number: invoice.trnNumber,
+    });
+    if (invoiceError) {
+      throw new Error(invoiceError.message);
     }
 
     let checkout: { sessionId: string; clientSecret: string };

@@ -13,6 +13,8 @@ export interface CampaignDraft {
   city: string;
   planSlug: PricingPlanSlug;
   billingCycle?: BillingCycle;
+  streetArea?: string;
+  trnNumber?: string;
   step: 1 | 2 | 3;
   updatedAt: number;
   promoCode?: string;

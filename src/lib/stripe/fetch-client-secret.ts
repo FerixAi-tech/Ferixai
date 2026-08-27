@@ -1,6 +1,7 @@
 "use client";
 
 import type { BillingCycle, PricingPlanSlug } from "@/lib/constants/pricing-plans";
+import type { InvoiceDetailsInput } from "@/lib/campaign/validate-invoice";
 
 export type StripeCheckoutPayload = {
   businessName: string;
@@ -11,6 +12,7 @@ export type StripeCheckoutPayload = {
   promoApplied: false;
   productDescription?: string;
   keyFeatures: string[];
+  invoice: InvoiceDetailsInput;
 };
 
 function readBrowserCookie(name: string): string | undefined {

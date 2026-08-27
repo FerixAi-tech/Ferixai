@@ -53,7 +53,9 @@ import {
   Sparkles,
 } from "lucide-react";
 import PaymentMethodLogos from "@/components/payment/PaymentMethodLogos";
+import CheckoutInvoiceForm from "@/components/payment/CheckoutInvoiceForm";
 import CustomStripeCheckout from "@/components/payment/CustomStripeCheckout";
+import { isValidStreetArea } from "@/lib/constants/city-streets";
 import { useRouter } from "next/navigation";
 import DarkSelect from "@/components/ui/DarkSelect";
 
@@ -99,6 +101,9 @@ export default function CampaignWizard({
     useState<PricingPlanSlug>(DEFAULT_PLAN_SLUG);
   const [billingCycle, setBillingCycle] =
     useState<BillingCycle>(DEFAULT_BILLING_CYCLE);
+  const [accountEmail, setAccountEmail] = useState("");
+  const [streetArea, setStreetArea] = useState("");
+  const [trnNumber, setTrnNumber] = useState("");
   const launchLockRef = useRef(false);
   const checkoutTrackedRef = useRef(false);
 
@@ -150,6 +155,8 @@ export default function CampaignWizard({
         ? draft.billingCycle
         : DEFAULT_BILLING_CYCLE,
     );
+    setStreetArea(draft.streetArea || "");
+    setTrnNumber(draft.trnNumber || "");
     setStep(draft.step || 1);
     setDraftRestored(true);
   }, [draftRestored, initialBusinessName]);
@@ -176,9 +183,25 @@ export default function CampaignWizard({
 
   const resolvedCategory = resolvedCategoryName();
   const isManufacturer = isManufacturerCategory(resolvedCategory);
+  const invoiceReady = Boolean(accountEmail.trim() && streetArea.trim() && city);
 
-  const embeddedCheckoutPayload = useMemo(
-    () => ({
+  useEffect(() => {
+    if (step !== 3) return;
+    void supabase.auth.getUser().then(({ data }) => {
+      setAccountEmail(data.user?.email?.trim() ?? "");
+    });
+  }, [step, supabase]);
+
+  useEffect(() => {
+    if (!streetArea) return;
+    if (!isValidStreetArea(city, streetArea)) {
+      setStreetArea("");
+    }
+  }, [city, streetArea]);
+
+  const embeddedCheckoutPayload = useMemo(() => {
+    if (!invoiceReady) return null;
+    return {
       businessName: businessName.trim(),
       category: resolvedCategory,
       city,
@@ -187,18 +210,28 @@ export default function CampaignWizard({
       promoApplied: false as const,
       productDescription: isManufacturer ? productDescription.trim() : undefined,
       keyFeatures: keyFeatures.map((f) => f.trim()),
-    }),
-    [
-      businessName,
-      resolvedCategory,
-      city,
-      planSlug,
-      billingCycle,
-      isManufacturer,
-      productDescription,
-      keyFeatures,
-    ],
-  );
+      invoice: {
+        businessName: businessName.trim(),
+        email: accountEmail.trim(),
+        emirateCity: city,
+        streetArea: streetArea.trim(),
+        trnNumber: trnNumber.trim() || null,
+      },
+    };
+  }, [
+    invoiceReady,
+    businessName,
+    resolvedCategory,
+    city,
+    planSlug,
+    billingCycle,
+    isManufacturer,
+    productDescription,
+    keyFeatures,
+    accountEmail,
+    streetArea,
+    trnNumber,
+  ]);
 
   async function persistCategoryToSupabase(name: string): Promise<void> {
     try {
@@ -232,6 +265,8 @@ export default function CampaignWizard({
       city,
       planSlug,
       billingCycle,
+      streetArea,
+      trnNumber,
       step: nextStep,
       updatedAt: Date.now(),
     });
@@ -252,6 +287,8 @@ export default function CampaignWizard({
     city,
     planSlug,
     billingCycle,
+    streetArea,
+    trnNumber,
     step,
   ]);
 
@@ -373,6 +410,13 @@ export default function CampaignWizard({
       return;
     }
 
+    if (!streetArea.trim()) {
+      setError("Please select a street or area address for your invoice.");
+      setLoading(false);
+      launchLockRef.current = false;
+      return;
+    }
+
     try {
       const res = await fetch("/api/payments/stripe/initialize", {
         method: "POST",
@@ -388,6 +432,13 @@ export default function CampaignWizard({
             ? productDescription.trim()
             : undefined,
           keyFeatures: keyFeatures.map((f) => f.trim()),
+          invoice: {
+            businessName: businessName.trim(),
+            email: accountEmail.trim(),
+            emirateCity: city,
+            streetArea: streetArea.trim(),
+            trnNumber: trnNumber.trim() || null,
+          },
           fbp: readBrowserCookie("_fbp"),
           fbc: readBrowserCookie("_fbc"),
         }),
@@ -693,12 +744,49 @@ export default function CampaignWizard({
               </div>
             </div>
 
-            {listPrice > 0 ? (
+            {listPrice > 0 && invoiceReady && embeddedCheckoutPayload ? (
               <CustomStripeCheckout
                 payload={embeddedCheckoutPayload}
                 payLabel={`Pay ${checkoutLabel} & launch`}
+                invoiceSection={
+                  <CheckoutInvoiceForm
+                    businessName={businessName.trim()}
+                    email={accountEmail}
+                    emirateCity={city}
+                    streetArea={streetArea}
+                    trnNumber={trnNumber}
+                    onStreetAreaChange={setStreetArea}
+                    onTrnNumberChange={setTrnNumber}
+                    compact
+                  />
+                }
               />
-            ) : null}
+            ) : listPrice > 0 ? (
+              <>
+                <CheckoutInvoiceForm
+                  businessName={businessName.trim()}
+                  email={accountEmail}
+                  emirateCity={city}
+                  streetArea={streetArea}
+                  trnNumber={trnNumber}
+                  onStreetAreaChange={setStreetArea}
+                  onTrnNumberChange={setTrnNumber}
+                />
+                <p className="mt-4 rounded-xl border border-amber-500/25 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+                  Select your street or area above to continue to payment.
+                </p>
+              </>
+            ) : (
+              <CheckoutInvoiceForm
+                businessName={businessName.trim()}
+                email={accountEmail}
+                emirateCity={city}
+                streetArea={streetArea}
+                trnNumber={trnNumber}
+                onStreetAreaChange={setStreetArea}
+                onTrnNumberChange={setTrnNumber}
+              />
+            )}
           </div>
 
           <div className="flex flex-col gap-3">
@@ -715,7 +803,7 @@ export default function CampaignWizard({
                 <button
                   type="button"
                   onClick={launchFreeCampaign}
-                  disabled={loading}
+                  disabled={loading || !streetArea.trim()}
                   className="lf-btn-primary inline-flex min-h-[48px] items-center gap-2 rounded-xl px-6 py-3 font-bold text-white disabled:opacity-60"
                 >
                   {loading && <Loader2 className="h-4 w-4 animate-spin" />}
