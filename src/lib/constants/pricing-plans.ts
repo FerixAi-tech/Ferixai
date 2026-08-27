@@ -88,6 +88,12 @@ export const MAX_YEARLY_SAVINGS_AED = Math.max(
   ...PRICING_PLANS.map((plan) => plan.yearlySavingsAed),
 );
 
+export const MAX_MONTHLY_SAVINGS_AED = Math.max(
+  ...PRICING_PLANS.map(
+    (plan) => plan.compareAtMonthlyAed - plan.priceMonthlyGbp,
+  ),
+);
+
 export function isBillingCycle(value: unknown): value is BillingCycle {
   return value === "monthly" || value === "yearly";
 }

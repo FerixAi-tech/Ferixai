@@ -672,7 +672,7 @@ export default function CampaignWizard({
             </dl>
           </div>
 
-          <div className="rounded-[18px] border border-violet-950/70 bg-[linear-gradient(165deg,#120c1e_0%,#0e0a18_45%,#090610_100%)] p-6">
+          <div className="rounded-[18px] border border-violet-950/70 bg-[linear-gradient(165deg,#120c1e_0%,#0e0a18_45%,#090610_100%)] p-6" lang="en">
             <h3 className="text-lg font-bold text-white">Checkout</h3>
             <div className="mt-4 rounded-xl border border-teal-400/25 bg-teal-500/5 px-4 py-3 text-sm text-[#cbd5e1]">
               Enter your payment details below to launch your campaign. Amount

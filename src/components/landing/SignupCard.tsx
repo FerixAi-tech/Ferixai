@@ -212,7 +212,7 @@ export default function SignupCard({
             <form onSubmit={handleSubmit} className="mt-6 space-y-4">
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-[#94a3b8]">
-                  Business name
+                  Your Business Name
                 </label>
                 <input
                   type="text"
@@ -221,7 +221,7 @@ export default function SignupCard({
                   required
                   minLength={2}
                   maxLength={120}
-                  placeholder="e.g. Harbour Dental, Bristol"
+                  placeholder="Your Business Name"
                   className="lf-input border-white/[0.12] bg-white/[0.04] transition focus:border-fuchsia-400/50 focus:bg-white/[0.05] focus:shadow-[0_0_0_3px_rgba(139,92,246,0.18),0_0_24px_rgba(236,72,153,0.16)]"
                   autoComplete="organization"
                 />

@@ -32,7 +32,7 @@ import { CHECKOUT_CURRENCY } from "@/lib/constants/checkout";
 
 export type { StripeCheckoutPayload };
 
-const CHECKOUT_STORAGE_KEY = "ferix_stripe_checkout_v2_aed";
+const CHECKOUT_STORAGE_KEY = "ferix_stripe_checkout_v3_en";
 const CHECKOUT_STORAGE_TTL_MS = 30 * 60 * 1000;
 
 function checkoutStoragePayloadKey(payloadKey: string): string {
@@ -296,7 +296,7 @@ export default function CustomStripeCheckout({
     process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?.trim() || null;
 
   const stripePromise = useMemo(
-    () => (publishableKey ? loadStripe(publishableKey) : null),
+    () => (publishableKey ? loadStripe(publishableKey, { locale: "en" }) : null),
     [publishableKey],
   );
 
@@ -407,7 +407,7 @@ export default function CustomStripeCheckout({
   }
 
   return (
-    <div className="mt-6 border-t border-white/10 pt-5">
+    <div className="mt-6 border-t border-white/10 pt-5" lang="en">
       <CheckoutElementsProvider
         key={clientSecret}
         stripe={stripePromise}

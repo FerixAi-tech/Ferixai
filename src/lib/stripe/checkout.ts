@@ -24,7 +24,7 @@ export async function createStripeCheckoutSession(options: {
   const session = await stripe.checkout.sessions.create({
     ui_mode: "elements",
     mode: "payment",
-    locale: "auto",
+    locale: "en",
     currency,
     adaptive_pricing: { enabled: false },
     billing_address_collection: "auto",
