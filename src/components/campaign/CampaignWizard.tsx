@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, useRef } from "react";
-import { UK_CITIES } from "@/lib/constants/cities";
+import { UAE_CITIES } from "@/lib/constants/cities";
 import {
   CUSTOM_CATEGORY_OPTION_VALUE,
   isBusinessCategory,
@@ -250,7 +250,7 @@ export default function CampaignWizard({
     } else if (!category) {
       errors.push("Please choose a category.");
     }
-    if (!city) errors.push("Please choose a town or city.");
+    if (!city) errors.push("Please choose a city.");
     if (isManufacturerCategory(cat) && productDescription.trim().length < 3) {
       errors.push(
         "Please describe what you manufacture (at least 3 characters).",
@@ -543,13 +543,13 @@ export default function CampaignWizard({
           )}
           <div>
             <label className="mb-1.5 flex items-center gap-2 text-sm text-[#94a3b8]">
-              <MapPin className="h-4 w-4" /> Town or city
+              <MapPin className="h-4 w-4" /> City
             </label>
             <DarkSelect
               value={city}
               onChange={setCity}
-              placeholder="Select a town or city"
-              options={UK_CITIES.map((c) => ({
+              placeholder="Select a city"
+              options={UAE_CITIES.map((c) => ({
                 value: c,
                 label: c,
               }))}
@@ -634,7 +634,7 @@ export default function CampaignWizard({
                 </div>
               ) : null}
               <div>
-                <dt className="text-[#64748b]">Town / city</dt>
+                <dt className="text-[#64748b]">City</dt>
                 <dd className="text-white">{city}</dd>
               </div>
               <div>
