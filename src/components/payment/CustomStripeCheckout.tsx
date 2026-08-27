@@ -28,6 +28,7 @@ import {
 import {
   fetchStripeCheckoutClientSecret,
   type StripeCheckoutPayload,
+  type StripeCheckoutSession,
 } from "@/lib/stripe/fetch-client-secret";
 import { CHECKOUT_CURRENCY } from "@/lib/constants/checkout";
 
@@ -339,7 +340,9 @@ export default function CustomStripeCheckout({
   );
   const [error, setError] = useState<string | null>(null);
   const [loadAttempt, setLoadAttempt] = useState(0);
-  const clientSecretCacheRef = useRef<Map<string, Promise<string>>>(new Map());
+  const clientSecretCacheRef = useRef<
+    Map<string, Promise<StripeCheckoutSession>>
+  >(new Map());
 
   const publishableKey =
     process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?.trim() || null;
