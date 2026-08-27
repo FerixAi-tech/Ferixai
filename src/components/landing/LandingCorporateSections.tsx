@@ -1,5 +1,7 @@
 "use client";
 
+import { BUSINESS_CATEGORIES } from "@/lib/constants/categories";
+
 const VALUES = [
   {
     title: "Instant AI Search Indexing",
@@ -23,18 +25,20 @@ const VALUES = [
   },
 ] as const;
 
-const SECTORS = [
-  "Restaurants & Cafes",
-  "Health & Clinics",
-  "Property",
-  "Legal & Consulting",
-  "Home Services",
-  "Retail",
-  "Automotive",
-  "Education",
-  "Travel & Hotels",
-  "Manufacturing",
+const FEATURED_SECTORS = [
+  "Aesthetic & Plastic Surgery Clinic",
+  "Luxury Car Rental",
+  "Yacht Charter & Boat Rental",
+  "Business Setup & Corporate Services",
+  "Interior Design & Fit-Out",
+  "Real Estate Agency / Broker",
+  "Law Firm & Legal Services",
+  "Lounge, Bar & Nightclub",
+  "Chauffeur & Luxury Transport",
 ] as const;
+
+const MORE_CATEGORIES_COUNT =
+  BUSINESS_CATEGORIES.length - FEATURED_SECTORS.length;
 
 export default function LandingCorporateSections() {
   return (
@@ -82,15 +86,16 @@ export default function LandingCorporateSections() {
                 Sector coverage
               </p>
               <h2 className="lf-orbitron mt-3 text-2xl font-bold text-white sm:text-3xl">
-                Made for local service businesses
+                Made for UAE businesses
               </h2>
               <p className="mt-4 text-sm leading-relaxed text-[#94a3b8]">
-                From clinics and cafes to trades and professional services —
-                FerixAI adapts content to your category and city.
+                From luxury transport and yacht charters to corporate setup and
+                aesthetic clinics — FerixAI adapts content to your category and
+                city.
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
-              {SECTORS.map((sector) => (
+              {FEATURED_SECTORS.map((sector) => (
                 <span
                   key={sector}
                   className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-sm text-emerald-100"
@@ -98,9 +103,11 @@ export default function LandingCorporateSections() {
                   {sector}
                 </span>
               ))}
-              <span className="rounded-full border border-emerald-400/45 bg-emerald-500/20 px-4 py-2 text-sm text-emerald-200">
-                +14 more categories
-              </span>
+              {MORE_CATEGORIES_COUNT > 0 ? (
+                <span className="rounded-full border border-emerald-400/45 bg-emerald-500/20 px-4 py-2 text-sm text-emerald-200">
+                  +{MORE_CATEGORIES_COUNT} more categories
+                </span>
+              ) : null}
             </div>
           </div>
         </div>
