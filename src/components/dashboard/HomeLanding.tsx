@@ -91,11 +91,11 @@ export default function HomeLanding({
             </div>
 
             <h1 className="lf-animate-in lf-animate-in-2 lf-orbitron text-2xl font-extrabold leading-tight tracking-tight sm:text-3xl lg:text-4xl xl:text-[2.75rem]">
-              The System That Puts Your Business at the Top of{" "}
+              Make your UAE business the #1 AI recommendation on{" "}
               <span className="bg-gradient-to-r from-emerald-300 to-green-400 bg-clip-text text-transparent">
                 ChatGPT, Gemini &amp; Claude
-              </span>{" "}
-              Answers.
+              </span>
+              .
             </h1>
 
             <div className="lf-animate-in lf-animate-in-3 mt-5 space-y-4 text-base leading-relaxed text-[#94a3b8] sm:text-lg">
