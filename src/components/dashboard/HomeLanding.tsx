@@ -1,17 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { Orbitron } from "next/font/google";
 import BrandLogo from "@/components/layout/BrandLogo";
 import SupportContact from "@/components/layout/SupportContact";
 import SignupCard from "@/components/landing/SignupCard";
-import FuturisticScene3D from "@/components/landing/FuturisticScene3D";
-import LandingAppFeatures from "@/components/landing/LandingAppFeatures";
-import SupportedAIPlatforms from "@/components/landing/SupportedAIPlatforms";
-import LandingCorporateSections from "@/components/landing/LandingCorporateSections";
-import LandingPricingPlans from "@/components/landing/LandingPricingPlans";
-import GlobalAiNetwork from "@/components/campaign/GlobalAiNetwork";
+import FuturisticScene3DLazy from "@/components/landing/FuturisticScene3DLazy";
+import LazyWhenVisible from "@/components/ui/LazyWhenVisible";
 import LandingSignupCtaLabel, {
   landingSignupButtonClassName,
 } from "@/components/landing/LandingSignupCtaLabel";
@@ -19,9 +16,25 @@ import "@/components/landing/landing-futuristic.css";
 import { listPricingPlans } from "@/lib/constants/pricing-plans";
 import { formatCurrency } from "@/lib/constants/metrics";
 
+const LandingPricingPlans = dynamic(
+  () => import("@/components/landing/LandingPricingPlans"),
+);
+const SupportedAIPlatforms = dynamic(
+  () => import("@/components/landing/SupportedAIPlatforms"),
+);
+const LandingCorporateSections = dynamic(
+  () => import("@/components/landing/LandingCorporateSections"),
+);
+const LandingAppFeatures = dynamic(
+  () => import("@/components/landing/LandingAppFeatures"),
+);
+const GlobalAiNetwork = dynamic(
+  () => import("@/components/campaign/GlobalAiNetwork"),
+);
+
 const orbitron = Orbitron({
   subsets: ["latin"],
-  weight: ["500", "600", "700", "800"],
+  weight: ["700", "800"],
   variable: "--font-orbitron",
 });
 
@@ -66,7 +79,7 @@ export default function HomeLanding({
     <div
       className={`landing-futuristic min-h-screen overflow-x-hidden bg-[#05070c] ${orbitron.variable}`}
     >
-      <FuturisticScene3D />
+      <FuturisticScene3DLazy />
       <div className="lf-grid-overlay" aria-hidden />
       <div className="lf-vignette" aria-hidden />
 
@@ -91,11 +104,14 @@ export default function HomeLanding({
             </div>
 
             <h1 className="lf-animate-in lf-animate-in-2 lf-orbitron text-2xl font-extrabold leading-tight tracking-tight sm:text-3xl lg:text-4xl xl:text-[2.75rem]">
-              Make your UAE business the #1 AI recommendation on{" "}
-              <span className="bg-gradient-to-r from-emerald-300 to-green-400 bg-clip-text text-transparent">
-                ChatGPT, Gemini &amp; Claude
+              <span className="block">Make your UAE business the</span>
+              <span className="mt-1 block sm:mt-2">
+                #1 AI recommendation on{" "}
+                <span className="bg-gradient-to-r from-emerald-300 to-green-400 bg-clip-text text-transparent">
+                  ChatGPT, Gemini &amp; Claude
+                </span>
+                .
               </span>
-              .
             </h1>
 
             <div className="lf-animate-in lf-animate-in-3 mt-5 space-y-4 text-base leading-relaxed text-[#94a3b8] sm:text-lg">
@@ -174,6 +190,8 @@ export default function HomeLanding({
           </div>
         </section>
 
+        <LazyWhenVisible rootMargin="500px">
+          <>
         <LandingPricingPlans onClaim={() => setSignupOpen(true)} />
 
         <section className="pb-12 pt-4" id="how-it-works">
@@ -217,6 +235,8 @@ export default function HomeLanding({
         <section className="pb-10">
           <GlobalAiNetwork />
         </section>
+          </>
+        </LazyWhenVisible>
 
         <footer className="border-t border-white/5 py-8 text-center text-xs text-[#94a3b8]">
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">

@@ -45,7 +45,7 @@ export default function LandingPricingPlans({
             loop
             muted
             playsInline
-            preload="auto"
+            preload="metadata"
             aria-label="FerixAI mobile demo"
           >
             <source src="/videos/telefon-video.mp4" type="video/mp4" />

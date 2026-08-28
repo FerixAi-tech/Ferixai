@@ -9,7 +9,7 @@ import {
   clearWizardSessionState,
   saveCampaignDraft,
 } from "@/lib/campaign/draft";
-import FuturisticScene3D from "@/components/landing/FuturisticScene3D";
+import FuturisticScene3DLazy from "@/components/landing/FuturisticScene3DLazy";
 import LandingSignupCtaLabel, {
   landingSignupButtonClassName,
 } from "@/components/landing/LandingSignupCtaLabel";
@@ -153,7 +153,7 @@ export default function SignupCard({
       <div className="lf-animate-in relative w-full max-w-md overflow-hidden rounded-[20px] border border-white/10 bg-gradient-to-b from-[#121821] to-[#0a0f16] p-[1px] shadow-[0_24px_80px_rgba(0,0,0,0.55)]">
         <div className="relative overflow-hidden rounded-[19px] bg-[#0b1118]/95 p-6 sm:p-8">
           <div className="pointer-events-none absolute inset-0 opacity-40">
-            <FuturisticScene3D compact />
+            <FuturisticScene3DLazy compact />
           </div>
 
           <button
