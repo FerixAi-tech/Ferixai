@@ -300,7 +300,9 @@ export async function autocompletePlacesNl(
     return (body.suggestions ?? [])
       .map((suggestion) => {
         const prediction = suggestion.placePrediction;
-        const placeId = prediction?.placeId?.trim();
+        if (!prediction) return null;
+
+        const placeId = prediction.placeId?.trim();
         if (!placeId) return null;
 
         const mainText =
