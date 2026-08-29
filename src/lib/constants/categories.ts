@@ -60,8 +60,11 @@ export const BUSINESS_CATEGORIES = [
   "Software & IT Services",
   "Spa & Massage",
   "Tattoo & Piercing Studio",
+  "Tailor",
   "Tutoring Service",
   "Veterinary Clinic",
+  "Veranda",
+  "Winter Garden",
   "Yacht Charter & Boat Rental",
 ] as const;
 
