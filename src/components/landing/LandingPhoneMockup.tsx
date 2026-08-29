@@ -15,24 +15,10 @@ export default function LandingPhoneMockup({
           muted
           playsInline
           preload="metadata"
-          aria-label="FerixAI mobile demo showing an Amsterdam local AI search question"
+          aria-label="FerixAI mobile demo"
         >
           <source src="/videos/telefon-video.mp4" type="video/mp4" />
         </video>
-
-        <div
-          className="pointer-events-none absolute inset-x-[10%] top-[14%] sm:top-[15%]"
-          aria-hidden
-        >
-          <div className="rounded-2xl border border-emerald-400/25 bg-[#05070c]/88 px-3 py-2.5 shadow-[0_0_24px_rgba(16,185,129,0.18)] backdrop-blur-sm sm:px-3.5 sm:py-3">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-emerald-300/90 sm:text-[11px]">
-              ChatGPT
-            </p>
-            <p className="mt-1 text-[11px] leading-snug text-white sm:text-xs">
-              Which is the best dental clinic in Amsterdam?
-            </p>
-          </div>
-        </div>
       </div>
     </div>
   );
