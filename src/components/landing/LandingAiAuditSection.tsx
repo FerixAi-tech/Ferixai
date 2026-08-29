@@ -167,7 +167,6 @@ export default function LandingAiAuditSection({
           ref={rootRef}
           className="lf-neon-card lf-neon-card--overflow-visible"
         >
-          <div className="lf-neon-spin" aria-hidden />
           <div className="lf-neon-inner overflow-visible p-6 sm:p-8">
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-fuchsia-300">
               AI visibility audit
