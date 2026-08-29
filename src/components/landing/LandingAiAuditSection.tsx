@@ -156,8 +156,13 @@ export default function LandingAiAuditSection({
   }
 
   return (
-    <section id="ai-audit-section" className="scroll-mt-24 overflow-visible pb-10 pt-2">
-      <div className="lf-ai-audit-card-wrap lf-animate-in mx-auto max-w-xl overflow-visible">
+    <section className="scroll-mt-24 overflow-visible pb-6 pt-2">
+      <LandingPhoneMockup className="lf-ai-audit-phone-wrap mb-10" />
+
+      <div
+        id="ai-audit-section"
+        className="lf-ai-audit-card-wrap lf-animate-in mx-auto max-w-xl overflow-visible"
+      >
         <article
           ref={rootRef}
           className="lf-neon-card lf-neon-card--overflow-visible"
@@ -354,8 +359,6 @@ export default function LandingAiAuditSection({
           </div>
         </article>
       </div>
-
-      <LandingPhoneMockup className="lf-ai-audit-phone-wrap mt-10" />
     </section>
   );
 }
