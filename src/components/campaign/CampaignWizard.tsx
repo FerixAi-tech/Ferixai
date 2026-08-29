@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, useRef } from "react";
-import { UAE_CITIES } from "@/lib/constants/cities";
+import { NL_CITIES } from "@/lib/constants/cities";
 import {
   CUSTOM_CATEGORY_OPTION_VALUE,
   isBusinessCategory,
@@ -356,7 +356,7 @@ export default function CampaignWizard({
     const plan = getPricingPlan(slug);
     trackInitiateCheckout({
       value: getPlanListPrice(plan, billingCycle),
-      currency: "AED",
+      currency: "EUR",
       content_name: `${plan.name} (${billingCycle})`,
       dedupeKey: `ferixai_meta_initiate_checkout:${slug}:${billingCycle}`,
     });
@@ -636,7 +636,7 @@ export default function CampaignWizard({
               value={city}
               onChange={setCity}
               placeholder="Select a city"
-              options={UAE_CITIES.map((c) => ({
+              options={NL_CITIES.map((c) => ({
                 value: c,
                 label: c,
               }))}

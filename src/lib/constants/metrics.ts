@@ -65,9 +65,9 @@ export function calculateVisibilityMetricsForPlan(
 }
 
 export function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat("en-AE", {
+  return new Intl.NumberFormat("en-NL", {
     style: "currency",
-    currency: "AED",
+    currency: "EUR",
     maximumFractionDigits: 0,
   }).format(amount);
 }

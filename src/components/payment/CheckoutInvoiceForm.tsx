@@ -71,7 +71,7 @@ export default function CheckoutInvoiceForm({
 
         <div>
           <label className="mb-1.5 block text-sm font-medium text-[#94a3b8]">
-            Emirate / City
+            City
           </label>
           <input
             type="text"

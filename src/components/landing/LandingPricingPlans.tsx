@@ -15,8 +15,11 @@ import {
   type BillingCycle,
   type PricingPlanSlug,
 } from "@/lib/constants/pricing-plans";
-import { formatCurrency } from "@/lib/constants/metrics";
-import { getPlanDetails, getPlanDetailsSummary } from "@/lib/constants/plan-details";
+import {
+  formatLandingCurrency,
+  getLandingPlanDetailsSummary,
+} from "@/lib/constants/landing-locale";
+import { getPlanDetails } from "@/lib/constants/plan-details";
 import LandingSignupCtaLabel, {
   landingSignupButtonClassName,
 } from "@/components/landing/LandingSignupCtaLabel";
@@ -58,7 +61,7 @@ export default function LandingPricingPlans({
           Pricing
         </p>
         <h2 className="lf-orbitron mt-3 text-2xl font-bold text-white sm:text-3xl">
-          Plans from {formatCurrency(fromPrice)}/{periodLabel}
+          Plans from {formatLandingCurrency(fromPrice)}/{periodLabel}
         </h2>
         <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-[#94a3b8]">
           Every plan indexes your business across ChatGPT, Gemini, and Claude
@@ -68,6 +71,7 @@ export default function LandingPricingPlans({
           <BillingCycleToggle
             value={billingCycle}
             onChange={setBillingCycle}
+            formatAmount={formatLandingCurrency}
           />
         </div>
       </div>
@@ -77,7 +81,7 @@ export default function LandingPricingPlans({
           const popular = plan.badge === "Most Popular";
           const open = expandedSlug === plan.slug;
           const details = getPlanDetails(plan.slug);
-          const detailsSummary = getPlanDetailsSummary(plan.slug, billingCycle);
+          const detailsSummary = getLandingPlanDetailsSummary(plan.slug, billingCycle);
           const price = getPlanListPrice(plan, billingCycle);
           const compareAtPrice = getPlanCompareAtPrice(plan, billingCycle);
           const yearlySavings =
@@ -111,6 +115,7 @@ export default function LandingPricingPlans({
                   compareAtPrice={compareAtPrice}
                   periodLabel={periodLabel}
                   savingsAmount={yearlySavings}
+                  formatAmount={formatLandingCurrency}
                 />
               </div>
 

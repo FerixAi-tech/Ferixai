@@ -11,10 +11,12 @@ export default function BillingCycleToggle({
   value,
   onChange,
   className = "",
+  formatAmount = formatCurrency,
 }: {
   value: BillingCycle;
   onChange: (cycle: BillingCycle) => void;
   className?: string;
+  formatAmount?: (amount: number) => string;
 }) {
   const monthlySelected = value === "monthly";
   const yearlySelected = value === "yearly";
@@ -44,7 +46,7 @@ export default function BillingCycleToggle({
                 : "bg-emerald-500/90 text-white shadow-[0_0_10px_rgba(16,185,129,0.35)]"
             }`}
           >
-            Save up to {formatCurrency(MAX_MONTHLY_SAVINGS_AED)}
+            Save up to {formatAmount(MAX_MONTHLY_SAVINGS_AED)}
           </span>
         </span>
       </button>
@@ -67,7 +69,7 @@ export default function BillingCycleToggle({
                 : "animate-pulse bg-emerald-500 text-white shadow-[0_0_12px_rgba(16,185,129,0.45)]"
             }`}
           >
-            Save up to {formatCurrency(MAX_YEARLY_SAVINGS_AED)}
+            Save up to {formatAmount(MAX_YEARLY_SAVINGS_AED)}
           </span>
         </span>
       </button>

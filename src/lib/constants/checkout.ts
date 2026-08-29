@@ -1,6 +1,6 @@
-export type CheckoutCurrency = "AED";
+export type CheckoutCurrency = "EUR";
 
-export const CHECKOUT_CURRENCY: CheckoutCurrency = "AED";
+export const CHECKOUT_CURRENCY: CheckoutCurrency = "EUR";
 
 export function getCheckoutCharge(payableAmount: number): {
   amount: number;
@@ -14,9 +14,9 @@ export function getCheckoutCharge(payableAmount: number): {
 
 export function formatCheckoutCharge(
   amount: number,
-  currency: CheckoutCurrency = "AED",
+  currency: CheckoutCurrency = "EUR",
 ): string {
-  return new Intl.NumberFormat("en-AE", {
+  return new Intl.NumberFormat("en-NL", {
     style: "currency",
     currency,
     maximumFractionDigits: 0,

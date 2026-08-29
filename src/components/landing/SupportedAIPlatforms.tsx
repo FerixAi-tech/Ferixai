@@ -10,12 +10,12 @@ const PLATFORMS = [
   },
   {
     name: "Gemini",
-    query: "Recommend a reliable car repair shop in Dubai.",
+    query: "Recommend a reliable car repair shop in Amsterdam.",
     note: "We feed Google’s AI ecosystem to make sure Gemini puts you at the top of local recommendations.",
   },
   {
     name: "Claude",
-    query: "Looking for a quiet cafe to work in Abu Dhabi.",
+    query: "Looking for a quiet cafe to work in Rotterdam.",
     note: "We optimise your unique features so Claude gives detailed, style-based recommendations about your business.",
   },
 ] as const;
