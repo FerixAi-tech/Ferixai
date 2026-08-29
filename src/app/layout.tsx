@@ -73,7 +73,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en-GB" className="dark">
+    <html lang="en-GB" className="dark" translate="no">
       <body
         className={`${geistSans.variable} ${geistMono.variable} min-h-screen font-sans`}
       >
