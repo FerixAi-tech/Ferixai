@@ -314,10 +314,23 @@ select.lf-input,
 
 .lf-neon-card.lf-neon-card--overflow-visible {
   overflow: visible;
+  isolation: auto;
 }
 
 #ai-audit-section {
   overflow: visible;
+  position: relative;
+  z-index: 20;
+}
+
+#ai-audit-section .lf-ai-audit-card-wrap {
+  position: relative;
+  z-index: 30;
+}
+
+#ai-audit-section .lf-ai-audit-phone-wrap {
+  position: relative;
+  z-index: 0;
 }
 
 .lf-neon-card:hover {
