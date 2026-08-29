@@ -321,6 +321,8 @@ select.lf-input,
   overflow: visible;
   position: relative;
   z-index: 20;
+  scroll-margin-top: 2rem;
+  scroll-margin-bottom: 2rem;
 }
 
 #ai-audit-section .lf-ai-audit-card-wrap {

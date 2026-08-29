@@ -80,9 +80,17 @@ export default function HomeLanding({
   const [signupInitialBusinessName, setSignupInitialBusinessName] = useState("");
 
   function scrollToAiAudit() {
-    document.getElementById("ai-audit-section")?.scrollIntoView({
+    const target = document.getElementById("ai-audit-section");
+    if (!target) return;
+
+    const top =
+      window.scrollY +
+      target.getBoundingClientRect().top -
+      (window.innerHeight - target.offsetHeight) / 2;
+
+    window.scrollTo({
+      top: Math.max(0, top),
       behavior: "smooth",
-      block: "start",
     });
   }
 
