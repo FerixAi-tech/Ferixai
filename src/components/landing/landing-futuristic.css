@@ -312,6 +312,14 @@ select.lf-input,
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
+.lf-neon-card.lf-neon-card--overflow-visible {
+  overflow: visible;
+}
+
+#ai-audit-section {
+  overflow: visible;
+}
+
 .lf-neon-card:hover {
   transform: translateY(-2px);
   border-color: rgba(91, 33, 182, 0.45);

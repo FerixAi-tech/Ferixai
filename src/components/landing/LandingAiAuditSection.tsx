@@ -156,14 +156,14 @@ export default function LandingAiAuditSection({
   }
 
   return (
-    <section id="ai-audit-section" className="scroll-mt-24 pb-10 pt-2">
-      <div className="lf-animate-in mx-auto max-w-xl">
+    <section id="ai-audit-section" className="scroll-mt-24 overflow-visible pb-10 pt-2">
+      <div className="lf-animate-in mx-auto max-w-xl overflow-visible">
         <article
           ref={rootRef}
-          className="lf-neon-card overflow-visible"
+          className="lf-neon-card lf-neon-card--overflow-visible"
         >
           <div className="lf-neon-spin" aria-hidden />
-          <div className="lf-neon-inner p-6 sm:p-8">
+          <div className="lf-neon-inner overflow-visible p-6 sm:p-8">
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-fuchsia-300">
               AI visibility audit
             </p>
@@ -175,12 +175,12 @@ export default function LandingAiAuditSection({
               real-time ChatGPT &amp; Gemini visibility score.
             </p>
 
-            <div className="relative mt-6">
+            <div className="relative z-[100] mt-6">
               <label className="sr-only" htmlFor="ai-audit-search">
                 Search your business in the Netherlands
               </label>
               <div className="flex flex-col gap-3 sm:flex-row">
-                <div className="relative min-w-0 flex-1">
+                <div className="relative z-[100] min-w-0 flex-1">
                   <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#64748b]" />
                   <input
                     id="ai-audit-search"
@@ -206,7 +206,7 @@ export default function LandingAiAuditSection({
                     <ul
                       id={listboxId}
                       role="listbox"
-                      className="absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-xl border border-white/10 bg-[#0e0a18] py-1 shadow-[0_20px_50px_rgba(0,0,0,0.45)]"
+                      className="absolute left-0 top-full z-[9999] mt-1 max-h-60 w-full overflow-y-auto rounded-xl border border-emerald-500/30 bg-black/90 py-1 shadow-[0_24px_60px_rgba(0,0,0,0.55)] backdrop-blur-md"
                     >
                       {suggestionsLoading ? (
                         <li className="flex items-center gap-2 px-4 py-3 text-sm text-[#94a3b8]">
