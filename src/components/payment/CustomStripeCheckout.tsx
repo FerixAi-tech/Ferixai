@@ -34,7 +34,7 @@ import { CHECKOUT_CURRENCY } from "@/lib/constants/checkout";
 
 export type { StripeCheckoutPayload };
 
-const CHECKOUT_STORAGE_KEY = "ferix_stripe_checkout_v4_en";
+const CHECKOUT_STORAGE_KEY = "ferix_stripe_checkout_v5_nl_ideal";
 const CHECKOUT_STORAGE_TTL_MS = 30 * 60 * 1000;
 
 function checkoutStoragePayloadKey(payloadKey: string): string {
@@ -316,7 +316,8 @@ function CheckoutPaymentForm({
         </button>
 
         <p className="text-center text-xs text-[#64748b]">
-          Card details are encrypted. Payments processed securely by Stripe.
+          Card and iDEAL details are encrypted. Payments processed securely by
+          Stripe.
         </p>
       </form>
     </div>
@@ -363,7 +364,7 @@ export default function CustomStripeCheckout({
       clientSecret,
       defaultValues: {
         billingAddress: {
-          address: { country: "AE" as const },
+          address: { country: "NL" as const },
         },
       },
       elementsOptions: {
