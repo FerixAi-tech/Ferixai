@@ -189,9 +189,12 @@ export default function HomeLanding({
               <button
                 type="button"
                 onClick={scrollToAiAudit}
-                className="inline-flex min-h-[48px] items-center justify-center rounded-xl border border-emerald-500/35 bg-emerald-500/10 px-7 py-3.5 text-sm font-semibold text-emerald-200 shadow-[0_0_20px_rgba(16,185,129,0.12)] transition hover:border-fuchsia-500/40 hover:bg-fuchsia-500/15 hover:text-fuchsia-100"
+                className="lf-btn-audit inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl px-7 py-3.5 text-base font-bold tracking-wide sm:w-auto"
               >
-                ⚡ Test Your AI Visibility
+                <span aria-hidden className="text-lg leading-none">
+                  ⚡
+                </span>
+                Test Your AI Visibility
               </button>
               <a
                 href="#pricing"
