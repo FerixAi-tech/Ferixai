@@ -198,3 +198,198 @@ export async function lookupBusinessPlace(
     return fallbackPlacesResult(city);
   }
 }
+
+export type PlacesAutocompleteSuggestion = {
+  placeId: string;
+  label: string;
+  mainText: string;
+  secondaryText: string;
+};
+
+type PlacesAutocompleteResponse = {
+  suggestions?: Array<{
+    placePrediction?: {
+      placeId?: string;
+      text?: { text?: string };
+      structuredFormat?: {
+        mainText?: { text?: string };
+        secondaryText?: { text?: string };
+      };
+    };
+  }>;
+};
+
+type PlaceDetailsResponse = {
+  id?: string;
+  displayName?: { text?: string };
+  formattedAddress?: string;
+  nationalPhoneNumber?: string;
+  internationalPhoneNumber?: string;
+  rating?: number;
+  userRatingCount?: number;
+  addressComponents?: Array<{
+    longText?: string;
+    shortText?: string;
+    types?: string[];
+  }>;
+};
+
+function normalizePlaceId(placeId: string): string {
+  return placeId.replace(/^places\//, "").trim();
+}
+
+export function extractCityFromAddressComponents(
+  components: PlaceDetailsResponse["addressComponents"],
+): string {
+  if (!components?.length) return "Netherlands";
+
+  const priority = [
+    "locality",
+    "postal_town",
+    "administrative_area_level_2",
+    "administrative_area_level_1",
+  ];
+
+  for (const type of priority) {
+    const match = components.find((component) => component.types?.includes(type));
+    if (match?.longText?.trim()) {
+      return match.longText.trim();
+    }
+  }
+
+  return "Netherlands";
+}
+
+export async function autocompletePlacesNl(
+  input: string,
+): Promise<PlacesAutocompleteSuggestion[]> {
+  const apiKey = getApiKey();
+  const query = input.trim();
+
+  if (!apiKey || query.length < 2) {
+    return [];
+  }
+
+  try {
+    const response = await fetch(
+      "https://places.googleapis.com/v1/places:autocomplete",
+      {
+        method: "POST",
+        cache: "no-store",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Goog-Api-Key": apiKey,
+          "X-Goog-FieldMask":
+            "suggestions.placePrediction.placeId,suggestions.placePrediction.text,suggestions.placePrediction.structuredFormat",
+        },
+        body: JSON.stringify({
+          input: query,
+          includedRegionCodes: ["NL"],
+          languageCode: "en",
+        }),
+      },
+    );
+
+    const body = (await response.json().catch(() => ({}))) as PlacesAutocompleteResponse;
+
+    if (!response.ok) {
+      console.error("Google Places autocomplete error:", response.status, body);
+      return [];
+    }
+
+    return (body.suggestions ?? [])
+      .map((suggestion) => {
+        const prediction = suggestion.placePrediction;
+        const placeId = prediction?.placeId?.trim();
+        if (!placeId) return null;
+
+        const mainText =
+          prediction.structuredFormat?.mainText?.text?.trim() ||
+          prediction.text?.text?.trim() ||
+          "";
+        const secondaryText =
+          prediction.structuredFormat?.secondaryText?.text?.trim() || "";
+        const label = prediction.text?.text?.trim() || mainText;
+
+        if (!label) return null;
+
+        return {
+          placeId: normalizePlaceId(placeId),
+          label,
+          mainText: mainText || label,
+          secondaryText,
+        };
+      })
+      .filter((item): item is PlacesAutocompleteSuggestion => item !== null)
+      .slice(0, 6);
+  } catch (err) {
+    console.error("Google Places autocomplete failed:", err);
+    return [];
+  }
+}
+
+export async function getPlaceDetailsById(
+  placeId: string,
+): Promise<PlacesLookupResult & { city: string }> {
+  const apiKey = getApiKey();
+  const normalizedId = normalizePlaceId(placeId);
+
+  if (!apiKey || !normalizedId) {
+    return { ...fallbackPlacesResult("Netherlands"), city: "Netherlands" };
+  }
+
+  const detailMask = [
+    "id",
+    "displayName",
+    "formattedAddress",
+    "nationalPhoneNumber",
+    "internationalPhoneNumber",
+    "rating",
+    "userRatingCount",
+    "addressComponents",
+  ].join(",");
+
+  try {
+    const response = await fetch(
+      `https://places.googleapis.com/v1/places/${encodeURIComponent(normalizedId)}`,
+      {
+        method: "GET",
+        cache: "no-store",
+        headers: {
+          "X-Goog-Api-Key": apiKey,
+          "X-Goog-FieldMask": detailMask,
+        },
+      },
+    );
+
+    const body = (await response.json().catch(() => ({}))) as PlaceDetailsResponse;
+
+    if (!response.ok) {
+      console.error("Google Place Details error:", response.status, body);
+      return { ...fallbackPlacesResult("Netherlands"), city: "Netherlands" };
+    }
+
+    const city = extractCityFromAddressComponents(body.addressComponents);
+    const address =
+      body.formattedAddress?.trim() || `${city}, Netherlands`;
+    const phone =
+      body.nationalPhoneNumber?.trim() ||
+      body.internationalPhoneNumber?.trim() ||
+      null;
+
+    return {
+      name: body.displayName?.text?.trim() || null,
+      formattedAddress: address,
+      phoneNumber: phone,
+      rating: typeof body.rating === "number" ? body.rating : null,
+      userRatingsTotal:
+        typeof body.userRatingCount === "number" ? body.userRatingCount : null,
+      placeId: normalizedId,
+      fromGoogle: true,
+      city,
+    };
+  } catch (err) {
+    console.error("Google Place Details failed:", err);
+    return { ...fallbackPlacesResult("Netherlands"), city: "Netherlands" };
+  }
+}

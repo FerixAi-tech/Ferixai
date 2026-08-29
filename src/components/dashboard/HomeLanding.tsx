@@ -7,12 +7,15 @@ import { Orbitron } from "next/font/google";
 import BrandLogo from "@/components/layout/BrandLogo";
 import SupportContact from "@/components/layout/SupportContact";
 import SignupCard from "@/components/landing/SignupCard";
+import LandingAiAuditSection from "@/components/landing/LandingAiAuditSection";
 import FuturisticScene3DLazy from "@/components/landing/FuturisticScene3DLazy";
 import LazyWhenVisible from "@/components/ui/LazyWhenVisible";
 import LandingSignupCtaLabel, {
   landingSignupButtonClassName,
 } from "@/components/landing/LandingSignupCtaLabel";
 import "@/components/landing/landing-futuristic.css";
+import { emptyKeyFeatures, saveCampaignDraft } from "@/lib/campaign/draft";
+import { saveLeadMagnetInput } from "@/lib/lead-magnet";
 import { listPricingPlans } from "@/lib/constants/pricing-plans";
 import { formatLandingCurrency } from "@/lib/constants/landing-locale";
 
@@ -74,6 +77,40 @@ export default function HomeLanding({
   openSignup?: boolean;
 }) {
   const [signupOpen, setSignupOpen] = useState(openSignup);
+  const [signupInitialBusinessName, setSignupInitialBusinessName] = useState("");
+
+  function scrollToAiAudit() {
+    document.getElementById("ai-audit-section")?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }
+
+  function handleFixVisibility(payload: {
+    businessName: string;
+    city: string;
+    formattedAddress: string;
+    phoneNumber: string | null;
+  }) {
+    saveLeadMagnetInput({
+      businessName: payload.businessName,
+      category: "Local Business",
+      city: payload.city,
+    });
+    saveCampaignDraft({
+      businessName: payload.businessName,
+      category: "Local Business",
+      productDescription: "",
+      keyFeatures: emptyKeyFeatures(),
+      city: payload.city,
+      planSlug: "starter",
+      billingCycle: "monthly",
+      step: 1,
+      updatedAt: Date.now(),
+    });
+    setSignupInitialBusinessName(payload.businessName);
+    setSignupOpen(true);
+  }
 
   return (
     <div
@@ -83,7 +120,11 @@ export default function HomeLanding({
       <div className="lf-grid-overlay" aria-hidden />
       <div className="lf-vignette" aria-hidden />
 
-      <SignupCard open={signupOpen} onClose={() => setSignupOpen(false)} />
+      <SignupCard
+        open={signupOpen}
+        onClose={() => setSignupOpen(false)}
+        initialBusinessName={signupInitialBusinessName}
+      />
 
       <div className="lf-page mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="hidden md:block">
@@ -126,13 +167,23 @@ export default function HomeLanding({
               </p>
             </div>
 
-            <div className="lf-animate-in lf-animate-in-4 mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="lf-animate-in lf-animate-in-4 mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
               <button
                 type="button"
-                onClick={() => setSignupOpen(true)}
+                onClick={() => {
+                  setSignupInitialBusinessName("");
+                  setSignupOpen(true);
+                }}
                 className={landingSignupButtonClassName}
               >
                 <LandingSignupCtaLabel />
+              </button>
+              <button
+                type="button"
+                onClick={scrollToAiAudit}
+                className="inline-flex min-h-[48px] items-center justify-center rounded-xl border border-emerald-500/35 bg-emerald-500/10 px-7 py-3.5 text-sm font-semibold text-emerald-200 shadow-[0_0_20px_rgba(16,185,129,0.12)] transition hover:border-fuchsia-500/40 hover:bg-fuchsia-500/15 hover:text-fuchsia-100"
+              >
+                ⚡ Test Your AI Visibility
               </button>
               <a
                 href="#pricing"
@@ -143,7 +194,7 @@ export default function HomeLanding({
             </div>
 
             <p className="lf-animate-in lf-animate-in-4 mt-3 text-xs font-medium text-[#94a3b8]">
-              ✓ No setup fee • Cancel anytime • 14-day money-back guarantee
+              ✓ No setup fee • Cancel anytime • 14-day money-back Guarantee
             </p>
 
             <div className="lf-animate-in lf-animate-in-5 mt-8 grid grid-cols-3 gap-4">
@@ -190,9 +241,16 @@ export default function HomeLanding({
           </div>
         </section>
 
+        <LandingAiAuditSection onFixVisibility={handleFixVisibility} />
+
         <LazyWhenVisible rootMargin="500px">
           <>
-        <LandingPricingPlans onClaim={() => setSignupOpen(true)} />
+        <LandingPricingPlans
+          onClaim={() => {
+            setSignupInitialBusinessName("");
+            setSignupOpen(true);
+          }}
+        />
 
         <section className="pb-12 pt-4" id="how-it-works">
           <div className="lf-animate-in mb-12 text-center">
