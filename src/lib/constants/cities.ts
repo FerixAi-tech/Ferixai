@@ -1,44 +1,26 @@
-// Major Dutch cities. Sorted A–Z.
-export const NL_CITIES = [
-  "Almere",
-  "Amersfoort",
-  "Amsterdam",
-  "Apeldoorn",
-  "Arnhem",
-  "Breda",
-  "Delft",
-  "Eindhoven",
-  "Enschede",
-  "Groningen",
-  "Haarlem",
-  "Leiden",
-  "Maastricht",
-  "Nijmegen",
-  "Rotterdam",
-  "The Hague",
-  "Tilburg",
-  "Utrecht",
+// Major UAE emirates and cities. Sorted A–Z.
+export const UAE_CITIES = [
+  "Abu Dhabi",
+  "Ajman",
+  "Al Ain",
+  "Dibba",
+  "Dubai",
+  "Fujairah",
+  "Hatta",
+  "Khor Fakkan",
+  "Madinat Zayed",
+  "Ras Al Khaimah",
+  "Ruwais",
+  "Sharjah",
+  "Umm Al Quwain",
   // Country-wide option, always last in the dropdown.
-  "Netherlands",
+  "United Arab Emirates",
 ] as const;
 
-/** @deprecated Use NL_CITIES */
-export const UAE_CITIES = NL_CITIES;
+/** @deprecated Use UAE_CITIES */
+export const UK_CITIES = UAE_CITIES;
 
-/** @deprecated Use NL_CITIES */
-export const UK_CITIES = NL_CITIES;
+export type UaeCity = (typeof UAE_CITIES)[number];
 
-export type NlCity = (typeof NL_CITIES)[number];
-
-/** @deprecated Use NlCity */
-export type UaeCity = NlCity;
-
-/** @deprecated Use NlCity */
-export type UkCity = NlCity;
-
-export function isNlCity(value: string): value is NlCity {
-  return (NL_CITIES as readonly string[]).includes(value);
-}
-
-/** @deprecated Use isNlCity */
-export const isUaeCity = isNlCity;
+/** @deprecated Use UaeCity */
+export type UkCity = UaeCity;

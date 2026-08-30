@@ -118,7 +118,7 @@ export default function LandingAiAuditSection({
 
   async function handleScan() {
     if (!selected?.placeId) {
-      setError("Search and select your business from the Netherlands suggestions.");
+      setError("Search and select your business from the UAE suggestions.");
       return;
     }
 
@@ -181,7 +181,7 @@ export default function LandingAiAuditSection({
 
             <div className="relative z-[100] mt-6">
               <label className="sr-only" htmlFor="ai-audit-search">
-                Search your business in the Netherlands
+                Search your business in the UAE
               </label>
               <div className="flex flex-col gap-3 sm:flex-row">
                 <div className="relative z-[100] min-w-0 flex-1">
@@ -198,7 +198,7 @@ export default function LandingAiAuditSection({
                     onFocus={() => {
                       if (suggestions.length > 0) setSuggestionsOpen(true);
                     }}
-                    placeholder="Search your business in the Netherlands"
+                    placeholder="Search your business in the UAE"
                     autoComplete="off"
                     role="combobox"
                     aria-expanded={suggestionsOpen}

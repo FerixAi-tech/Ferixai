@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, useRef } from "react";
-import { NL_CITIES } from "@/lib/constants/cities";
+import { UAE_CITIES } from "@/lib/constants/cities";
 import {
   CUSTOM_CATEGORY_OPTION_VALUE,
   isBusinessCategory,
@@ -356,7 +356,7 @@ export default function CampaignWizard({
     const plan = getPricingPlan(slug);
     trackInitiateCheckout({
       value: getPlanListPrice(plan, billingCycle),
-      currency: "EUR",
+      currency: "AED",
       content_name: `${plan.name} (${billingCycle})`,
       dedupeKey: `ferixai_meta_initiate_checkout:${slug}:${billingCycle}`,
     });
@@ -630,13 +630,13 @@ export default function CampaignWizard({
           )}
           <div>
             <label className="mb-1.5 flex items-center gap-2 text-sm text-[#94a3b8]">
-              <MapPin className="h-4 w-4" /> City
+              <MapPin className="h-4 w-4" /> Emirate / City
             </label>
             <DarkSelect
               value={city}
               onChange={setCity}
-              placeholder="Select a city"
-              options={NL_CITIES.map((c) => ({
+              placeholder="Select an emirate or city"
+              options={UAE_CITIES.map((c) => ({
                 value: c,
                 label: c,
               }))}

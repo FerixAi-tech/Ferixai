@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 
 const HOTSPOTS = [
-  { id: "nl", label: "Netherlands", x: 48, y: 28, delay: "0s" },
+  { id: "uae", label: "United Arab Emirates", x: 52, y: 34, delay: "0s" },
   { id: "usa", label: "United States", x: 22.5, y: 38, delay: "0.35s" },
   { id: "ca", label: "Canada", x: 24, y: 26, delay: "0.7s" },
   { id: "tr", label: "Turkey", x: 56.5, y: 38.5, delay: "1.05s" },
@@ -177,7 +177,7 @@ export default function GlobalAiNetwork() {
           Global AI Network Active
         </h3>
         <p className="mt-3 text-sm leading-relaxed text-[#94a3b8] sm:text-base">
-          Powering real-time knowledge graphs across the Netherlands, USA, Canada,
+          Powering real-time knowledge graphs across the UAE, USA, Canada,
           Turkey, and Australia. Ensuring local brands are accurately indexed and
           surfaced in AI-driven answers worldwide.
         </p>
@@ -201,7 +201,7 @@ export default function GlobalAiNetwork() {
           viewBox="0 0 1000 500"
           className="h-full w-full text-emerald-400/25"
           role="img"
-          aria-label="World map highlighting the Netherlands, United States, Canada, Turkey, and Australia"
+          aria-label="World map highlighting the United Arab Emirates, United States, Canada, Turkey, and Australia"
         >
           <defs>
             <linearGradient id="landFill" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -229,7 +229,7 @@ export default function GlobalAiNetwork() {
             <path d="M250 270 L290 275 L310 340 L295 410 L260 430 L240 380 L235 320 Z" />
             {/* Middle East cluster */}
             <path d="M460 110 L510 105 L545 125 L540 165 L500 175 L465 155 Z" />
-            {/* Netherlands / Western Europe */}
+            {/* UAE / Middle East */}
             <path d="M455 95 L485 88 L498 102 L488 118 L462 115 Z" />
             {/* Africa */}
             <path d="M480 200 L540 195 L575 250 L560 340 L510 360 L470 300 Z" />

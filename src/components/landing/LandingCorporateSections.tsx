@@ -26,15 +26,15 @@ const VALUES = [
 ] as const;
 
 const FEATURED_SECTORS = [
-  "Aesthetic & Plastic Surgery Clinic",
-  "Bike & E-Bike Rental",
-  "Canal Tours & Boat Rental",
-  "Business Setup & BV Formation",
-  "Interior Design & Fit-Out",
+  "Luxury Car Rental",
+  "Yacht Charter & Boat Rental",
   "Real Estate Agency / Broker",
+  "Business Setup & PRO Services",
+  "Aesthetic & Plastic Surgery Clinic",
+  "Interior Design & Fit-Out",
   "Law Firm & Legal Services",
   "Cafe, Bar & Hospitality",
-  "Taxi & Private Transport",
+  "Chauffeur & Luxury Transport",
 ] as const;
 
 const MORE_CATEGORIES_COUNT =
@@ -86,11 +86,11 @@ export default function LandingCorporateSections() {
                 Sector coverage
               </p>
               <h2 className="lf-orbitron mt-3 text-2xl font-bold text-white sm:text-3xl">
-                Made for Dutch businesses
+                Made for UAE businesses
               </h2>
               <p className="mt-4 text-sm leading-relaxed text-[#94a3b8]">
-                From canal tours and hospitality to BV formation and aesthetic
-                clinics — FerixAI adapts content to your category and city.
+                From luxury car rentals and yacht charters to real estate and
+                business setup — FerixAI adapts content to your category and emirate.
               </p>
             </div>
             <div className="flex flex-wrap gap-2">

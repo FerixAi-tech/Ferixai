@@ -1,5 +1,5 @@
 import {
-  isNlCity,
+  isUaeCity,
   isValidStreetArea,
 } from "@/lib/constants/city-streets";
 
@@ -42,8 +42,8 @@ export function validateInvoiceDetails(body: unknown): InvoiceDetailsInput {
   }
 
   const city = String(emirateCity ?? "").trim();
-  if (!city || !isNlCity(city)) {
-    throw new Error("Please select a valid city");
+  if (!city || !isUaeCity(city)) {
+    throw new Error("Please select a valid emirate or city");
   }
 
   const street = String(streetArea ?? "").trim();

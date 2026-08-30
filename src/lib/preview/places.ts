@@ -241,7 +241,7 @@ function normalizePlaceId(placeId: string): string {
 export function extractCityFromAddressComponents(
   components: PlaceDetailsResponse["addressComponents"],
 ): string {
-  if (!components?.length) return "Netherlands";
+  if (!components?.length) return "United Arab Emirates";
 
   const priority = [
     "locality",
@@ -257,10 +257,10 @@ export function extractCityFromAddressComponents(
     }
   }
 
-  return "Netherlands";
+  return "United Arab Emirates";
 }
 
-export async function autocompletePlacesNl(
+export async function autocompletePlacesUae(
   input: string,
 ): Promise<PlacesAutocompleteSuggestion[]> {
   const apiKey = getApiKey();
@@ -284,7 +284,7 @@ export async function autocompletePlacesNl(
         },
         body: JSON.stringify({
           input: query,
-          includedRegionCodes: ["NL"],
+          includedRegionCodes: ["AE"],
           languageCode: "en",
         }),
       },
@@ -337,7 +337,7 @@ export async function getPlaceDetailsById(
   const normalizedId = normalizePlaceId(placeId);
 
   if (!apiKey || !normalizedId) {
-    return { ...fallbackPlacesResult("Netherlands"), city: "Netherlands" };
+    return { ...fallbackPlacesResult("United Arab Emirates"), city: "United Arab Emirates" };
   }
 
   const detailMask = [
@@ -368,12 +368,12 @@ export async function getPlaceDetailsById(
 
     if (!response.ok) {
       console.error("Google Place Details error:", response.status, body);
-      return { ...fallbackPlacesResult("Netherlands"), city: "Netherlands" };
+      return { ...fallbackPlacesResult("United Arab Emirates"), city: "United Arab Emirates" };
     }
 
     const city = extractCityFromAddressComponents(body.addressComponents);
     const address =
-      body.formattedAddress?.trim() || `${city}, Netherlands`;
+      body.formattedAddress?.trim() || `${city}, United Arab Emirates`;
     const phone =
       body.nationalPhoneNumber?.trim() ||
       body.internationalPhoneNumber?.trim() ||
@@ -392,6 +392,6 @@ export async function getPlaceDetailsById(
     };
   } catch (err) {
     console.error("Google Place Details failed:", err);
-    return { ...fallbackPlacesResult("Netherlands"), city: "Netherlands" };
+    return { ...fallbackPlacesResult("United Arab Emirates"), city: "United Arab Emirates" };
   }
 }

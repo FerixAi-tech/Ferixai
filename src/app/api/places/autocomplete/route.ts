@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { autocompletePlacesNl } from "@/lib/preview/places";
+import { autocompletePlacesUae } from "@/lib/preview/places";
 
 export const runtime = "nodejs";
 
@@ -10,6 +10,6 @@ export async function GET(request: Request) {
     return NextResponse.json({ suggestions: [] });
   }
 
-  const suggestions = await autocompletePlacesNl(query);
+  const suggestions = await autocompletePlacesUae(query);
   return NextResponse.json({ suggestions });
 }
