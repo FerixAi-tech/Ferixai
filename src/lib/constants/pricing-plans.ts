@@ -33,7 +33,7 @@ export const PRICING_PLANS: readonly PricingPlan[] = [
   {
     slug: "starter",
     name: "Starter Plan",
-    priceMonthlyGbp: 10,
+    priceMonthlyGbp: 499,
     compareAtMonthlyAed: 699,
     priceYearlyAed: 3999,
     compareAtYearlyAed: 5988,
