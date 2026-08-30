@@ -21,14 +21,14 @@ export function isApplePayPlatform(userAgent: string): boolean {
   return isIos || isSafari;
 }
 
-/** Card + iDEAL form below Express — wallets render in Express row only. */
+/** Card form below Express — wallets render in Express row only. */
 export const cardOnlyPaymentElementOptions: StripeCheckoutPaymentElementOptions =
   {
     layout: {
       type: "tabs",
       defaultCollapsed: false,
     },
-    paymentMethodOrder: ["ideal", "card"],
+    paymentMethodOrder: ["card"],
     wallets: {
       applePay: "never",
       googlePay: "never",
@@ -117,7 +117,7 @@ export function getPaymentElementOptions(
 
 export function getPaymentSectionLabel(userAgent: string): string {
   void userAgent;
-  return "iDEAL · Debit or credit card";
+  return "Debit or credit card";
 }
 
-export const checkoutSessionPaymentMethodTypes = ["card", "ideal"] as const;
+export const checkoutSessionPaymentMethodTypes = ["card"] as const;

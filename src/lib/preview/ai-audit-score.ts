@@ -24,14 +24,14 @@ export function computeAiVisibilityScore(seed: string): {
 export const AI_AUDIT_STATUS_ITEMS = [
   {
     icon: "❌" as const,
-    text: "ChatGPT: Competitors recommended ahead of your business",
+    text: "ChatGPT: UAE competitors recommended ahead of your business",
   },
   {
     icon: "❌" as const,
-    text: "Gemini: Entity missing in local search knowledge graph",
+    text: "Gemini: Missing from Dubai & Abu Dhabi local knowledge graph",
   },
   {
     icon: "⚠️" as const,
-    text: "Claude: Incomplete citation coverage",
+    text: "Claude: Incomplete citation coverage across UAE emirates",
   },
 ] as const;

@@ -38,15 +38,6 @@ export default function PaymentMethodLogos({
             className="max-h-full max-w-full object-contain"
           />
         </div>
-        <div className="flex h-[4.25rem] w-[8.5rem] shrink-0 items-center justify-center sm:h-20 sm:w-[10rem]">
-          <Image
-            src="/ideal.png"
-            alt="iDEAL"
-            width={200}
-            height={64}
-            className="max-h-full max-w-full object-contain"
-          />
-        </div>
         <div className="flex h-[4.25rem] w-[5rem] shrink-0 items-center justify-center sm:h-20 sm:w-[5.75rem]">
           <Image
             src="/stripe.png"

@@ -3,31 +3,45 @@ import {
   AI_AUDIT_STATUS_ITEMS,
   computeAiVisibilityScore,
 } from "@/lib/preview/ai-audit-score";
-import { getPlaceDetailsById } from "@/lib/preview/places";
+import {
+  getPlaceDetailsById,
+  lookupBusinessByTextQuery,
+} from "@/lib/preview/places";
 
 export const runtime = "nodejs";
 
 export async function POST(request: Request) {
   try {
-    const body = (await request.json()) as { placeId?: string };
+    const body = (await request.json()) as {
+      placeId?: string;
+      businessName?: string;
+    };
     const placeId = body.placeId?.trim();
+    const businessName = body.businessName?.trim();
 
-    if (!placeId) {
+    if (!placeId && !businessName) {
       return NextResponse.json(
-        { error: "Please select a business from the suggestions." },
+        {
+          error:
+            "Enter your UAE business name or pick a suggestion, then scan again.",
+        },
         { status: 400 },
       );
     }
 
-    const place = await getPlaceDetailsById(placeId);
-    const businessName = place.name?.trim() || "Selected business";
-    const scoreSeed = place.placeId || businessName;
+    const place = placeId
+      ? await getPlaceDetailsById(placeId)
+      : await lookupBusinessByTextQuery(businessName!);
+
+    const resolvedName =
+      place.name?.trim() || businessName?.trim() || "Your UAE business";
+    const scoreSeed = place.placeId || resolvedName;
     const { score, band } = computeAiVisibilityScore(scoreSeed);
 
     return NextResponse.json({
       ok: true,
       result: {
-        businessName,
+        businessName: resolvedName,
         formattedAddress: place.formattedAddress,
         phoneNumber: place.phoneNumber,
         rating: place.rating,

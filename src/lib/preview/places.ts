@@ -33,10 +33,10 @@ function getApiKey(): string | undefined {
 
 /** Only used when Places fails or returns no usable result. */
 export function fallbackPlacesResult(city: string): PlacesLookupResult {
-  const trimmedCity = city.trim() || "United Kingdom";
+  const trimmedCity = city.trim() || "United Arab Emirates";
   return {
     name: null,
-    formattedAddress: `${trimmedCity}, UK`,
+    formattedAddress: `${trimmedCity}, UAE`,
     phoneNumber: null,
     rating: null,
     userRatingsTotal: null,
@@ -93,7 +93,7 @@ export async function lookupBusinessPlace(
         body: JSON.stringify({
           textQuery,
           languageCode: "en",
-          regionCode: "GB",
+          regionCode: "AE",
           maxResultCount: 5,
         }),
       },
@@ -164,7 +164,7 @@ export async function lookupBusinessPlace(
     }
 
     const address =
-      details.formattedAddress?.trim() || `${city}, UK`;
+      details.formattedAddress?.trim() || `${city}, UAE`;
     const phone =
       details.nationalPhoneNumber?.trim() ||
       details.internationalPhoneNumber?.trim() ||
@@ -394,4 +394,47 @@ export async function getPlaceDetailsById(
     console.error("Google Place Details failed:", err);
     return { ...fallbackPlacesResult("United Arab Emirates"), city: "United Arab Emirates" };
   }
+}
+
+/** Text search for landing audit when the business is not in autocomplete suggestions. */
+export async function lookupBusinessByTextQuery(
+  query: string,
+): Promise<PlacesLookupResult & { city: string }> {
+  const businessName = query.trim();
+  if (!businessName) {
+    return {
+      ...fallbackPlacesResult("United Arab Emirates"),
+      city: "United Arab Emirates",
+    };
+  }
+
+  const place = await lookupBusinessPlace({
+    businessName,
+    city: "United Arab Emirates",
+  });
+
+  if (place.fromGoogle && place.name) {
+    let city = "United Arab Emirates";
+    if (place.placeId) {
+      const details = await getPlaceDetailsById(place.placeId);
+      city = details.city;
+    }
+
+    return {
+      ...place,
+      name: place.name,
+      city,
+    };
+  }
+
+  return {
+    name: businessName,
+    formattedAddress: `${businessName}, UAE`,
+    phoneNumber: null,
+    rating: null,
+    userRatingsTotal: null,
+    placeId: null,
+    fromGoogle: false,
+    city: "United Arab Emirates",
+  };
 }
