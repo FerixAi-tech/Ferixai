@@ -47,3 +47,14 @@ input[type="range"]::-moz-range-thumb {
     scroll-behavior: auto !important;
   }
 }
+
+/* Crisp live chat — slightly larger bottom-right launcher */
+#crisp-chatbox-button {
+  transform: scale(1.22);
+  transform-origin: bottom right;
+}
+
+#crisp-chatbox-button span {
+  width: 72px !important;
+  height: 72px !important;
+}
