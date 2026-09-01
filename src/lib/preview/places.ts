@@ -7,6 +7,7 @@ export type PlacesLookupResult = {
   name: string | null;
   formattedAddress: string;
   phoneNumber: string | null;
+  websiteUri: string | null;
   rating: number | null;
   userRatingsTotal: number | null;
   placeId: string | null;
@@ -21,6 +22,7 @@ type PlacesNewSearchResponse = {
     formattedAddress?: string;
     nationalPhoneNumber?: string;
     internationalPhoneNumber?: string;
+    websiteUri?: string;
     rating?: number;
     userRatingCount?: number;
   }>;
@@ -38,6 +40,7 @@ export function fallbackPlacesResult(city: string): PlacesLookupResult {
     name: null,
     formattedAddress: `${trimmedCity}, UAE`,
     phoneNumber: null,
+    websiteUri: null,
     rating: null,
     userRatingsTotal: null,
     placeId: null,
@@ -75,6 +78,7 @@ export async function lookupBusinessPlace(
     "places.formattedAddress",
     "places.nationalPhoneNumber",
     "places.internationalPhoneNumber",
+    "places.websiteUri",
     "places.rating",
     "places.userRatingCount",
   ].join(",");
@@ -133,6 +137,7 @@ export async function lookupBusinessPlace(
         "formattedAddress",
         "nationalPhoneNumber",
         "internationalPhoneNumber",
+        "websiteUri",
         "rating",
         "userRatingCount",
       ].join(",");
@@ -169,6 +174,7 @@ export async function lookupBusinessPlace(
       details.nationalPhoneNumber?.trim() ||
       details.internationalPhoneNumber?.trim() ||
       null;
+    const websiteUri = details.websiteUri?.trim() || null;
     const rating =
       typeof details.rating === "number" ? details.rating : null;
     const userRatingsTotal =
@@ -188,6 +194,7 @@ export async function lookupBusinessPlace(
       name: details.displayName?.text?.trim() || null,
       formattedAddress: address,
       phoneNumber: phone,
+      websiteUri,
       rating,
       userRatingsTotal,
       placeId,
@@ -225,6 +232,7 @@ type PlaceDetailsResponse = {
   formattedAddress?: string;
   nationalPhoneNumber?: string;
   internationalPhoneNumber?: string;
+  websiteUri?: string;
   rating?: number;
   userRatingCount?: number;
   addressComponents?: Array<{
@@ -346,6 +354,7 @@ export async function getPlaceDetailsById(
     "formattedAddress",
     "nationalPhoneNumber",
     "internationalPhoneNumber",
+    "websiteUri",
     "rating",
     "userRatingCount",
     "addressComponents",
@@ -378,11 +387,13 @@ export async function getPlaceDetailsById(
       body.nationalPhoneNumber?.trim() ||
       body.internationalPhoneNumber?.trim() ||
       null;
+    const websiteUri = body.websiteUri?.trim() || null;
 
     return {
       name: body.displayName?.text?.trim() || null,
       formattedAddress: address,
       phoneNumber: phone,
+      websiteUri,
       rating: typeof body.rating === "number" ? body.rating : null,
       userRatingsTotal:
         typeof body.userRatingCount === "number" ? body.userRatingCount : null,
@@ -431,6 +442,7 @@ export async function lookupBusinessByTextQuery(
     name: businessName,
     formattedAddress: `${businessName}, UAE`,
     phoneNumber: null,
+    websiteUri: null,
     rating: null,
     userRatingsTotal: null,
     placeId: null,

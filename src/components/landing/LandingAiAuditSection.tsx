@@ -1,10 +1,23 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
-import { ArrowRight, Loader2, Search } from "lucide-react";
-import { formatLandingCurrency } from "@/lib/constants/landing-locale";
-import { listPricingPlans } from "@/lib/constants/pricing-plans";
+import { Loader2, RotateCcw, Search, Sparkles, Zap } from "lucide-react";
+import DarkSelect from "@/components/ui/DarkSelect";
 import LandingPhoneMockup from "@/components/landing/LandingPhoneMockup";
+import AuditTerminalLoader from "@/components/landing/ai-audit/AuditTerminalLoader";
+import {
+  AuditChatPanelAfter,
+  AuditChatPanelBefore,
+} from "@/components/landing/ai-audit/AuditChatPanels";
+import AuditSimulatorCta from "@/components/landing/ai-audit/AuditSimulatorCta";
+import {
+  AUDIT_SCAN_DURATION_MS,
+  AUDIT_SECTORS,
+  isAuditSectorId,
+  type AuditCompetitor,
+  type AuditSectorId,
+} from "@/lib/constants/audit-sectors";
+import type { BillingCycle } from "@/lib/constants/pricing-plans";
 
 type AutocompleteSuggestion = {
   placeId: string;
@@ -13,21 +26,25 @@ type AutocompleteSuggestion = {
   secondaryText: string;
 };
 
-type AuditResult = {
+type SimulatorResult = {
   businessName: string;
   formattedAddress: string;
   phoneNumber: string | null;
+  websiteUri: string | null;
   rating: number | null;
   userRatingsTotal: number | null;
   city: string;
   placeId: string | null;
-  visibilityScore: number;
-  visibilityBand: string;
-  statusItems: ReadonlyArray<{ icon: string; text: string }>;
+  sectorId: AuditSectorId;
+  sectorLabel: string;
+  campaignCategory: string;
+  boneQuestion: string;
+  competitors: readonly AuditCompetitor[];
 };
 
-const STARTER_MONTHLY = listPricingPlans()[0]!.priceMonthlyGbp;
 const MANUAL_AUDIT_PLACE_ID = "__manual__";
+
+type Phase = "input" | "scanning" | "results";
 
 export default function LandingAiAuditSection({
   onFixVisibility,
@@ -35,6 +52,8 @@ export default function LandingAiAuditSection({
   onFixVisibility: (payload: {
     businessName: string;
     city: string;
+    category: string;
+    billingCycle: BillingCycle;
     formattedAddress: string;
     phoneNumber: string | null;
   }) => void;
@@ -43,19 +62,29 @@ export default function LandingAiAuditSection({
   const rootRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<number | null>(null);
 
+  const [phase, setPhase] = useState<Phase>("input");
+  const [sectorId, setSectorId] = useState<AuditSectorId | "">("");
+  const [customCategoryLabel, setCustomCategoryLabel] = useState("");
+  const [manualMode, setManualMode] = useState(false);
+
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<AutocompleteSuggestion[]>([]);
   const [suggestionsOpen, setSuggestionsOpen] = useState(false);
   const [suggestionsLoading, setSuggestionsLoading] = useState(false);
   const [selected, setSelected] = useState<AutocompleteSuggestion | null>(null);
-  const [scanning, setScanning] = useState(false);
-  const [scanMessage, setScanMessage] = useState("");
-  const [result, setResult] = useState<AuditResult | null>(null);
+
+  const [manualBusinessName, setManualBusinessName] = useState("");
+  const [manualWebsite, setManualWebsite] = useState("");
+  const [manualPhone, setManualPhone] = useState("");
+
+  const [result, setResult] = useState<SimulatorResult | null>(null);
+  const [billingCycle, setBillingCycle] = useState<BillingCycle>("monthly");
   const [error, setError] = useState("");
 
   const trimmedQuery = query.trim();
   const showSuggestions =
-    suggestionsOpen && trimmedQuery.length >= 2;
+    phase === "input" && suggestionsOpen && trimmedQuery.length >= 2;
+  const showGeneralCategory = sectorId === "general";
 
   useEffect(() => {
     function onPointerDown(event: MouseEvent) {
@@ -69,17 +98,15 @@ export default function LandingAiAuditSection({
   }, []);
 
   useEffect(() => {
-    if (selected && trimmedQuery === selected.label) {
-      return;
-    }
+    if (phase !== "input" || manualMode) return;
+
+    if (selected && trimmedQuery === selected.label) return;
     if (selected && trimmedQuery !== selected.label) {
       setSelected(null);
       setResult(null);
     }
 
-    if (debounceRef.current) {
-      window.clearTimeout(debounceRef.current);
-    }
+    if (debounceRef.current) window.clearTimeout(debounceRef.current);
 
     if (trimmedQuery.length < 2) {
       setSuggestions([]);
@@ -97,24 +124,19 @@ export default function LandingAiAuditSection({
           setSuggestions(data.suggestions ?? []);
           setSuggestionsOpen(true);
         })
-        .catch(() => {
-          setSuggestions([]);
-        })
-        .finally(() => {
-          setSuggestionsLoading(false);
-        });
+        .catch(() => setSuggestions([]))
+        .finally(() => setSuggestionsLoading(false));
     }, 280);
 
     return () => {
-      if (debounceRef.current) {
-        window.clearTimeout(debounceRef.current);
-      }
+      if (debounceRef.current) window.clearTimeout(debounceRef.current);
     };
-  }, [query, selected, trimmedQuery]);
+  }, [query, selected, trimmedQuery, phase, manualMode]);
 
   function selectSuggestion(item: AutocompleteSuggestion) {
     setSelected(item);
     setQuery(item.label);
+    setManualBusinessName(item.mainText);
     setSuggestionsOpen(false);
     setResult(null);
     setError("");
@@ -125,63 +147,113 @@ export default function LandingAiAuditSection({
       placeId: MANUAL_AUDIT_PLACE_ID,
       label: name,
       mainText: name,
-      secondaryText: "Search in the UAE (not listed on Google Maps)",
+      secondaryText: "Manual UAE search (not on Google Maps)",
     });
+    setManualMode(true);
   }
 
   function buildScanPayload() {
     const usePlaceId =
+      !manualMode &&
       selected?.placeId &&
       selected.placeId !== MANUAL_AUDIT_PLACE_ID &&
       trimmedQuery === selected.label;
 
-    if (usePlaceId) {
-      return { placeId: selected.placeId };
-    }
+    const businessName = manualMode
+      ? manualBusinessName.trim()
+      : trimmedQuery;
 
-    return { businessName: trimmedQuery };
+    return {
+      sectorId,
+      customCategoryLabel:
+        sectorId === "general" ? customCategoryLabel.trim() : undefined,
+      ...(usePlaceId ? { placeId: selected!.placeId } : { businessName }),
+      manualWebsite: manualWebsite.trim() || undefined,
+      manualPhone: manualPhone.trim() || undefined,
+    };
   }
 
-  async function handleScan() {
+  function validateInput(): string | null {
+    if (!isAuditSectorId(sectorId)) {
+      return "Please select your business sector.";
+    }
+    if (sectorId === "general" && customCategoryLabel.trim().length < 2) {
+      return "Enter your business type for the general sector (e.g. Bakery, Spa).";
+    }
+    if (manualMode) {
+      if (manualBusinessName.trim().length < 2) {
+        return "Enter your business name (at least 2 characters).";
+      }
+      return null;
+    }
     if (trimmedQuery.length < 2) {
-      setError("Enter your UAE business name (at least 2 characters).");
+      return "Search and select your business on Google Maps UAE.";
+    }
+    return null;
+  }
+
+  async function handleSimulate() {
+    const validationError = validateInput();
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
-    setScanning(true);
+    setPhase("scanning");
     setError("");
     setResult(null);
-    setScanMessage(
-      "Scanning UAE Google Maps data and querying ChatGPT, Gemini & Claude…",
-    );
-
-    await new Promise((resolve) => window.setTimeout(resolve, 2400));
 
     try {
-      const response = await fetch("/api/places/audit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(buildScanPayload()),
-      });
+      const [response] = await Promise.all([
+        fetch("/api/places/audit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(buildScanPayload()),
+        }),
+        new Promise((resolve) =>
+          window.setTimeout(resolve, AUDIT_SCAN_DURATION_MS),
+        ),
+      ]);
+
       const data = (await response.json()) as {
         error?: string;
-        result?: AuditResult;
+        result?: SimulatorResult;
       };
 
       if (!response.ok || !data.result) {
-        throw new Error(data.error || "Scan failed. Please try again.");
+        throw new Error(data.error || "Simulation failed. Please try again.");
       }
 
       setResult(data.result);
+      setPhase("results");
     } catch (err) {
+      setPhase("input");
       setError(
-        err instanceof Error ? err.message : "Scan failed. Please try again.",
+        err instanceof Error ? err.message : "Simulation failed. Please try again.",
       );
-    } finally {
-      setScanning(false);
-      setScanMessage("");
     }
   }
+
+  function resetSimulator() {
+    setPhase("input");
+    setResult(null);
+    setError("");
+  }
+
+  function handleCheckout() {
+    if (!result) return;
+    onFixVisibility({
+      businessName: result.businessName,
+      city: result.city,
+      category: result.campaignCategory,
+      billingCycle,
+      formattedAddress: result.formattedAddress,
+      phoneNumber: result.phoneNumber,
+    });
+  }
+
+  const cardWidthClass =
+    phase === "results" ? "max-w-6xl" : "max-w-xl";
 
   return (
     <section className="scroll-mt-24 overflow-visible pb-6 pt-2">
@@ -189,7 +261,7 @@ export default function LandingAiAuditSection({
 
       <div
         id="ai-audit-section"
-        className="lf-ai-audit-card-wrap lf-animate-in mx-auto max-w-xl overflow-visible"
+        className={`lf-ai-audit-card-wrap lf-animate-in mx-auto overflow-visible transition-all duration-500 ${cardWidthClass}`}
       >
         <article
           ref={rootRef}
@@ -197,118 +269,209 @@ export default function LandingAiAuditSection({
         >
           <div className="lf-neon-inner overflow-visible p-6 sm:p-8">
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-fuchsia-300">
-              UAE AI visibility audit
+              Live AI Visibility Simulator
             </p>
             <h2 className="lf-orbitron mt-3 text-xl font-bold text-white sm:text-2xl">
               Audit Your UAE Business on AI Search Engines
             </h2>
             <p className="mt-3 text-sm leading-relaxed text-[#94a3b8]">
-              Search your business on Google Maps across Dubai, Abu Dhabi &amp;
-              the UAE — then simulate your real-time ChatGPT &amp; Gemini
-              visibility score.
+              Pick your sector, pull your Google Maps listing across Dubai, Abu
+              Dhabi &amp; the UAE — then simulate how ChatGPT answers today vs.
+              after FerixAI.
             </p>
 
-            <div className="relative z-[100] mt-6">
-              <label className="sr-only" htmlFor="ai-audit-search">
-                Search your UAE business
-              </label>
-              <div className="flex flex-col gap-3 sm:flex-row">
-                <div className="relative z-[100] min-w-0 flex-1">
-                  <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#64748b]" />
-                  <input
-                    id="ai-audit-search"
-                    type="text"
-                    value={query}
-                    onChange={(event) => {
-                      setQuery(event.target.value);
-                      setSuggestionsOpen(true);
+            {phase === "input" ? (
+              <div className="mt-6 space-y-4">
+                <div>
+                  <label
+                    htmlFor="audit-sector"
+                    className="mb-1.5 block text-sm font-medium text-[#94a3b8]"
+                  >
+                    Business sector
+                  </label>
+                  <DarkSelect
+                    id="audit-sector"
+                    value={sectorId}
+                    onChange={(value) => {
+                      setSectorId(value as AuditSectorId);
                       setError("");
                     }}
-                    onFocus={() => {
-                      if (trimmedQuery.length >= 2) setSuggestionsOpen(true);
-                    }}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter") {
-                        event.preventDefault();
-                        void handleScan();
-                      }
-                    }}
-                    placeholder="e.g. Your café in Dubai Marina"
-                    autoComplete="off"
-                    role="combobox"
-                    aria-expanded={showSuggestions}
-                    aria-controls={listboxId}
-                    className="lf-input w-full pl-10"
+                    placeholder="Select your sector"
+                    options={AUDIT_SECTORS.map((sector) => ({
+                      value: sector.id,
+                      label: sector.label,
+                    }))}
                   />
-                  {showSuggestions ? (
-                    <ul
-                      id={listboxId}
-                      role="listbox"
-                      className="absolute left-0 top-full z-[9999] mt-1 max-h-60 w-full overflow-y-auto rounded-xl border border-emerald-500/30 bg-black/90 py-1 shadow-[0_24px_60px_rgba(0,0,0,0.55)] backdrop-blur-md"
-                    >
-                      {suggestionsLoading ? (
-                        <li className="flex items-center gap-2 px-4 py-3 text-sm text-[#94a3b8]">
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          Searching Google Maps UAE…
-                        </li>
-                      ) : (
-                        <>
-                          {suggestions.map((item) => (
-                            <li key={item.placeId} role="option">
-                              <button
-                                type="button"
-                                onClick={() => selectSuggestion(item)}
-                                className="flex w-full flex-col px-4 py-3 text-left transition hover:bg-white/5"
-                              >
-                                <span className="text-sm font-semibold text-white">
-                                  {item.mainText}
-                                </span>
-                                {item.secondaryText ? (
-                                  <span className="mt-0.5 text-xs text-[#94a3b8]">
-                                    {item.secondaryText}
-                                  </span>
-                                ) : null}
-                              </button>
-                            </li>
-                          ))}
-                          <li role="option">
-                            <button
-                              type="button"
-                              onClick={() => selectManualSearch(trimmedQuery)}
-                              className="flex w-full flex-col border-t border-white/10 px-4 py-3 text-left transition hover:bg-emerald-500/10"
-                            >
-                              <span className="text-sm font-semibold text-emerald-200">
-                                Search for &quot;{trimmedQuery}&quot; in the UAE
-                              </span>
-                              <span className="mt-0.5 text-xs text-[#94a3b8]">
-                                Not listed on Google Maps? Scan anyway
-                              </span>
-                            </button>
-                          </li>
-                        </>
-                      )}
-                    </ul>
-                  ) : null}
                 </div>
+
+                {showGeneralCategory ? (
+                  <div>
+                    <label
+                      htmlFor="audit-custom-category"
+                      className="mb-1.5 block text-sm font-medium text-[#94a3b8]"
+                    >
+                      Your business type
+                    </label>
+                    <input
+                      id="audit-custom-category"
+                      type="text"
+                      value={customCategoryLabel}
+                      onChange={(event) => {
+                        setCustomCategoryLabel(event.target.value);
+                        setError("");
+                      }}
+                      placeholder="e.g. Bakery, Spa, Tailor"
+                      className="lf-input w-full"
+                    />
+                  </div>
+                ) : null}
+
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-sm font-medium text-[#94a3b8]">
+                    {manualMode
+                      ? "Manual business details"
+                      : "Google Maps UAE search"}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setManualMode((current) => !current);
+                      setError("");
+                    }}
+                    className="text-xs font-semibold text-emerald-300 transition hover:text-emerald-200"
+                  >
+                    {manualMode
+                      ? "Search on Google Maps instead"
+                      : "Can't find on Maps?"}
+                  </button>
+                </div>
+
+                {manualMode ? (
+                  <div className="space-y-3 rounded-xl border border-white/10 bg-white/[0.02] p-4">
+                    <input
+                      type="text"
+                      value={manualBusinessName}
+                      onChange={(event) => {
+                        setManualBusinessName(event.target.value);
+                        setError("");
+                      }}
+                      placeholder="Business name"
+                      className="lf-input w-full"
+                    />
+                    <input
+                      type="url"
+                      value={manualWebsite}
+                      onChange={(event) => setManualWebsite(event.target.value)}
+                      placeholder="Website URL (optional)"
+                      className="lf-input w-full"
+                    />
+                    <input
+                      type="tel"
+                      value={manualPhone}
+                      onChange={(event) => setManualPhone(event.target.value)}
+                      placeholder="Phone number (optional)"
+                      className="lf-input w-full"
+                    />
+                  </div>
+                ) : (
+                  <div className="relative z-[100]">
+                    <label className="sr-only" htmlFor="ai-audit-search">
+                      Search your UAE business
+                    </label>
+                    <div className="relative z-[100]">
+                      <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#64748b]" />
+                      <input
+                        id="ai-audit-search"
+                        type="text"
+                        value={query}
+                        onChange={(event) => {
+                          setQuery(event.target.value);
+                          setSuggestionsOpen(true);
+                          setError("");
+                        }}
+                        onFocus={() => {
+                          if (trimmedQuery.length >= 2) setSuggestionsOpen(true);
+                        }}
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter") {
+                            event.preventDefault();
+                            void handleSimulate();
+                          }
+                        }}
+                        placeholder="e.g. Your café in Dubai Marina"
+                        autoComplete="off"
+                        role="combobox"
+                        aria-expanded={showSuggestions}
+                        aria-controls={listboxId}
+                        className="lf-input w-full pl-10"
+                      />
+                      {showSuggestions ? (
+                        <ul
+                          id={listboxId}
+                          role="listbox"
+                          className="absolute left-0 top-full z-[9999] mt-1 max-h-60 w-full overflow-y-auto rounded-xl border border-emerald-500/30 bg-black/90 py-1 shadow-[0_24px_60px_rgba(0,0,0,0.55)] backdrop-blur-md"
+                        >
+                          {suggestionsLoading ? (
+                            <li className="flex items-center gap-2 px-4 py-3 text-sm text-[#94a3b8]">
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                              Searching Google Maps UAE…
+                            </li>
+                          ) : (
+                            <>
+                              {suggestions.map((item) => (
+                                <li key={item.placeId} role="option">
+                                  <button
+                                    type="button"
+                                    onClick={() => selectSuggestion(item)}
+                                    className="flex w-full flex-col px-4 py-3 text-left transition hover:bg-white/5"
+                                  >
+                                    <span className="text-sm font-semibold text-white">
+                                      {item.mainText}
+                                    </span>
+                                    {item.secondaryText ? (
+                                      <span className="mt-0.5 text-xs text-[#94a3b8]">
+                                        {item.secondaryText}
+                                      </span>
+                                    ) : null}
+                                  </button>
+                                </li>
+                              ))}
+                              <li role="option">
+                                <button
+                                  type="button"
+                                  onClick={() => selectManualSearch(trimmedQuery)}
+                                  className="flex w-full flex-col border-t border-white/10 px-4 py-3 text-left transition hover:bg-emerald-500/10"
+                                >
+                                  <span className="text-sm font-semibold text-emerald-200">
+                                    Search for &quot;{trimmedQuery}&quot; manually
+                                  </span>
+                                  <span className="mt-0.5 text-xs text-[#94a3b8]">
+                                    Not on Google Maps? Enter details yourself
+                                  </span>
+                                </button>
+                              </li>
+                            </>
+                          )}
+                        </ul>
+                      ) : null}
+                    </div>
+                  </div>
+                )}
 
                 <button
                   type="button"
-                  onClick={() => void handleScan()}
-                  disabled={scanning || trimmedQuery.length < 2}
-                  className="lf-btn-primary inline-flex min-h-[48px] shrink-0 items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white disabled:opacity-60"
+                  onClick={() => void handleSimulate()}
+                  className="group relative inline-flex min-h-[52px] w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-fuchsia-600 via-violet-600 to-emerald-500 px-6 py-3.5 text-sm font-bold text-white shadow-[0_0_32px_rgba(192,38,211,0.35)] transition hover:scale-[1.01] hover:shadow-[0_0_42px_rgba(52,211,153,0.45)] sm:text-base"
                 >
-                  {scanning ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : null}
-                  Scan Now ⚡
+                  <span className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 opacity-0 transition group-hover:opacity-100" />
+                  <Zap className="h-4 w-4" />
+                  Simulate AI Visibility
+                  <Sparkles className="h-4 w-4" />
                 </button>
               </div>
-              <p className="mt-2 text-xs text-[#64748b]">
-                Can&apos;t find your listing? Type your business name and tap{" "}
-                <span className="font-semibold text-[#94a3b8]">Scan Now</span> —
-                we&apos;ll still run the audit.
-              </p>
-            </div>
+            ) : null}
+
+            {phase === "scanning" ? <AuditTerminalLoader /> : null}
 
             {error ? (
               <p className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
@@ -316,98 +479,48 @@ export default function LandingAiAuditSection({
               </p>
             ) : null}
 
-            {scanning ? (
-              <div className="mt-6 rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-5">
-                <div className="flex items-center gap-3">
-                  <Loader2 className="h-5 w-5 animate-spin text-emerald-300" />
-                  <p className="text-sm font-medium text-emerald-100">
-                    {scanMessage}
-                  </p>
+            {phase === "results" && result ? (
+              <div className="lf-animate-in mt-6 space-y-6">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-300">
+                      Simulation complete
+                    </p>
+                    <p className="mt-1 text-sm text-[#94a3b8]">
+                      {result.sectorLabel} · {result.businessName}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={resetSimulator}
+                    className="inline-flex items-center gap-2 rounded-lg border border-white/10 px-3 py-2 text-xs font-semibold text-[#94a3b8] transition hover:border-emerald-500/40 hover:text-emerald-200"
+                  >
+                    <RotateCcw className="h-3.5 w-3.5" />
+                    Run another simulation
+                  </button>
                 </div>
-                <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-emerald-950/60">
-                  <div className="h-full w-2/3 animate-pulse rounded-full bg-gradient-to-r from-emerald-400 to-fuchsia-400" />
+
+                <div className="grid gap-4 lg:grid-cols-2">
+                  <AuditChatPanelBefore
+                    boneQuestion={result.boneQuestion}
+                    competitors={result.competitors}
+                    businessName={result.businessName}
+                  />
+                  <AuditChatPanelAfter
+                    boneQuestion={result.boneQuestion}
+                    businessName={result.businessName}
+                    formattedAddress={result.formattedAddress}
+                    websiteUri={result.websiteUri}
+                    phoneNumber={result.phoneNumber}
+                    rating={result.rating}
+                  />
                 </div>
-              </div>
-            ) : null}
 
-            {result ? (
-              <div className="mt-6 space-y-5 border-t border-white/10 pt-6">
-                <dl className="grid gap-3 sm:grid-cols-2">
-                  <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
-                    <dt className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#64748b]">
-                      Business
-                    </dt>
-                    <dd className="mt-1 text-sm font-semibold text-white">
-                      {result.businessName}
-                    </dd>
-                  </div>
-                  <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
-                    <dt className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#64748b]">
-                      Phone
-                    </dt>
-                    <dd className="mt-1 text-sm text-white">
-                      {result.phoneNumber || "Not listed"}
-                    </dd>
-                  </div>
-                  <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 sm:col-span-2">
-                    <dt className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#64748b]">
-                      Address
-                    </dt>
-                    <dd className="mt-1 text-sm text-white">
-                      {result.formattedAddress}
-                    </dd>
-                  </div>
-                  <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
-                    <dt className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#64748b]">
-                      Google Rating
-                    </dt>
-                    <dd className="mt-1 text-sm text-white">
-                      {result.rating != null ? `${result.rating.toFixed(1)} ★` : "N/A"}
-                      {result.userRatingsTotal != null
-                        ? ` · ${result.userRatingsTotal} reviews`
-                        : ""}
-                    </dd>
-                  </div>
-                  <div className="rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3">
-                    <dt className="text-[11px] font-semibold uppercase tracking-[0.12em] text-red-200/80">
-                      AI Visibility Score
-                    </dt>
-                    <dd className="lf-orbitron mt-1 text-2xl font-bold text-red-200">
-                      {result.visibilityScore}%{" "}
-                      <span className="text-sm font-semibold text-red-100/90">
-                        [{result.visibilityBand}]
-                      </span>
-                    </dd>
-                  </div>
-                </dl>
-
-                <ul className="space-y-2.5">
-                  {result.statusItems.map((item) => (
-                    <li
-                      key={item.text}
-                      className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-[#e2e8f0]"
-                    >
-                      {item.icon} <span className="text-[#cbd5e1]">{item.text}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    onFixVisibility({
-                      businessName: result.businessName,
-                      city: result.city,
-                      formattedAddress: result.formattedAddress,
-                      phoneNumber: result.phoneNumber,
-                    })
-                  }
-                  className="lf-btn-primary inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl px-5 py-3.5 text-sm font-bold text-white sm:text-base"
-                >
-                  Fix Visibility &amp; Claim #1 Spot (
-                  {formatLandingCurrency(STARTER_MONTHLY)}/mo)
-                  <ArrowRight className="h-4 w-4" />
-                </button>
+                <AuditSimulatorCta
+                  billingCycle={billingCycle}
+                  onBillingCycleChange={setBillingCycle}
+                  onCheckout={handleCheckout}
+                />
               </div>
             ) : null}
           </div>

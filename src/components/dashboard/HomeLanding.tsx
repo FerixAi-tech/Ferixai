@@ -17,6 +17,7 @@ import "@/components/landing/landing-futuristic.css";
 import { emptyKeyFeatures, saveCampaignDraft } from "@/lib/campaign/draft";
 import { saveLeadMagnetInput } from "@/lib/lead-magnet";
 import { listPricingPlans } from "@/lib/constants/pricing-plans";
+import type { BillingCycle } from "@/lib/constants/pricing-plans";
 import { formatLandingCurrency } from "@/lib/constants/landing-locale";
 
 const LandingPricingPlans = dynamic(
@@ -97,22 +98,24 @@ export default function HomeLanding({
   function handleFixVisibility(payload: {
     businessName: string;
     city: string;
+    category: string;
+    billingCycle: BillingCycle;
     formattedAddress: string;
     phoneNumber: string | null;
   }) {
     saveLeadMagnetInput({
       businessName: payload.businessName,
-      category: "Local Business",
+      category: payload.category,
       city: payload.city,
     });
     saveCampaignDraft({
       businessName: payload.businessName,
-      category: "Local Business",
+      category: payload.category,
       productDescription: "",
       keyFeatures: emptyKeyFeatures(),
       city: payload.city,
       planSlug: "starter",
-      billingCycle: "monthly",
+      billingCycle: payload.billingCycle,
       step: 1,
       updatedAt: Date.now(),
     });

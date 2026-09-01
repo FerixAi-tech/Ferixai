@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import {
-  AI_AUDIT_STATUS_ITEMS,
-  computeAiVisibilityScore,
-} from "@/lib/preview/ai-audit-score";
+  getAuditSector,
+  isAuditSectorId,
+  type AuditSectorId,
+} from "@/lib/constants/audit-sectors";
 import {
   getPlaceDetailsById,
   lookupBusinessByTextQuery,
@@ -10,20 +11,42 @@ import {
 
 export const runtime = "nodejs";
 
+function resolveCity(city: string): string {
+  const trimmed = city.trim();
+  if (!trimmed || trimmed === "United Arab Emirates") return "Dubai";
+  return trimmed;
+}
+
 export async function POST(request: Request) {
   try {
     const body = (await request.json()) as {
       placeId?: string;
       businessName?: string;
+      sectorId?: string;
+      customCategoryLabel?: string;
+      manualWebsite?: string;
+      manualPhone?: string;
     };
+
     const placeId = body.placeId?.trim();
     const businessName = body.businessName?.trim();
+    const sectorId = body.sectorId?.trim() ?? "";
+    const customCategoryLabel = body.customCategoryLabel?.trim();
+    const manualWebsite = body.manualWebsite?.trim() || null;
+    const manualPhone = body.manualPhone?.trim() || null;
+
+    if (!isAuditSectorId(sectorId)) {
+      return NextResponse.json(
+        { error: "Please select your business sector." },
+        { status: 400 },
+      );
+    }
 
     if (!placeId && !businessName) {
       return NextResponse.json(
         {
           error:
-            "Enter your UAE business name or pick a suggestion, then scan again.",
+            "Enter your UAE business name or pick a Google Maps suggestion.",
         },
         { status: 400 },
       );
@@ -33,25 +56,32 @@ export async function POST(request: Request) {
       ? await getPlaceDetailsById(placeId)
       : await lookupBusinessByTextQuery(businessName!);
 
+    const sector = getAuditSector(sectorId as AuditSectorId);
+    const city = resolveCity(place.city);
     const resolvedName =
       place.name?.trim() || businessName?.trim() || "Your UAE business";
-    const scoreSeed = place.placeId || resolvedName;
-    const { score, band } = computeAiVisibilityScore(scoreSeed);
+    const boneQuestion = sector.boneQuestion(city, customCategoryLabel);
 
     return NextResponse.json({
       ok: true,
       result: {
         businessName: resolvedName,
         formattedAddress: place.formattedAddress,
-        phoneNumber: place.phoneNumber,
+        phoneNumber: manualPhone || place.phoneNumber,
+        websiteUri: manualWebsite || place.websiteUri,
         rating: place.rating,
         userRatingsTotal: place.userRatingsTotal,
-        city: place.city,
+        city,
         placeId: place.placeId,
         fromGoogle: place.fromGoogle,
-        visibilityScore: score,
-        visibilityBand: band,
-        statusItems: AI_AUDIT_STATUS_ITEMS,
+        sectorId: sector.id,
+        sectorLabel: sector.label,
+        campaignCategory:
+          sector.id === "general" && customCategoryLabel
+            ? customCategoryLabel
+            : sector.campaignCategory,
+        boneQuestion,
+        competitors: sector.competitors,
       },
     });
   } catch (err) {
