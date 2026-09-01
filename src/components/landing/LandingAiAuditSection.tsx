@@ -12,12 +12,18 @@ import {
 import AuditSimulatorCta from "@/components/landing/ai-audit/AuditSimulatorCta";
 import {
   AUDIT_SCAN_DURATION_MS,
-  AUDIT_SECTORS,
-  isAuditSectorId,
+  isAuditCategory,
   type AuditCompetitor,
-  type AuditSectorId,
 } from "@/lib/constants/audit-sectors";
+import {
+  CUSTOM_CATEGORY_OPTION_VALUE,
+  isValidCategoryName,
+  listBusinessCategoryOptions,
+  normalizeCategoryName,
+} from "@/lib/constants/categories";
 import type { BillingCycle } from "@/lib/constants/pricing-plans";
+
+const CATEGORY_OPTIONS = listBusinessCategoryOptions();
 
 type AutocompleteSuggestion = {
   placeId: string;
@@ -35,9 +41,7 @@ type SimulatorResult = {
   userRatingsTotal: number | null;
   city: string;
   placeId: string | null;
-  sectorId: AuditSectorId;
-  sectorLabel: string;
-  campaignCategory: string;
+  category: string;
   boneQuestion: string;
   competitors: readonly AuditCompetitor[];
 };
@@ -63,8 +67,9 @@ export default function LandingAiAuditSection({
   const debounceRef = useRef<number | null>(null);
 
   const [phase, setPhase] = useState<Phase>("input");
-  const [sectorId, setSectorId] = useState<AuditSectorId | "">("");
-  const [customCategoryLabel, setCustomCategoryLabel] = useState("");
+  const [category, setCategory] = useState("");
+  const [customCategoryOpen, setCustomCategoryOpen] = useState(false);
+  const [customCategory, setCustomCategory] = useState("");
   const [manualMode, setManualMode] = useState(false);
 
   const [query, setQuery] = useState("");
@@ -84,7 +89,13 @@ export default function LandingAiAuditSection({
   const trimmedQuery = query.trim();
   const showSuggestions =
     phase === "input" && suggestionsOpen && trimmedQuery.length >= 2;
-  const showGeneralCategory = sectorId === "general";
+
+  function resolvedCategory(): string {
+    if (customCategoryOpen || category === CUSTOM_CATEGORY_OPTION_VALUE) {
+      return normalizeCategoryName(customCategory);
+    }
+    return normalizeCategoryName(category);
+  }
 
   useEffect(() => {
     function onPointerDown(event: MouseEvent) {
@@ -164,9 +175,7 @@ export default function LandingAiAuditSection({
       : trimmedQuery;
 
     return {
-      sectorId,
-      customCategoryLabel:
-        sectorId === "general" ? customCategoryLabel.trim() : undefined,
+      category: resolvedCategory(),
       ...(usePlaceId ? { placeId: selected!.placeId } : { businessName }),
       manualWebsite: manualWebsite.trim() || undefined,
       manualPhone: manualPhone.trim() || undefined,
@@ -174,11 +183,14 @@ export default function LandingAiAuditSection({
   }
 
   function validateInput(): string | null {
-    if (!isAuditSectorId(sectorId)) {
-      return "Please select your business sector.";
-    }
-    if (sectorId === "general" && customCategoryLabel.trim().length < 2) {
-      return "Enter your business type for the general sector (e.g. Bakery, Spa).";
+    if (customCategoryOpen || category === CUSTOM_CATEGORY_OPTION_VALUE) {
+      if (!isValidCategoryName(customCategory)) {
+        return "Please enter your category (2–80 characters).";
+      }
+    } else if (!category) {
+      return "Please choose a category.";
+    } else if (!isAuditCategory(category)) {
+      return "Please select a valid category.";
     }
     if (manualMode) {
       if (manualBusinessName.trim().length < 2) {
@@ -245,7 +257,7 @@ export default function LandingAiAuditSection({
     onFixVisibility({
       businessName: result.businessName,
       city: result.city,
-      category: result.campaignCategory,
+      category: result.category,
       billingCycle,
       formattedAddress: result.formattedAddress,
       phoneNumber: result.phoneNumber,
@@ -275,7 +287,7 @@ export default function LandingAiAuditSection({
               Audit Your UAE Business on AI Search Engines
             </h2>
             <p className="mt-3 text-sm leading-relaxed text-[#94a3b8]">
-              Pick your sector, pull your Google Maps listing across Dubai, Abu
+              Pick your category, pull your Google Maps listing across Dubai, Abu
               Dhabi &amp; the UAE — then simulate how ChatGPT answers today vs.
               after FerixAI.
             </p>
@@ -284,47 +296,71 @@ export default function LandingAiAuditSection({
               <div className="mt-6 space-y-4">
                 <div>
                   <label
-                    htmlFor="audit-sector"
+                    htmlFor="audit-category"
                     className="mb-1.5 block text-sm font-medium text-[#94a3b8]"
                   >
-                    Business sector
+                    Category
                   </label>
-                  <DarkSelect
-                    id="audit-sector"
-                    value={sectorId}
-                    onChange={(value) => {
-                      setSectorId(value as AuditSectorId);
-                      setError("");
-                    }}
-                    placeholder="Select your sector"
-                    options={AUDIT_SECTORS.map((sector) => ({
-                      value: sector.id,
-                      label: sector.label,
-                    }))}
-                  />
+                  {!customCategoryOpen ? (
+                    <>
+                      <DarkSelect
+                        id="audit-category"
+                        value={category}
+                        onChange={(value) => {
+                          setCategory(value);
+                          setCustomCategoryOpen(false);
+                          setCustomCategory("");
+                          setError("");
+                        }}
+                        placeholder="Select a category"
+                        options={CATEGORY_OPTIONS.map((item) => ({
+                          value: item.name,
+                          label: item.name,
+                        }))}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setCustomCategoryOpen(true);
+                          setCategory(CUSTOM_CATEGORY_OPTION_VALUE);
+                          setCustomCategory("");
+                          setError("");
+                        }}
+                        className="mt-2 text-left text-sm font-semibold text-teal-300 transition hover:text-teal-200 hover:underline"
+                      >
+                        If your category isn&apos;t listed, click here
+                      </button>
+                    </>
+                  ) : (
+                    <div className="space-y-2">
+                      <input
+                        id="audit-category"
+                        type="text"
+                        value={customCategory}
+                        onChange={(event) => {
+                          setCustomCategory(event.target.value);
+                          setError("");
+                        }}
+                        placeholder="Type your category"
+                        maxLength={80}
+                        className="lf-input w-full"
+                        autoFocus
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setCustomCategoryOpen(false);
+                          setCustomCategory("");
+                          setCategory("");
+                          setError("");
+                        }}
+                        className="text-sm font-semibold text-[#94a3b8] transition hover:text-white hover:underline"
+                      >
+                        Back to category list
+                      </button>
+                    </div>
+                  )}
                 </div>
-
-                {showGeneralCategory ? (
-                  <div>
-                    <label
-                      htmlFor="audit-custom-category"
-                      className="mb-1.5 block text-sm font-medium text-[#94a3b8]"
-                    >
-                      Your business type
-                    </label>
-                    <input
-                      id="audit-custom-category"
-                      type="text"
-                      value={customCategoryLabel}
-                      onChange={(event) => {
-                        setCustomCategoryLabel(event.target.value);
-                        setError("");
-                      }}
-                      placeholder="e.g. Bakery, Spa, Tailor"
-                      className="lf-input w-full"
-                    />
-                  </div>
-                ) : null}
 
                 <div className="flex items-center justify-between gap-3">
                   <p className="text-sm font-medium text-[#94a3b8]">
@@ -487,7 +523,7 @@ export default function LandingAiAuditSection({
                       Simulation complete
                     </p>
                     <p className="mt-1 text-sm text-[#94a3b8]">
-                      {result.sectorLabel} · {result.businessName}
+                      {result.category} · {result.businessName}
                     </p>
                   </div>
                   <button

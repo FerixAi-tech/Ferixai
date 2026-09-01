@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import {
-  getAuditSector,
-  isAuditSectorId,
-  type AuditSectorId,
+  getAuditCategoryConfig,
+  isAuditCategory,
 } from "@/lib/constants/audit-sectors";
+import { normalizeCategoryName } from "@/lib/constants/categories";
 import {
   getPlaceDetailsById,
   lookupBusinessByTextQuery,
@@ -22,22 +22,20 @@ export async function POST(request: Request) {
     const body = (await request.json()) as {
       placeId?: string;
       businessName?: string;
-      sectorId?: string;
-      customCategoryLabel?: string;
+      category?: string;
       manualWebsite?: string;
       manualPhone?: string;
     };
 
     const placeId = body.placeId?.trim();
     const businessName = body.businessName?.trim();
-    const sectorId = body.sectorId?.trim() ?? "";
-    const customCategoryLabel = body.customCategoryLabel?.trim();
+    const category = normalizeCategoryName(body.category ?? "");
     const manualWebsite = body.manualWebsite?.trim() || null;
     const manualPhone = body.manualPhone?.trim() || null;
 
-    if (!isAuditSectorId(sectorId)) {
+    if (!isAuditCategory(category)) {
       return NextResponse.json(
-        { error: "Please select your business sector." },
+        { error: "Please select or enter a valid category." },
         { status: 400 },
       );
     }
@@ -56,11 +54,11 @@ export async function POST(request: Request) {
       ? await getPlaceDetailsById(placeId)
       : await lookupBusinessByTextQuery(businessName!);
 
-    const sector = getAuditSector(sectorId as AuditSectorId);
+    const config = getAuditCategoryConfig(category);
     const city = resolveCity(place.city);
     const resolvedName =
       place.name?.trim() || businessName?.trim() || "Your UAE business";
-    const boneQuestion = sector.boneQuestion(city, customCategoryLabel);
+    const boneQuestion = config.boneQuestion(city);
 
     return NextResponse.json({
       ok: true,
@@ -74,14 +72,9 @@ export async function POST(request: Request) {
         city,
         placeId: place.placeId,
         fromGoogle: place.fromGoogle,
-        sectorId: sector.id,
-        sectorLabel: sector.label,
-        campaignCategory:
-          sector.id === "general" && customCategoryLabel
-            ? customCategoryLabel
-            : sector.campaignCategory,
+        category,
         boneQuestion,
-        competitors: sector.competitors,
+        competitors: config.competitors,
       },
     });
   } catch (err) {

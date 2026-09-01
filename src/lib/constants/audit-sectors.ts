@@ -1,28 +1,44 @@
-export type AuditSectorId =
-  | "real-estate"
-  | "dental-aesthetic"
-  | "corporate-law"
-  | "luxury-transport"
-  | "general";
+import {
+  isValidCategoryName,
+  normalizeCategoryName,
+  type BusinessCategory,
+} from "@/lib/constants/categories";
 
 export type AuditCompetitor = {
   name: string;
   subtitle: string;
 };
 
-export type AuditSector = {
-  id: AuditSectorId;
-  label: string;
-  campaignCategory: string;
-  boneQuestion: (city: string, customLabel?: string) => string;
+type CategoryAuditConfig = {
+  boneQuestion: (city: string) => string;
   competitors: readonly AuditCompetitor[];
 };
 
-export const AUDIT_SECTORS: readonly AuditSector[] = [
-  {
-    id: "real-estate",
-    label: "Real Estate (Property & Real Estate)",
-    campaignCategory: "Real Estate Agency / Broker",
+function defaultCompetitors(category: string): readonly AuditCompetitor[] {
+  return [
+    {
+      name: "Established UAE Market Leader",
+      subtitle: `Top-rated ${category}`,
+    },
+    {
+      name: "Verified Local Provider",
+      subtitle: "Industry leader",
+    },
+    {
+      name: "Top-Rated Competitor",
+      subtitle: "Verified agency",
+    },
+  ] as const;
+}
+
+function defaultBoneQuestion(category: string, city: string): string {
+  return `What are the most reputable ${category.toLowerCase()} providers in ${city}?`;
+}
+
+const CATEGORY_OVERRIDES: Partial<
+  Record<BusinessCategory, CategoryAuditConfig>
+> = {
+  "Real Estate Agency / Broker": {
     boneQuestion: (city) =>
       `What are the top recommended luxury real estate brokers in ${city} with verified licensing?`,
     competitors: [
@@ -31,64 +47,123 @@ export const AUDIT_SECTORS: readonly AuditSector[] = [
       { name: "fam Properties", subtitle: "Premium brokerage" },
     ],
   },
-  {
-    id: "dental-aesthetic",
-    label: "Dental & Aesthetic Clinics",
-    campaignCategory: "Dental Clinic",
+  "Dental Clinic": {
     boneQuestion: (city) =>
-      `Which dental and aesthetic clinics in ${city} have the highest patient trust and certified practitioners?`,
+      `Which dental clinics in ${city} have the highest patient trust and certified practitioners?`,
     competitors: [
       { name: "Versailles Dental Clinic", subtitle: "Industry leader" },
       { name: "Dr. Michael's Dental Clinic", subtitle: "Verified clinic" },
       { name: "Al Zahra Hospital Dental", subtitle: "Trusted provider" },
     ],
   },
-  {
-    id: "corporate-law",
-    label: "Corporate Law & Business Setup",
-    campaignCategory: "Business Setup & Corporate Services",
+  "Aesthetic & Plastic Surgery Clinic": {
     boneQuestion: (city) =>
-      `Can you suggest the most reliable business setup and corporate law firms in ${city}?`,
+      `Which aesthetic and plastic surgery clinics in ${city} are most recommended by patients?`,
+    competitors: [
+      { name: "CosmeSurge Hospital", subtitle: "Industry leader" },
+      { name: "Kaya Skin Clinic", subtitle: "Verified clinic" },
+      { name: "Euromed Clinic", subtitle: "Trusted provider" },
+    ],
+  },
+  "Business Setup & Corporate Services": {
+    boneQuestion: (city) =>
+      `Can you suggest the most reliable business setup firms in ${city}?`,
     competitors: [
       { name: "Virtuzone", subtitle: "Industry leader" },
       { name: "Shuraa Business Setup", subtitle: "Verified agency" },
-      { name: "Al Tamimi & Company", subtitle: "Legal authority" },
+      { name: "Commitbiz", subtitle: "Trusted provider" },
     ],
   },
-  {
-    id: "luxury-transport",
-    label: "Luxury Car Rental & Chauffeur",
-    campaignCategory: "Luxury Car Rental",
+  "Law Firm & Legal Services": {
     boneQuestion: (city) =>
-      `Top-rated luxury car rental and chauffeur services in ${city} with transparent pricing?`,
+      `Which corporate law firms in ${city} are best for business and licensing matters?`,
+    competitors: [
+      { name: "Al Tamimi & Company", subtitle: "Legal authority" },
+      { name: "Hadef & Partners", subtitle: "Industry leader" },
+      { name: "BSA Ahmad Bin Hezeem", subtitle: "Verified firm" },
+    ],
+  },
+  "Luxury Car Rental": {
+    boneQuestion: (city) =>
+      `Top-rated luxury car rental services in ${city} with transparent pricing?`,
     competitors: [
       { name: "Diamond Lease", subtitle: "Industry leader" },
       { name: "Superior Car Rental", subtitle: "Verified fleet" },
-      { name: "Rotana Star Luxury Cars", subtitle: "Premium chauffeur" },
+      { name: "Rotana Star Luxury Cars", subtitle: "Premium rental" },
     ],
   },
-  {
-    id: "general",
-    label: "General Local Business (Other)",
-    campaignCategory: "Local Business",
-    boneQuestion: (city, customLabel) => {
-      const label = customLabel?.trim() || "local business";
-      return `What are the most reputable ${label} providers in ${city}?`;
-    },
+  "Chauffeur & Luxury Transport": {
+    boneQuestion: (city) =>
+      `Best chauffeur and luxury transport services in ${city} for executive travel?`,
     competitors: [
-      { name: "Established UAE Market Leader", subtitle: "Industry leader" },
-      { name: "Verified Local Provider", subtitle: "Verified agency" },
-      { name: "Top-Rated Competitor", subtitle: "High visibility" },
+      { name: "Blacklane UAE", subtitle: "Industry leader" },
+      { name: "Dubai Private Chauffeur", subtitle: "Verified service" },
+      { name: "Luxury Ride Dubai", subtitle: "Premium chauffeur" },
     ],
   },
-] as const;
+  Restaurant: {
+    boneQuestion: (city) =>
+      `What are the best restaurants in ${city} recommended for quality and service?`,
+    competitors: [
+      { name: "Zuma Dubai", subtitle: "Industry leader" },
+      { name: "La Petite Maison", subtitle: "Verified favorite" },
+      { name: "Pierchic", subtitle: "Top-rated dining" },
+    ],
+  },
+  Cafe: {
+    boneQuestion: (city) =>
+      `Which cafés in ${city} are best for specialty coffee and remote work?`,
+    competitors: [
+      { name: "Tom & Serg", subtitle: "Industry leader" },
+      { name: "% Arabica Dubai", subtitle: "Verified café" },
+      { name: "Common Grounds", subtitle: "Top-rated coffee" },
+    ],
+  },
+  "Yacht Charter & Boat Rental": {
+    boneQuestion: (city) =>
+      `Top yacht charter and boat rental companies in ${city} with licensed crews?`,
+    competitors: [
+      { name: "Charlux Yachts", subtitle: "Industry leader" },
+      { name: "Xclusive Yachts", subtitle: "Verified charter" },
+      { name: "Royal Yachts", subtitle: "Premium fleet" },
+    ],
+  },
+  "Fitness & Gym": {
+    boneQuestion: (city) =>
+      `Which gyms and fitness centres in ${city} are most recommended?`,
+    competitors: [
+      { name: "Fitness First UAE", subtitle: "Industry leader" },
+      { name: "Gold's Gym Dubai", subtitle: "Verified gym" },
+      { name: "Warehouse Gym", subtitle: "Top-rated training" },
+    ],
+  },
+  "Hotel & Accommodation": {
+    boneQuestion: (city) =>
+      `What are the best hotels in ${city} for business and leisure stays?`,
+    competitors: [
+      { name: "Burj Al Arab", subtitle: "Industry leader" },
+      { name: "Atlantis The Palm", subtitle: "Verified luxury" },
+      { name: "Address Downtown", subtitle: "Top-rated stay" },
+    ],
+  },
+};
 
-export function getAuditSector(id: AuditSectorId): AuditSector {
-  return AUDIT_SECTORS.find((sector) => sector.id === id) ?? AUDIT_SECTORS[4]!;
+export function getAuditCategoryConfig(category: string): CategoryAuditConfig {
+  const normalized = normalizeCategoryName(category);
+  const override = CATEGORY_OVERRIDES[normalized as BusinessCategory];
+
+  if (override) {
+    return override;
+  }
+
+  return {
+    boneQuestion: (city) => defaultBoneQuestion(normalized, city),
+    competitors: defaultCompetitors(normalized),
+  };
 }
 
-export function isAuditSectorId(value: string): value is AuditSectorId {
-  return AUDIT_SECTORS.some((sector) => sector.id === value);
+export function isAuditCategory(value: string): boolean {
+  return isValidCategoryName(value);
 }
 
 export const AUDIT_SCAN_STEPS = [
