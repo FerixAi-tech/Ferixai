@@ -5,6 +5,7 @@ import {
   resolvePricingPlanSlug,
 } from "@/lib/constants/pricing-plans";
 import AdminPanelLogoutButton from "@/components/admin/AdminPanelLogoutButton";
+import AdminPanelNav from "@/components/admin/AdminPanelNav";
 import Link from "next/link";
 
 export default async function AdminPublishedContents() {
@@ -43,6 +44,8 @@ export default async function AdminPublishedContents() {
         </div>
         <AdminPanelLogoutButton />
       </div>
+
+      <AdminPanelNav active="/om-admin-panel" />
 
       <div className="space-y-4">
         {(campaigns || []).map((campaign) => {

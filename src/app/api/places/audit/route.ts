@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { saveLandingAuditSimulation } from "@/lib/audit/save-simulation";
 import {
   getAuditCategoryConfig,
   isAuditCategory,
@@ -59,14 +60,34 @@ export async function POST(request: Request) {
     const resolvedName =
       place.name?.trim() || businessName?.trim() || "Your UAE business";
     const boneQuestion = config.boneQuestion(city);
+    const phoneNumber = manualPhone || place.phoneNumber;
+    const websiteUri = manualWebsite || place.websiteUri;
+
+    await saveLandingAuditSimulation({
+      category,
+      businessName: resolvedName,
+      formattedAddress: place.formattedAddress,
+      city,
+      phoneNumber,
+      websiteUri,
+      googleRating: place.rating,
+      googleReviewCount: place.userRatingsTotal,
+      placeId: place.placeId,
+      fromGoogle: place.fromGoogle,
+      manualEntry: !placeId,
+      boneQuestion,
+      competitors: config.competitors,
+      referrer: request.headers.get("referer"),
+      userAgent: request.headers.get("user-agent"),
+    });
 
     return NextResponse.json({
       ok: true,
       result: {
         businessName: resolvedName,
         formattedAddress: place.formattedAddress,
-        phoneNumber: manualPhone || place.phoneNumber,
-        websiteUri: manualWebsite || place.websiteUri,
+        phoneNumber,
+        websiteUri,
         rating: place.rating,
         userRatingsTotal: place.userRatingsTotal,
         city,

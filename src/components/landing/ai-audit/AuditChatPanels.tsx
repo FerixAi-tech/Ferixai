@@ -30,41 +30,41 @@ export function AuditChatPanelBefore({
 }) {
   return (
     <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-red-500/35 bg-[#0a0d14] shadow-[0_0_40px_rgba(239,68,68,0.08)]">
-      <header className="border-b border-red-500/20 bg-red-500/10 px-4 py-3">
-        <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-red-200/90">
+      <header className="border-b border-red-500/20 bg-red-500/10 px-4 py-3.5 sm:px-5">
+        <p className="text-xs font-bold uppercase tracking-[0.16em] text-red-200/90 sm:text-sm">
           ❌ Current Status — Customer Loss
         </p>
       </header>
-      <div className="flex items-center gap-3 border-b border-white/5 px-4 py-3">
-        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#10a37f]/20 ring-1 ring-[#10a37f]/40">
+      <div className="flex items-center gap-3 border-b border-white/5 px-4 py-3.5 sm:px-5">
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#10a37f]/20 ring-1 ring-[#10a37f]/40">
           <Bot className="h-5 w-5 text-[#10a37f]" aria-hidden />
         </div>
-        <p className="text-sm font-semibold text-white">ChatGPT</p>
+        <p className="text-base font-semibold text-white sm:text-lg">ChatGPT</p>
       </div>
-      <div className="space-y-4 p-4">
-        <div className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5 text-xs italic leading-relaxed text-[#cbd5e1]">
+      <div className="space-y-4 p-4 sm:p-5">
+        <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm italic leading-relaxed text-[#cbd5e1] sm:text-base">
           &quot;{boneQuestion}&quot;
         </div>
-        <ol className="space-y-2.5 text-sm text-[#e2e8f0]">
+        <ol className="space-y-3 text-base text-[#e2e8f0] sm:text-lg">
           {competitors.map((competitor, index) => (
             <li
               key={competitor.name}
-              className="rounded-lg border border-white/8 bg-white/[0.02] px-3 py-2.5"
+              className="rounded-lg border border-white/8 bg-white/[0.02] px-4 py-3"
             >
               <span className="font-semibold text-white">
                 {index + 1}. {competitor.name}
               </span>
-              <span className="mt-1 block text-xs italic text-[#94a3b8]">
+              <span className="mt-1 block text-sm italic text-[#94a3b8] sm:text-base">
                 — {competitor.subtitle}
               </span>
             </li>
           ))}
         </ol>
       </div>
-      <footer className="mt-auto border-t border-red-500/25 bg-red-500/10 p-4 text-xs leading-relaxed text-red-100">
+      <footer className="mt-auto border-t border-red-500/25 bg-red-500/10 p-4 text-sm leading-relaxed text-red-100 sm:p-5 sm:text-base">
         🔴 Warning:{" "}
-        <strong className="font-semibold text-white">{businessName}</strong> is
-        NOT indexed in OpenAI &amp; Claude Entity Graphs.{" "}
+        <strong className="font-semibold text-white">{businessName}</strong>{" "}
+        is NOT indexed in OpenAI &amp; Claude Entity Graphs.{" "}
         <strong className="text-red-200">0 Leads Captured.</strong>
       </footer>
     </article>
