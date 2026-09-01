@@ -48,13 +48,13 @@ input[type="range"]::-moz-range-thumb {
   }
 }
 
-/* Crisp live chat — slightly larger bottom-right launcher */
+/* Crisp live chat — larger bottom-right launcher */
 #crisp-chatbox-button {
-  transform: scale(1.22);
+  transform: scale(1.45);
   transform-origin: bottom right;
 }
 
 #crisp-chatbox-button span {
-  width: 72px !important;
-  height: 72px !important;
+  width: 84px !important;
+  height: 84px !important;
 }
