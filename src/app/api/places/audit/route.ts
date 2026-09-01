@@ -2,12 +2,14 @@ import { NextResponse } from "next/server";
 import { saveLandingAuditSimulation } from "@/lib/audit/save-simulation";
 import {
   getAuditCategoryConfig,
+  getCategoryPlacesSearchQuery,
   isAuditCategory,
 } from "@/lib/constants/audit-sectors";
 import { normalizeCategoryName } from "@/lib/constants/categories";
 import {
   getPlaceDetailsById,
   lookupBusinessByTextQuery,
+  searchCategoryCompetitors,
 } from "@/lib/preview/places";
 
 export const runtime = "nodejs";
@@ -63,6 +65,21 @@ export async function POST(request: Request) {
     const phoneNumber = manualPhone || place.phoneNumber;
     const websiteUri = manualWebsite || place.websiteUri;
 
+    const liveCompetitors = await searchCategoryCompetitors({
+      searchQuery: getCategoryPlacesSearchQuery(category, city),
+      excludeName: resolvedName,
+      excludePlaceId: place.placeId,
+    });
+
+    const competitors =
+      liveCompetitors.length >= 3
+        ? liveCompetitors.slice(0, 3).map((competitor, index) => ({
+            name: competitor.name,
+            subtitle:
+              config.competitors[index]?.subtitle ?? competitor.subtitle,
+          }))
+        : config.competitors;
+
     await saveLandingAuditSimulation({
       category,
       businessName: resolvedName,
@@ -76,7 +93,7 @@ export async function POST(request: Request) {
       fromGoogle: place.fromGoogle,
       manualEntry: !placeId,
       boneQuestion,
-      competitors: config.competitors,
+      competitors,
       referrer: request.headers.get("referer"),
       userAgent: request.headers.get("user-agent"),
     });
@@ -95,7 +112,7 @@ export async function POST(request: Request) {
         fromGoogle: place.fromGoogle,
         category,
         boneQuestion,
-        competitors: config.competitors,
+        competitors,
       },
     });
   } catch (err) {

@@ -148,6 +148,34 @@ const CATEGORY_OVERRIDES: Partial<
   },
 };
 
+const CATEGORY_PLACES_SEARCH: Partial<Record<BusinessCategory, string>> = {
+  "Real Estate Agency / Broker": "real estate agency broker",
+  "Dental Clinic": "dental clinic",
+  "Aesthetic & Plastic Surgery Clinic": "aesthetic plastic surgery clinic",
+  "Business Setup & Corporate Services": "business setup company",
+  "Law Firm & Legal Services": "law firm",
+  "Luxury Car Rental": "luxury car rental",
+  "Car Rental": "car rental",
+  "Chauffeur & Luxury Transport": "chauffeur luxury transport",
+  Restaurant: "restaurant",
+  Cafe: "cafe coffee shop",
+  "Yacht Charter & Boat Rental": "yacht charter boat rental",
+  "Fitness & Gym": "gym fitness centre",
+  "Hotel & Accommodation": "hotel",
+};
+
+/** Google Places text query for finding real competitors in a category + city. */
+export function getCategoryPlacesSearchQuery(
+  category: string,
+  city: string,
+): string {
+  const normalized = normalizeCategoryName(category);
+  const term =
+    CATEGORY_PLACES_SEARCH[normalized as BusinessCategory] ??
+    normalized.toLowerCase();
+  return `best ${term} ${city} UAE`;
+}
+
 export function getAuditCategoryConfig(category: string): CategoryAuditConfig {
   const normalized = normalizeCategoryName(category);
   const override = CATEGORY_OVERRIDES[normalized as BusinessCategory];

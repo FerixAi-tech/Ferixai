@@ -407,6 +407,193 @@ export async function getPlaceDetailsById(
   }
 }
 
+export type CategoryCompetitorPlace = {
+  name: string;
+  subtitle: string;
+  placeId: string | null;
+  rating: number | null;
+  userRatingsTotal: number | null;
+};
+
+const COMPETITOR_SUBTITLE_LABELS = [
+  "Industry leader",
+  "Verified provider",
+  "Top-rated local",
+] as const;
+
+function normalizeBusinessNameKey(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/\b(llc|l\.l\.c\.|inc|ltd|co\.|fz|fze|dmcc)\b/gi, "")
+    .replace(/[^a-z0-9]/g, "");
+}
+
+function isSameBusiness(
+  candidateName: string,
+  excludeName?: string,
+  excludePlaceId?: string | null,
+  candidatePlaceId?: string | null,
+): boolean {
+  if (
+    excludePlaceId &&
+    candidatePlaceId &&
+    normalizePlaceId(excludePlaceId) === normalizePlaceId(candidatePlaceId)
+  ) {
+    return true;
+  }
+
+  if (!excludeName?.trim()) return false;
+
+  const excludeKey = normalizeBusinessNameKey(excludeName);
+  const candidateKey = normalizeBusinessNameKey(candidateName);
+  if (!excludeKey || !candidateKey) return false;
+
+  return (
+    excludeKey === candidateKey ||
+    excludeKey.includes(candidateKey) ||
+    candidateKey.includes(excludeKey)
+  );
+}
+
+function competitorRankScore(
+  rating: number | null,
+  reviewCount: number | null,
+): number {
+  const r = rating ?? 0;
+  const reviews = reviewCount ?? 0;
+  return r * Math.log10(reviews + 10);
+}
+
+function competitorSubtitle(
+  index: number,
+  rating: number | null,
+  reviewCount: number | null,
+): string {
+  const label =
+    COMPETITOR_SUBTITLE_LABELS[index] ?? COMPETITOR_SUBTITLE_LABELS[2];
+  if (rating != null && reviewCount != null && reviewCount > 0) {
+    return `${label} · ${rating.toFixed(1)}★ (${reviewCount} reviews)`;
+  }
+  return label;
+}
+
+/** Top local businesses in a category via Google Places — used for audit competitor list. */
+export async function searchCategoryCompetitors(input: {
+  searchQuery: string;
+  excludeName?: string;
+  excludePlaceId?: string | null;
+  limit?: number;
+}): Promise<CategoryCompetitorPlace[]> {
+  const apiKey = getApiKey();
+  const limit = input.limit ?? 3;
+  const textQuery = input.searchQuery.trim();
+
+  if (!apiKey || !textQuery) {
+    return [];
+  }
+
+  const fieldMask = [
+    "places.id",
+    "places.displayName",
+    "places.rating",
+    "places.userRatingCount",
+  ].join(",");
+
+  try {
+    const response = await fetch(
+      "https://places.googleapis.com/v1/places:searchText",
+      {
+        method: "POST",
+        cache: "no-store",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Goog-Api-Key": apiKey,
+          "X-Goog-FieldMask": fieldMask,
+        },
+        body: JSON.stringify({
+          textQuery,
+          languageCode: "en",
+          regionCode: "AE",
+          maxResultCount: 10,
+        }),
+      },
+    );
+
+    const body = (await response.json().catch(() => ({}))) as PlacesNewSearchResponse;
+
+    if (!response.ok) {
+      console.error(
+        "Google Places competitor search HTTP error:",
+        response.status,
+        body,
+      );
+      return [];
+    }
+
+    const ranked = (body.places ?? [])
+      .map((place) => {
+        const name = place.displayName?.text?.trim();
+        if (!name) return null;
+
+        const placeId =
+          place.id?.trim() ||
+          (place.name?.startsWith("places/")
+            ? place.name.replace(/^places\//, "").trim()
+            : null);
+
+        if (
+          isSameBusiness(
+            name,
+            input.excludeName,
+            input.excludePlaceId,
+            placeId,
+          )
+        ) {
+          return null;
+        }
+
+        const rating =
+          typeof place.rating === "number" ? place.rating : null;
+        const userRatingsTotal =
+          typeof place.userRatingCount === "number"
+            ? place.userRatingCount
+            : null;
+
+        return {
+          name,
+          placeId,
+          rating,
+          userRatingsTotal,
+          score: competitorRankScore(rating, userRatingsTotal),
+        };
+      })
+      .filter(
+        (
+          item,
+        ): item is {
+          name: string;
+          placeId: string | null;
+          rating: number | null;
+          userRatingsTotal: number | null;
+          score: number;
+        } => item !== null,
+      )
+      .sort((a, b) => b.score - a.score)
+      .slice(0, limit);
+
+    return ranked.map((item, index) => ({
+      name: item.name,
+      placeId: item.placeId,
+      rating: item.rating,
+      userRatingsTotal: item.userRatingsTotal,
+      subtitle: competitorSubtitle(index, item.rating, item.userRatingsTotal),
+    }));
+  } catch (err) {
+    console.error("Google Places competitor search failed:", err);
+    return [];
+  }
+}
+
 /** Text search for landing audit when the business is not in autocomplete suggestions. */
 export async function lookupBusinessByTextQuery(
   query: string,
