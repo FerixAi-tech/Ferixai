@@ -28,10 +28,10 @@ export default function AuditSimulatorCta({
       <div className="flex items-start gap-3">
         <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-fuchsia-300" />
         <div>
-          <h3 className="lf-orbitron text-lg font-bold text-white sm:text-xl">
+          <h3 className="lf-orbitron text-xl font-bold text-white sm:text-2xl">
             Don&apos;t Let Rivals Take Your AI Search Traffic.
           </h3>
-          <p className="mt-2 text-sm leading-relaxed text-[#94a3b8]">
+          <p className="mt-2 text-base leading-relaxed text-[#94a3b8] sm:text-lg">
             Turn this preview into live reality across ChatGPT, Claude, and
             Gemini in 48 hours.
           </p>

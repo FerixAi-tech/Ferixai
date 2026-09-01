@@ -7,10 +7,16 @@ function Stars({ rating }: { rating: number | null }) {
   const value = rating ?? 0;
   const full = Math.round(value);
   return (
-    <span className="text-amber-300">
+    <span className="text-lg text-amber-300 sm:text-xl">
       {"⭐".repeat(Math.max(1, Math.min(5, full)))}
     </span>
   );
+}
+
+function websiteHref(uri: string): string {
+  const trimmed = uri.trim();
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  return `https://${trimmed}`;
 }
 
 export function AuditChatPanelBefore({
@@ -85,44 +91,57 @@ export function AuditChatPanelAfter({
 
   return (
     <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-emerald-500/35 bg-[#0a0d14] shadow-[0_0_40px_rgba(16,185,129,0.12)]">
-      <header className="border-b border-emerald-500/20 bg-emerald-500/10 px-4 py-3">
-        <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-emerald-200/90">
+      <header className="border-b border-emerald-500/20 bg-emerald-500/10 px-4 py-3.5 sm:px-5">
+        <p className="text-xs font-bold uppercase tracking-[0.16em] text-emerald-200/90 sm:text-sm">
           ✨ After FerixAI Optimization
         </p>
       </header>
-      <div className="flex items-center gap-3 border-b border-white/5 px-4 py-3">
-        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#10a37f]/20 ring-1 ring-[#10a37f]/40">
+      <div className="flex items-center gap-3 border-b border-white/5 px-4 py-3.5 sm:px-5">
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#10a37f]/20 ring-1 ring-[#10a37f]/40">
           <Bot className="h-5 w-5 text-[#10a37f]" aria-hidden />
         </div>
-        <p className="text-sm font-semibold text-white">ChatGPT</p>
+        <p className="text-base font-semibold text-white sm:text-lg">ChatGPT</p>
       </div>
-      <div className="space-y-4 p-4">
-        <div className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5 text-xs italic leading-relaxed text-[#cbd5e1]">
+      <div className="space-y-4 p-4 sm:p-5">
+        <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm italic leading-relaxed text-[#cbd5e1] sm:text-base">
           &quot;{boneQuestion}&quot;
         </div>
-        <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-3.5 text-sm leading-relaxed text-[#e2e8f0]">
-          <p className="font-bold text-white">
-            1. {businessName} <Stars rating={rating} />{" "}
-            <span className="text-xs font-normal text-emerald-200">
+        <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-4 text-base leading-relaxed text-[#e2e8f0] sm:px-5 sm:py-5 sm:text-lg">
+          <p className="text-lg font-bold text-white sm:text-xl">
+            1. {businessName}{" "}
+            <Stars rating={rating} />{" "}
+            <span className="mt-1 block text-sm font-normal text-emerald-200 sm:inline sm:text-base">
               (Rating: {ratingLabel})
             </span>
           </p>
-          <p className="mt-2 text-xs text-[#cbd5e1]">
+          <p className="mt-3 text-sm text-[#cbd5e1] sm:text-base">
             📍 Address: {formattedAddress}
           </p>
-          <p className="mt-1 text-xs text-[#cbd5e1]">
-            🌐 Website: {websiteUri || "Not listed"}
+          <p className="mt-2 text-sm text-[#cbd5e1] sm:text-base">
+            🌐 Website:{" "}
+            {websiteUri ? (
+              <a
+                href={websiteHref(websiteUri)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-emerald-300 underline decoration-emerald-400/50 underline-offset-2 transition hover:text-emerald-200 hover:decoration-emerald-300"
+              >
+                {websiteUri}
+              </a>
+            ) : (
+              "Not listed"
+            )}
           </p>
-          <p className="mt-1 text-xs text-[#cbd5e1]">
+          <p className="mt-2 text-sm text-[#cbd5e1] sm:text-base">
             📞 Phone: {phoneNumber || "Not listed"}
           </p>
-          <p className="mt-3 text-xs italic text-emerald-100/90">
+          <p className="mt-4 text-sm italic text-emerald-100/90 sm:text-base">
             💬 &quot;Officially verified via Enterprise AEO Index. Recognized as
             one of the premier licensed providers in Dubai.&quot;
           </p>
         </div>
       </div>
-      <footer className="mt-auto border-t border-emerald-500/25 bg-emerald-500/10 p-4 text-xs leading-relaxed text-emerald-100">
+      <footer className="mt-auto border-t border-emerald-500/25 bg-emerald-500/10 p-4 text-sm leading-relaxed text-emerald-100 sm:p-5 sm:text-base">
         🟢 100% Entity Authority Active across ChatGPT, Claude &amp; Gemini.
       </footer>
     </article>
