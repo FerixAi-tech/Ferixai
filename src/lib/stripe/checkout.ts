@@ -1,7 +1,7 @@
 import { getAppBaseUrl } from "@/lib/constants/urls";
 import type { CampaignInput } from "@/lib/campaign/validate-input";
 import { getCheckoutCharge, CHECKOUT_CURRENCY } from "@/lib/constants/checkout";
-import { getPricingPlan } from "@/lib/constants/pricing-plans";
+import { getCheckoutPlanName } from "@/lib/constants/checkout-plans";
 import { getStripe } from "@/lib/stripe/server";
 import { ensurePaymentMethodDomains } from "@/lib/stripe/payment-method-domains";
 import { checkoutSessionPaymentMethodTypes } from "@/lib/stripe/payment-methods";
@@ -14,7 +14,7 @@ export async function createStripeCheckoutSession(options: {
   orderId: string;
 }): Promise<{ sessionId: string; clientSecret: string }> {
   const { userId, email, input, conversationId, orderId } = options;
-  const plan = getPricingPlan(input.planSlug);
+  const planLabel = getCheckoutPlanName(input.planSlug);
   const charge = getCheckoutCharge(input.totalCostGbp);
   const currency = charge.currency.toLowerCase();
   const baseUrl = getAppBaseUrl();
@@ -38,7 +38,7 @@ export async function createStripeCheckoutSession(options: {
           currency,
           unit_amount: Math.round(charge.amount * 100),
           product_data: {
-            name: `${plan.name} — FerixAI ${input.billingCycle} plan`,
+            name: `${planLabel} — FerixAI ${input.billingCycle} plan`,
             description:
               "AI visibility indexing across ChatGPT, Gemini & Claude for your business.",
           },

@@ -104,3 +104,18 @@ export function getAgencyCapacityLabel(
 ): string {
   return cycle === "yearly" ? plan.yearlyGrowth : plan.monthlyCapacity;
 }
+
+export function isAgencyPlanSlug(value: unknown): value is AgencyPlanSlug {
+  if (typeof value !== "string") return false;
+  return AGENCY_PRICING_PLANS.some((plan) => plan.slug === value);
+}
+
+export function getAgencyPricingPlan(slug: AgencyPlanSlug): AgencyPricingPlan {
+  const plan = AGENCY_PRICING_PLANS.find((item) => item.slug === slug);
+  if (!plan) {
+    throw new Error(`Unknown agency pricing plan: ${slug}`);
+  }
+  return plan;
+}
+
+export const DEFAULT_AGENCY_PLAN_SLUG: AgencyPlanSlug = "agency-growth";

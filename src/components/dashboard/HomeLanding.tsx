@@ -257,8 +257,6 @@ export default function HomeLanding({
 
         <LandingAiAuditSection onFixVisibility={handleFixVisibility} />
 
-        <LazyWhenVisible rootMargin="500px">
-          <>
         <LandingPricingPlans
           onClaim={() => {
             setSignupInitialBusinessName("");
@@ -266,6 +264,8 @@ export default function HomeLanding({
           }}
         />
 
+        <LazyWhenVisible rootMargin="500px">
+          <>
         <section className="pb-12 pt-4" id="how-it-works">
           <div className="lf-animate-in mb-12 text-center">
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-fuchsia-300">

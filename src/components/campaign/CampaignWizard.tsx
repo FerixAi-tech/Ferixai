@@ -21,16 +21,20 @@ import {
 } from "@/lib/constants/checkout";
 import { trackCompleteRegistration, trackInitiateCheckout } from "@/lib/meta/pixel";
 import {
+  getCheckoutContentPlanSlug,
+  getCheckoutPlanListPrice,
+  getCheckoutPlanName,
+  isCheckoutPlanSlug,
+  resolveCheckoutPlanSlug,
+  type CheckoutPlanSlug,
+} from "@/lib/constants/checkout-plans";
+import {
   DEFAULT_BILLING_CYCLE,
   DEFAULT_PLAN_SLUG,
-  getPlanListPrice,
   getBillingPeriodLabel,
   getPricingPlan,
   isBillingCycle,
-  isPricingPlanSlug,
-  resolvePricingPlanSlug,
   type BillingCycle,
-  type PricingPlanSlug,
 } from "@/lib/constants/pricing-plans";
 import MetricsPreview from "@/components/campaign/MetricsPreview";
 import PricingPlanCards from "@/components/campaign/PricingPlanCards";
@@ -98,7 +102,7 @@ export default function CampaignWizard({
     useState<[string, string, string]>(() => emptyKeyFeatures());
   const [city, setCity] = useState("");
   const [planSlug, setPlanSlug] =
-    useState<PricingPlanSlug>(DEFAULT_PLAN_SLUG);
+    useState<CheckoutPlanSlug>(DEFAULT_PLAN_SLUG);
   const [billingCycle, setBillingCycle] =
     useState<BillingCycle>(DEFAULT_BILLING_CYCLE);
   const [accountEmail, setAccountEmail] = useState("");
@@ -148,7 +152,7 @@ export default function CampaignWizard({
     setKeyFeatures(normalizeKeyFeatures(draft.keyFeatures));
     setCity(draft.city);
     setPlanSlug(
-      resolvePricingPlanSlug(draft.planSlug) ?? DEFAULT_PLAN_SLUG,
+      resolveCheckoutPlanSlug(draft.planSlug) ?? DEFAULT_PLAN_SLUG,
     );
     setBillingCycle(
       isBillingCycle(draft.billingCycle)
@@ -161,8 +165,9 @@ export default function CampaignWizard({
     setDraftRestored(true);
   }, [draftRestored, initialBusinessName]);
 
-  const pricingPlan = getPricingPlan(planSlug);
-  const listPrice = getPlanListPrice(pricingPlan, billingCycle);
+  const pricingPlan = getPricingPlan(getCheckoutContentPlanSlug(planSlug));
+  const listPrice = getCheckoutPlanListPrice(planSlug, billingCycle);
+  const planDisplayName = getCheckoutPlanName(planSlug);
   const periodLabel = getBillingPeriodLabel(billingCycle);
   const checkoutCharge = getCheckoutCharge(listPrice);
   const checkoutLabel = formatCheckoutCharge(
@@ -344,25 +349,24 @@ export default function CampaignWizard({
 
   function getStep2Errors(): string[] {
     const errors: string[] = [];
-    if (!isPricingPlanSlug(planSlug)) {
+    if (!isCheckoutPlanSlug(planSlug)) {
       errors.push("Please select a pricing plan.");
     }
     return errors;
   }
 
-  function trackPlanCheckout(slug: PricingPlanSlug) {
+  function trackPlanCheckout(slug: CheckoutPlanSlug) {
     if (checkoutTrackedRef.current) return;
     checkoutTrackedRef.current = true;
-    const plan = getPricingPlan(slug);
     trackInitiateCheckout({
-      value: getPlanListPrice(plan, billingCycle),
+      value: getCheckoutPlanListPrice(slug, billingCycle),
       currency: "AED",
-      content_name: `${plan.name} (${billingCycle})`,
+      content_name: `${getCheckoutPlanName(slug)} (${billingCycle})`,
       dedupeKey: `ferixai_meta_initiate_checkout:${slug}:${billingCycle}`,
     });
   }
 
-  function selectPlan(slug: PricingPlanSlug) {
+  function selectPlan(slug: CheckoutPlanSlug) {
     setPlanSlug(slug);
     trackPlanCheckout(slug);
   }
@@ -729,7 +733,7 @@ export default function CampaignWizard({
               <div>
                 <dt className="text-[#64748b]">Plan</dt>
                 <dd className="text-white">
-                  {pricingPlan.name} · {formatCurrency(listPrice)}
+                  {planDisplayName} · {formatCurrency(listPrice)}
                   /{periodLabel}
                 </dd>
               </div>
@@ -756,7 +760,7 @@ export default function CampaignWizard({
                   {formatCurrency(listPrice)}
                 </p>
                 <p className="mt-1 text-xs text-[#64748b]">
-                  {pricingPlan.name} · billed {billingCycle}
+                  {planDisplayName} · billed {billingCycle}
                 </p>
               </div>
             </div>

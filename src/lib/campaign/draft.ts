@@ -1,4 +1,5 @@
-import type { PricingPlanSlug, BillingCycle } from "@/lib/constants/pricing-plans";
+import type { CheckoutPlanSlug } from "@/lib/constants/checkout-plans";
+import type { BillingCycle } from "@/lib/constants/pricing-plans";
 import {
   DEFAULT_BILLING_CYCLE,
   DEFAULT_PLAN_SLUG,
@@ -11,7 +12,7 @@ export interface CampaignDraft {
   /** Top 3 key features describing the business */
   keyFeatures?: [string, string, string];
   city: string;
-  planSlug: PricingPlanSlug;
+  planSlug: CheckoutPlanSlug;
   billingCycle?: BillingCycle;
   streetArea?: string;
   trnNumber?: string;

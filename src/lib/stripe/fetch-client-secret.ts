@@ -1,12 +1,13 @@
 "use client";
 
-import type { BillingCycle, PricingPlanSlug } from "@/lib/constants/pricing-plans";
+import type { CheckoutPlanSlug } from "@/lib/constants/checkout-plans";
+import type { BillingCycle } from "@/lib/constants/pricing-plans";
 
 export type StripeCheckoutPayload = {
   businessName: string;
   category: string;
   city: string;
-  planSlug: PricingPlanSlug;
+  planSlug: CheckoutPlanSlug;
   billingCycle: BillingCycle;
   promoApplied: false;
   productDescription?: string;

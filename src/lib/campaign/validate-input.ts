@@ -3,14 +3,15 @@ import {
   BILLING_CYCLE_DAYS,
   DEFAULT_BILLING_CYCLE,
   getBillingCycleDays,
-  getPlanListPrice,
-  getPricingPlan,
   isBillingCycle,
-  isPricingPlanSlug,
   PROMO_DISCOUNT_GBP,
   type BillingCycle,
-  type PricingPlanSlug,
 } from "@/lib/constants/pricing-plans";
+import {
+  getCheckoutPlanListPrice,
+  isCheckoutPlanSlug,
+  type CheckoutPlanSlug,
+} from "@/lib/constants/checkout-plans";
 import {
   isManufacturerCategory,
   isValidCategoryName,
@@ -21,7 +22,7 @@ export interface CampaignInput {
   businessName: string;
   category: string;
   city: string;
-  planSlug: PricingPlanSlug;
+  planSlug: CheckoutPlanSlug;
   billingCycle: BillingCycle;
   /** List monthly price (GBP) */
   listPriceGbp: number;
@@ -82,7 +83,7 @@ export function validateCampaignInput(body: unknown): CampaignInput {
     throw new Error("All fields are required");
   }
 
-  if (!isPricingPlanSlug(planSlug)) {
+  if (!isCheckoutPlanSlug(planSlug)) {
     throw new Error("Please select a valid pricing plan");
   }
 
@@ -91,7 +92,6 @@ export function validateCampaignInput(body: unknown): CampaignInput {
     throw new Error("Please enter a valid category (2–80 characters)");
   }
 
-  const plan = getPricingPlan(planSlug);
   const billingCycle: BillingCycle = isBillingCycle(billingCycleRaw)
     ? billingCycleRaw
     : DEFAULT_BILLING_CYCLE;
@@ -105,7 +105,7 @@ export function validateCampaignInput(body: unknown): CampaignInput {
 
   const discountGbp = applied ? PROMO_DISCOUNT_GBP : 0;
   const { listPrice, payable } = applyPromoDiscount(
-    getPlanListPrice(plan, billingCycle),
+    getCheckoutPlanListPrice(planSlug, billingCycle),
     discountGbp,
   );
 

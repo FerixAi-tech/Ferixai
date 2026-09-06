@@ -14,6 +14,7 @@ import {
   calculateVisibilityMetricsForPlan,
   getCampaignContentPlanForPlan,
 } from "@/lib/constants/metrics";
+import { getCheckoutContentPlanSlug } from "@/lib/constants/checkout-plans";
 import { getPricingPlan, getBillingCycleDays } from "@/lib/constants/pricing-plans";
 import { publishToDevTo } from "@/lib/devto/publish-article";
 import { redeemPromoCode } from "@/lib/promo/codes";
@@ -74,7 +75,7 @@ export async function createCampaignForUser(
     keyFeatures,
   } = input;
   const admin = createAdminClient();
-  const pricingPlan = getPricingPlan(planSlug);
+  const pricingPlan = getPricingPlan(getCheckoutContentPlanSlug(planSlug));
   const metrics = calculateVisibilityMetricsForPlan(pricingPlan, totalCostGbp);
   const contentPlan = getCampaignContentPlanForPlan(pricingPlan, totalCostGbp);
   const now = new Date();
