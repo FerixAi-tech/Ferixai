@@ -12,11 +12,17 @@ export default function BillingCycleToggle({
   onChange,
   className = "",
   formatAmount = formatCurrency,
+  maxMonthlySavings = MAX_MONTHLY_SAVINGS_AED,
+  maxYearlySavings = MAX_YEARLY_SAVINGS_AED,
+  showMonthlySavings = true,
 }: {
   value: BillingCycle;
   onChange: (cycle: BillingCycle) => void;
   className?: string;
   formatAmount?: (amount: number) => string;
+  maxMonthlySavings?: number;
+  maxYearlySavings?: number;
+  showMonthlySavings?: boolean;
 }) {
   const monthlySelected = value === "monthly";
   const yearlySelected = value === "yearly";
@@ -39,15 +45,17 @@ export default function BillingCycleToggle({
       >
         <span className="flex flex-col items-center gap-1">
           <span className="text-sm font-semibold">Monthly</span>
-          <span
-            className={`rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] sm:text-[10px] ${
-              monthlySelected
-                ? "bg-emerald-400 text-[#052e1f] shadow-[0_0_14px_rgba(52,211,153,0.55)]"
-                : "bg-emerald-500/90 text-white shadow-[0_0_10px_rgba(16,185,129,0.35)]"
-            }`}
-          >
-            Save up to {formatAmount(MAX_MONTHLY_SAVINGS_AED)}
-          </span>
+          {showMonthlySavings ? (
+            <span
+              className={`rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] sm:text-[10px] ${
+                monthlySelected
+                  ? "bg-emerald-400 text-[#052e1f] shadow-[0_0_14px_rgba(52,211,153,0.55)]"
+                  : "bg-emerald-500/90 text-white shadow-[0_0_10px_rgba(16,185,129,0.35)]"
+              }`}
+            >
+              Save up to {formatAmount(maxMonthlySavings)}
+            </span>
+          ) : null}
         </span>
       </button>
       <button
@@ -69,7 +77,7 @@ export default function BillingCycleToggle({
                 : "animate-pulse bg-emerald-500 text-white shadow-[0_0_12px_rgba(16,185,129,0.45)]"
             }`}
           >
-            Save up to {formatAmount(MAX_YEARLY_SAVINGS_AED)}
+            Save up to {formatAmount(maxYearlySavings)}
           </span>
         </span>
       </button>

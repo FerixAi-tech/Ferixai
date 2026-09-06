@@ -4,7 +4,11 @@ import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import BillingCycleToggle from "@/components/pricing/BillingCycleToggle";
 import PlanPriceDisplay from "@/components/pricing/PlanPriceDisplay";
+import PricingAudienceToggle, {
+  type PricingAudience,
+} from "@/components/pricing/PricingAudienceToggle";
 import PaymentMethodLogos from "@/components/payment/PaymentMethodLogos";
+import LandingAgencyPricingPlans from "@/components/landing/LandingAgencyPricingPlans";
 import {
   DEFAULT_BILLING_CYCLE,
   getBillingPeriodLabel,
@@ -30,6 +34,7 @@ export default function LandingPricingPlans({
   onClaim?: () => void;
 }) {
   const plans = listPricingPlans();
+  const [audience, setAudience] = useState<PricingAudience>("business");
   const [billingCycle, setBillingCycle] =
     useState<BillingCycle>(DEFAULT_BILLING_CYCLE);
   const fromPrice = getPlanListPrice(plans[0]!, billingCycle);
@@ -40,6 +45,28 @@ export default function LandingPricingPlans({
 
   return (
     <section className="pb-16 pt-4" id="pricing">
+      <div className="mb-8 flex justify-center">
+        <PricingAudienceToggle value={audience} onChange={setAudience} />
+      </div>
+
+      {audience === "agency" ? (
+        <>
+          <LandingAgencyPricingPlans />
+          <PaymentMethodLogos className="mt-10" />
+          {onClaim ? (
+            <div className="mx-auto mt-8 flex w-full max-w-xl justify-center">
+              <button
+                type="button"
+                onClick={onClaim}
+                className={landingSignupButtonClassName}
+              >
+                <LandingSignupCtaLabel />
+              </button>
+            </div>
+          ) : null}
+        </>
+      ) : (
+        <>
       <div className="lf-animate-in mb-10 text-center">
         <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-300">
           Pricing
@@ -166,6 +193,8 @@ export default function LandingPricingPlans({
           </button>
         </div>
       ) : null}
+        </>
+      )}
     </section>
   );
 }
