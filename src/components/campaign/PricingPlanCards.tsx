@@ -71,11 +71,8 @@ export default function PricingPlanCards({
 
   return (
     <div className="space-y-8">
-      <div className="flex justify-center">
+      <div className="flex flex-col items-center gap-4">
         <PricingAudienceToggle value={audience} onChange={handleAudienceChange} />
-      </div>
-
-      <div className="flex justify-center">
         <BillingCycleToggle
           value={billingCycle}
           onChange={onBillingCycleChange}
