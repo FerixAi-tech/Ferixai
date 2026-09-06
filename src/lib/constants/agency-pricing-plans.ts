@@ -34,7 +34,7 @@ export const AGENCY_PRICING_PLANS: readonly AgencyPricingPlan[] = [
       "Multi-client unified dashboard",
       "Dedicated AEO & GEO indexing per business",
       "Standard AI citation tracking (ChatGPT, Gemini, Perplexity)",
-      "Email support & multi-business onboarding form",
+      "Automated email onboarding: Submit details for up to 5 businesses right after purchase",
     ],
   },
   {
@@ -50,6 +50,7 @@ export const AGENCY_PRICING_PLANS: readonly AgencyPricingPlan[] = [
       "Includes 10 initial client slots, plus add +10 new business slots every month throughout the year",
     features: [
       "Everything in Starter",
+      "Automated email onboarding: Submit details for up to 10 businesses right after purchase",
       "Accelerated vector ingestion & schema sync",
       "Client performance tracking",
       "Priority support queue",
@@ -70,14 +71,17 @@ export const AGENCY_PRICING_PLANS: readonly AgencyPricingPlan[] = [
     features: [
       "Everything in Growth",
       "Maximum AI search engine authority & high-frequency updates",
-      "Dedicated account manager & custom onboarding flow",
-      "Highest margin optimization for agencies",
+      "Dedicated onboarding concierge: Submit details for up to 20 businesses via email right after purchase",
+      "Dedicated account manager & highest margin optimization for agencies",
     ],
   },
 ] as const;
 
 export const AGENCY_BILLING_CYCLE_NOTE =
   "All client slots share the primary billing cycle from the date of activation.";
+
+export const AGENCY_ONBOARDING_HOW_IT_WORKS =
+  "How it works: Immediately after checkout, you will receive an onboarding email to submit the business names, websites, and categories for all your allocated client slots.";
 
 export const MAX_AGENCY_YEARLY_SAVINGS_AED = Math.max(
   ...AGENCY_PRICING_PLANS.map((plan) => plan.yearlySavingsAed),

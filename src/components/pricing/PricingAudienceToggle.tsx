@@ -16,7 +16,7 @@ export default function PricingAudienceToggle({
 
   return (
     <div
-      className={`inline-flex w-full max-w-md rounded-xl border border-white/10 bg-[#0e0a18]/80 p-1 sm:w-auto ${className}`}
+      className={`inline-flex w-full max-w-lg rounded-2xl border-2 border-white/20 bg-[#0e0a18] p-1.5 shadow-[0_0_32px_rgba(139,92,246,0.18)] sm:w-auto ${className}`}
       role="group"
       aria-label="Pricing audience"
     >
@@ -24,10 +24,10 @@ export default function PricingAudienceToggle({
         type="button"
         onClick={() => onChange("business")}
         aria-pressed={businessSelected}
-        className={`min-h-[44px] flex-1 rounded-lg px-4 py-2.5 text-sm font-semibold transition sm:px-5 ${
+        className={`min-h-[52px] flex-1 rounded-xl px-5 py-3 text-sm font-bold transition sm:px-6 sm:text-base ${
           businessSelected
-            ? "bg-violet-500/25 text-violet-100 shadow-[0_0_20px_rgba(139,92,246,0.28)] ring-1 ring-violet-400/40"
-            : "text-[#94a3b8] hover:bg-violet-500/10 hover:text-violet-100"
+            ? "bg-violet-500/35 text-white shadow-[0_0_24px_rgba(139,92,246,0.45)] ring-2 ring-violet-400/60"
+            : "text-[#cbd5e1] ring-1 ring-white/10 hover:bg-violet-500/15 hover:text-white"
         }`}
       >
         Business
@@ -36,10 +36,10 @@ export default function PricingAudienceToggle({
         type="button"
         onClick={() => onChange("agency")}
         aria-pressed={agencySelected}
-        className={`min-h-[44px] flex-1 rounded-lg px-4 py-2.5 text-sm font-semibold transition sm:px-5 ${
+        className={`min-h-[52px] flex-1 rounded-xl px-5 py-3 text-sm font-bold transition sm:px-6 sm:text-base ${
           agencySelected
-            ? "bg-teal-500/25 text-teal-100 shadow-[0_0_20px_rgba(20,184,166,0.28)] ring-1 ring-teal-400/40"
-            : "text-[#94a3b8] hover:bg-teal-500/10 hover:text-teal-100"
+            ? "bg-teal-500/35 text-white shadow-[0_0_24px_rgba(20,184,166,0.45)] ring-2 ring-teal-400/60"
+            : "text-[#cbd5e1] ring-1 ring-white/10 hover:bg-teal-500/15 hover:text-white"
         }`}
       >
         Agency / Freelancer

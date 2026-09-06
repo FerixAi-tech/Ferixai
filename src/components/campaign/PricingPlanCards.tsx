@@ -10,6 +10,7 @@ import PricingAudienceToggle, {
 import AgencyPricingCardGrid from "@/components/pricing/AgencyPricingCardGrid";
 import {
   AGENCY_BILLING_CYCLE_NOTE,
+  AGENCY_ONBOARDING_HOW_IT_WORKS,
   DEFAULT_AGENCY_PLAN_SLUG,
   isAgencyPlanSlug,
   MAX_AGENCY_YEARLY_SAVINGS_AED,
@@ -91,8 +92,9 @@ export default function PricingPlanCards({
             selectedSlug={resolveAgencySlug(selectedSlug)}
             onSelect={onSelect}
           />
-          <p className="mx-auto max-w-3xl text-center text-xs leading-relaxed text-[#64748b] sm:text-sm">
-            {AGENCY_BILLING_CYCLE_NOTE}
+          <p className="mx-auto max-w-3xl space-y-2 text-center text-xs leading-relaxed text-[#64748b] sm:text-sm">
+            <span className="block">{AGENCY_BILLING_CYCLE_NOTE}</span>
+            <span className="block">{AGENCY_ONBOARDING_HOW_IT_WORKS}</span>
           </p>
         </>
       ) : (
