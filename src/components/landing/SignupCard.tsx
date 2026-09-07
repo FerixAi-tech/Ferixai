@@ -13,7 +13,7 @@ import { trackCompleteRegistration, trackLead } from "@/lib/meta/pixel";
 
 const TRUST_ITEMS = [
   { icon: "⚡", label: "Instant access" },
-  { icon: "🆓", label: "No credit card" },
+  { icon: "❌", label: "No credit card" },
   { icon: "🔒", label: "Secure checkout" },
   { icon: "⏱️", label: "Results begin within 48h" },
 ] as const;
