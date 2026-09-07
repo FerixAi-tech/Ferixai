@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
 import createGlobe, { type Marker } from "cobe";
 import {
   GLOBE_MARKERS,
@@ -25,6 +25,14 @@ function getGlobeQuality(width: number) {
     ),
     mapSamples: isMobile ? 7000 : 14000,
   };
+}
+
+function markerLabelStyle(markerId: string): CSSProperties {
+  return {
+    positionAnchor: `--cobe-${markerId}`,
+    opacity: `var(--cobe-visible-${markerId}, 0)`,
+    filter: `blur(calc((1 - var(--cobe-visible-${markerId}, 0)) * 6px))`,
+  } as CSSProperties;
 }
 
 export default function InteractiveGlobe() {
@@ -176,6 +184,17 @@ export default function InteractiveGlobe() {
         className="relative z-10 h-full w-full cursor-grab active:cursor-grabbing"
         aria-label="Interactive 3D globe showing FerixAI active regions in the United Arab Emirates, Turkey, United States, Canada, and Australia"
       />
+
+      {GLOBE_MARKERS.map((marker) => (
+        <span
+          key={marker.id}
+          className="globe-marker-label"
+          style={markerLabelStyle(marker.id)}
+        >
+          <span className="sm:hidden">{marker.shortLabel}</span>
+          <span className="hidden sm:inline">{marker.label}</span>
+        </span>
+      ))}
     </div>
   );
 }

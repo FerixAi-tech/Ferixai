@@ -58,3 +58,35 @@ input[type="range"]::-moz-range-thumb {
   width: 84px !important;
   height: 84px !important;
 }
+
+/* Cobe globe — country labels anchored to marker dots */
+.globe-marker-label {
+  position: absolute;
+  pointer-events: none;
+  z-index: 20;
+  white-space: nowrap;
+  border-radius: 9999px;
+  border: 1px solid rgba(52, 211, 153, 0.35);
+  background: rgba(0, 0, 0, 0.68);
+  padding: 3px 8px;
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: rgba(209, 250, 229, 0.96);
+  backdrop-filter: blur(6px);
+  bottom: anchor(top);
+  left: anchor(center);
+  transform: translate(-50%, calc(-100% - 10px));
+  transition:
+    opacity 0.25s ease,
+    filter 0.25s ease;
+}
+
+@media (min-width: 640px) {
+  .globe-marker-label {
+    font-size: 10px;
+    padding: 4px 10px;
+    transform: translate(-50%, calc(-100% - 12px));
+  }
+}
