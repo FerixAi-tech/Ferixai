@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { MessageCircle } from "lucide-react";
 
 declare global {
   interface Window {
@@ -10,8 +9,9 @@ declare global {
 }
 
 function openCrispChat() {
-  if (typeof window === "undefined" || !window.$crisp) return;
+  if (typeof window === "undefined") return;
 
+  window.$crisp = window.$crisp || [];
   window.$crisp.push(["do", "chat:show"]);
   window.$crisp.push(["do", "chat:open"]);
 }
@@ -31,6 +31,13 @@ export default function CustomChatButton() {
     suppressTooltip();
     openCrispChat();
   }, [suppressTooltip]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.$crisp = window.$crisp || [];
+      window.$crisp.push(["do", "chat:hide"]);
+    }
+  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -85,7 +92,7 @@ export default function CustomChatButton() {
   }, [tooltipSuppressed]);
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
+    <div className="fixed bottom-5 right-4 z-50 flex flex-col items-end gap-3 md:bottom-6 md:right-6">
       {!tooltipSuppressed ? (
         <button
           type="button"
@@ -113,13 +120,12 @@ export default function CustomChatButton() {
         type="button"
         onClick={handleOpenChat}
         aria-label="Talk to Founder — open live chat"
-        className="inline-flex items-center gap-3 rounded-full border border-violet-500/40 bg-[linear-gradient(135deg,rgba(88,28,135,0.92),rgba(30,20,50,0.96))] px-5 py-3 text-sm font-semibold text-white shadow-[0_0_24px_rgba(139,92,246,0.35)] transition hover:border-violet-400/60 hover:shadow-[0_0_32px_rgba(139,92,246,0.5)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-400"
+        className="inline-flex items-center gap-2.5 rounded-full border border-purple-400/40 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 px-4 py-2.5 text-sm font-medium whitespace-nowrap text-white shadow-[0_0_20px_rgba(168,85,247,0.45)] transition hover:from-purple-500 hover:to-indigo-500 hover:shadow-[0_0_28px_rgba(168,85,247,0.6)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-400"
       >
-        <span className="relative flex h-2.5 w-2.5 shrink-0">
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-          <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400" />
-        </span>
-        <MessageCircle className="h-4 w-4 shrink-0 text-violet-200" aria-hidden />
+        <span
+          className="h-2.5 w-2.5 shrink-0 rounded-full bg-emerald-400 animate-pulse"
+          aria-hidden
+        />
         <span>Talk to Founder</span>
       </button>
     </div>
