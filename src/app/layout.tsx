@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Script from "next/script";
 import { APP_URL } from "@/lib/constants/urls";
@@ -68,6 +68,13 @@ export const metadata: Metadata = {
       "facebook-domain-verification": "wezjv9fq6h2ua45ws930wtk5d30256",
     },
   },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({
