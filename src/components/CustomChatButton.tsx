@@ -132,10 +132,10 @@ export default function CustomChatButton() {
       <button
         type="button"
         onClick={handleOpenChat}
-        aria-label="Customer service — open live chat"
+        aria-label="Customer Services — open live chat"
         className="inline-flex items-center gap-2 rounded-full border border-purple-400/30 bg-gradient-to-r from-purple-600 to-indigo-600 px-5 py-3 text-sm font-semibold whitespace-nowrap text-white shadow-[0_4px_25px_rgba(147,51,234,0.5)] transition-all duration-200 hover:scale-105 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-400"
       >
-        💬 customer service 🟢
+        💬 Customer Services 🟢
       </button>
     </div>
   );
