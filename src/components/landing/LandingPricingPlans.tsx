@@ -33,6 +33,7 @@ import { getPlanDetails } from "@/lib/constants/plan-details";
 import LandingSignupCtaLabel, {
   landingSignupButtonClassName,
 } from "@/components/landing/LandingSignupCtaLabel";
+import { captureCheckoutInitiated } from "@/lib/posthog/client";
 
 export default function LandingPricingPlans({
   onClaim,
@@ -57,6 +58,15 @@ export default function LandingPricingPlans({
     audience === "agency"
       ? "Manage multiple client profiles from one dashboard with dedicated AEO indexing, citation tracking, and scalable client slots."
       : "Every plan indexes your business across ChatGPT, Gemini, and Claude for local recommendation queries.";
+
+  function handlePricingClaim() {
+    const planName =
+      audience === "agency"
+        ? listAgencyPricingPlans()[1]?.name ?? "Agency Growth"
+        : businessPlans[1]?.name ?? "Growth Plan";
+    captureCheckoutInitiated(planName, { source: "landing_pricing_cta" });
+    onClaim?.();
+  }
 
   return (
     <section className="pb-16 pt-4" id="pricing">
@@ -198,7 +208,7 @@ export default function LandingPricingPlans({
         <div className="mx-auto mt-8 flex w-full max-w-xl justify-center">
           <button
             type="button"
-            onClick={onClaim}
+            onClick={handlePricingClaim}
             className={landingSignupButtonClassName}
           >
             <LandingSignupCtaLabel />

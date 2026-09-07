@@ -4,6 +4,7 @@ import Script from "next/script";
 import { APP_URL } from "@/lib/constants/urls";
 import MetaPixel from "@/components/meta/MetaPixel";
 import CrispChat from "@/components/layout/CrispChat";
+import { Providers } from "@/app/providers";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -87,7 +88,7 @@ export default function RootLayout({
         </Script>
         <MetaPixel />
         <CrispChat />
-        {children}
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

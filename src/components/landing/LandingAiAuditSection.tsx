@@ -22,6 +22,8 @@ import {
   normalizeCategoryName,
 } from "@/lib/constants/categories";
 import type { BillingCycle } from "@/lib/constants/pricing-plans";
+import { captureCheckoutInitiated } from "@/lib/posthog/client";
+import { getPricingPlan } from "@/lib/constants/pricing-plans";
 
 const CATEGORY_OPTIONS = listBusinessCategoryOptions();
 
@@ -254,6 +256,9 @@ export default function LandingAiAuditSection({
 
   function handleCheckout() {
     if (!result) return;
+    captureCheckoutInitiated(getPricingPlan("starter").name, {
+      source: "audit_simulator_cta",
+    });
     onFixVisibility({
       businessName: result.businessName,
       city: result.city,

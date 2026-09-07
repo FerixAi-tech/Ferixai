@@ -20,6 +20,7 @@ import {
   getCheckoutCharge,
 } from "@/lib/constants/checkout";
 import { trackCompleteRegistration, trackInitiateCheckout } from "@/lib/meta/pixel";
+import { captureCheckoutInitiated } from "@/lib/posthog/client";
 import {
   getCheckoutContentPlanSlug,
   getCheckoutPlanListPrice,
@@ -399,6 +400,7 @@ export default function CampaignWizard({
     setError("");
     persistDraft(2);
     trackPlanCheckout(planSlug);
+    captureCheckoutInitiated(planDisplayName, { source: "wizard_review_continue" });
 
     void supabase.auth.getUser().then(({ data }) => {
       if (!data.user) {

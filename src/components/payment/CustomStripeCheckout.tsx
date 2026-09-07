@@ -30,6 +30,8 @@ import {
   type StripeCheckoutPayload,
   type StripeCheckoutSession,
 } from "@/lib/stripe/fetch-client-secret";
+import { captureCheckoutInitiated } from "@/lib/posthog/client";
+import { getCheckoutPlanName } from "@/lib/constants/checkout-plans";
 import { CHECKOUT_CURRENCY } from "@/lib/constants/checkout";
 
 export type { StripeCheckoutPayload };
@@ -141,11 +143,13 @@ class ExpressCheckoutBoundary extends Component<
 
 function CheckoutPaymentForm({
   payLabel,
+  planName,
   onRetry,
   invoiceSection,
   onBeforePay,
 }: {
   payLabel: string;
+  planName: string;
   onRetry: () => void;
   invoiceSection?: ReactNode;
   onBeforePay?: () => Promise<void>;
@@ -207,6 +211,7 @@ function CheckoutPaymentForm({
     setMessage(null);
 
     try {
+      captureCheckoutInitiated(planName, { source: "stripe_card_pay" });
       if (onBeforePay) {
         await onBeforePay();
       }
@@ -231,6 +236,7 @@ function CheckoutPaymentForm({
 
     void (async () => {
       try {
+        captureCheckoutInitiated(planName, { source: "stripe_express_pay" });
         if (onBeforePay) {
           await onBeforePay();
         }
@@ -478,6 +484,7 @@ export default function CustomStripeCheckout({
       >
         <CheckoutPaymentForm
           payLabel={payLabel}
+          planName={getCheckoutPlanName(payload.planSlug)}
           onRetry={retryCheckout}
           invoiceSection={invoiceSection}
           onBeforePay={handleBeforePay}
