@@ -2,9 +2,15 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
+type CrispCommand =
+  | string
+  | string[]
+  | [string, string]
+  | [string, string, () => void];
+
 declare global {
   interface Window {
-    $crisp?: Array<string | string[] | (() => void)>;
+    $crisp?: CrispCommand[];
   }
 }
 
