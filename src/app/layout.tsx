@@ -4,6 +4,7 @@ import Script from "next/script";
 import { APP_URL } from "@/lib/constants/urls";
 import MetaPixel from "@/components/meta/MetaPixel";
 import CrispChat from "@/components/layout/CrispChat";
+import CustomChatButton from "@/components/CustomChatButton";
 import { Providers } from "@/app/providers";
 import "./globals.css";
 
@@ -88,6 +89,7 @@ export default function RootLayout({
         </Script>
         <MetaPixel />
         <CrispChat />
+        <CustomChatButton />
         <Providers>{children}</Providers>
       </body>
     </html>

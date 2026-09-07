@@ -48,15 +48,9 @@ input[type="range"]::-moz-range-thumb {
   }
 }
 
-/* Crisp live chat — larger bottom-right launcher */
+/* Crisp — hide default launcher; custom button opens chat via CustomChatButton */
 #crisp-chatbox-button {
-  transform: scale(1.45);
-  transform-origin: bottom right;
-}
-
-#crisp-chatbox-button span {
-  width: 84px !important;
-  height: 84px !important;
+  display: none !important;
 }
 
 /* Cobe globe — country labels anchored to marker dots */
@@ -89,4 +83,9 @@ input[type="range"]::-moz-range-thumb {
     padding: 4px 10px;
     transform: translate(-50%, calc(-100% - 12px));
   }
+}
+
+.crisp-client .cc-159j4,
+.crisp-client [data-selector="chatbox-button"] {
+  display: none !important;
 }
