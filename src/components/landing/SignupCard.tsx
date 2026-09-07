@@ -12,10 +12,10 @@ import {
 import { trackCompleteRegistration, trackLead } from "@/lib/meta/pixel";
 
 const TRUST_ITEMS = [
-  "Instant access",
-  "No credit card",
-  "Secure checkout",
-  "Results begin within 48h",
+  { icon: "⚡", label: "Instant access" },
+  { icon: "🆓", label: "No credit card" },
+  { icon: "🔒", label: "Secure checkout" },
+  { icon: "⏱️", label: "Results begin within 48h" },
 ] as const;
 
 const AI_PLATFORMS = ["ChatGPT", "Gemini", "Claude", "Perplexity"] as const;
@@ -189,11 +189,12 @@ export default function SignupCard({
 
             <div className="mt-4 grid grid-cols-2 gap-x-3 gap-y-2 text-[12px] text-[#9ca3af] sm:text-[13px]">
               {TRUST_ITEMS.map((item) => (
-                <span key={item} className="inline-flex items-center gap-1.5">
-                  <span className="text-emerald-400" aria-hidden>
-                    ✓
-                  </span>
-                  {item}
+                <span
+                  key={item.label}
+                  className="inline-flex items-center gap-1.5"
+                >
+                  <span aria-hidden>{item.icon}</span>
+                  {item.label}
                 </span>
               ))}
             </div>
