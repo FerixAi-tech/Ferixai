@@ -306,6 +306,8 @@ function CheckoutPaymentForm({
           <div className="rounded-xl border border-white/10 bg-[#0e0a18]/60 p-4 sm:p-5">
             <PaymentElement options={paymentOptions} />
           </div>
+
+          <CheckoutTrustBadges />
         </div>
 
         {message ? (
@@ -324,8 +326,6 @@ function CheckoutPaymentForm({
           {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
           {payLabel}
         </button>
-
-        <CheckoutTrustBadges />
       </form>
     </div>
   );
