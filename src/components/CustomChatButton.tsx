@@ -15,8 +15,10 @@ declare global {
 }
 
 function openCrispChat() {
-  if (typeof window === "undefined" || !window.$crisp) return;
+  if (typeof window === "undefined") return;
 
+  window.$crisp = window.$crisp || [];
+  window.$crisp.push(["do", "chat:show"]);
   window.$crisp.push(["do", "chat:open"]);
 }
 
@@ -33,10 +35,7 @@ export default function CustomChatButton() {
 
   const handleOpenChat = useCallback(() => {
     suppressTooltip();
-    if (typeof window !== "undefined") {
-      window.$crisp = window.$crisp || [];
-      openCrispChat();
-    }
+    openCrispChat();
   }, [suppressTooltip]);
 
   useEffect(() => {
@@ -58,7 +57,6 @@ export default function CustomChatButton() {
 
     function onChatOpened() {
       suppressTooltip();
-      window.$crisp?.push(["do", "chat:hide"]);
     }
 
     window.$crisp = window.$crisp || [];
@@ -134,14 +132,10 @@ export default function CustomChatButton() {
       <button
         type="button"
         onClick={handleOpenChat}
-        aria-label="Talk to Founder — open live chat"
-        className="inline-flex items-center gap-2.5 rounded-full border border-purple-400/30 bg-gradient-to-r from-purple-600 to-indigo-600 px-5 py-3 text-sm font-semibold whitespace-nowrap text-white shadow-[0_4px_25px_rgba(147,51,234,0.5)] transition-all duration-200 hover:scale-105 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-400"
+        aria-label="Customer service — open live chat"
+        className="inline-flex items-center gap-2 rounded-full border border-purple-400/30 bg-gradient-to-r from-purple-600 to-indigo-600 px-5 py-3 text-sm font-semibold whitespace-nowrap text-white shadow-[0_4px_25px_rgba(147,51,234,0.5)] transition-all duration-200 hover:scale-105 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-400"
       >
-        <span className="relative flex h-2.5 w-2.5 shrink-0">
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-          <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
-        </span>
-        <span>Talk to Founder</span>
+        💬 customer service 🟢
       </button>
     </div>
   );
