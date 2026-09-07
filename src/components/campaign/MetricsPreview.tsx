@@ -25,11 +25,13 @@ import { getPlanDetails, getPlanDetailsSummary } from "@/lib/constants/plan-deta
 interface MetricsPreviewProps {
   planSlug: CheckoutPlanSlug;
   billingCycle: BillingCycle;
+  variant?: "full" | "inclusions";
 }
 
 export default function MetricsPreview({
   planSlug,
   billingCycle,
+  variant = "full",
 }: MetricsPreviewProps) {
   const planName = getCheckoutPlanName(planSlug);
   const listPrice = getCheckoutPlanListPrice(planSlug, billingCycle);
@@ -53,6 +55,32 @@ export default function MetricsPreview({
     ? getAgencyCapacityLabel(getAgencyPricingPlan(planSlug), billingCycle)
     : getPlanDetailsSummary(contentPlanSlug, billingCycle);
 
+  const inclusionsContent = isAgency ? (
+    <p className="text-sm leading-relaxed text-[#cbd5e1]">{detailsSummary}</p>
+  ) : (
+    <>
+      <dl className="space-y-3">
+        {details.metrics.map((metric) => (
+          <div key={metric.label}>
+            <dt className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#94a3b8]">
+              {metric.label}
+            </dt>
+            <dd className="mt-0.5 text-sm leading-snug text-white">
+              {metric.value}
+            </dd>
+          </div>
+        ))}
+      </dl>
+      <p className="mt-4 border-t border-white/10 pt-4 text-sm leading-relaxed text-[#cbd5e1]">
+        {detailsSummary}
+      </p>
+    </>
+  );
+
+  if (variant === "inclusions") {
+    return <div className="space-y-1">{inclusionsContent}</div>;
+  }
+
   return (
     <div className="space-y-6">
       <div className="rounded-[18px] border border-violet-950/70 bg-[linear-gradient(165deg,#120c1e_0%,#0e0a18_45%,#090610_100%)] p-6">
@@ -69,27 +97,7 @@ export default function MetricsPreview({
       </div>
 
       <div className="rounded-[18px] border border-violet-950/70 bg-[linear-gradient(165deg,#120c1e_0%,#0e0a18_45%,#090610_100%)] p-5">
-        {isAgency ? (
-          <p className="text-sm leading-relaxed text-[#cbd5e1]">{detailsSummary}</p>
-        ) : (
-          <>
-            <dl className="space-y-3">
-              {details.metrics.map((metric) => (
-                <div key={metric.label}>
-                  <dt className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#94a3b8]">
-                    {metric.label}
-                  </dt>
-                  <dd className="mt-0.5 text-sm leading-snug text-white">
-                    {metric.value}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-            <p className="mt-4 border-t border-white/10 pt-4 text-sm leading-relaxed text-[#cbd5e1]">
-              {detailsSummary}
-            </p>
-          </>
-        )}
+        {inclusionsContent}
       </div>
     </div>
   );

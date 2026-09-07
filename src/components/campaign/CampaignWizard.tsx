@@ -734,6 +734,19 @@ export default function CampaignWizard({
                 <dd className="text-white">{contentPlan.aggressiveness}</dd>
               </div>
             </dl>
+
+            <div className="mt-6 border-t border-white/10 pt-5">
+              <h4 className="text-xs font-bold uppercase tracking-[0.14em] text-[#94a3b8]">
+                What&apos;s included in your plan
+              </h4>
+              <div className="mt-4">
+                <MetricsPreview
+                  planSlug={planSlug}
+                  billingCycle={billingCycle}
+                  variant="inclusions"
+                />
+              </div>
+            </div>
           </div>
 
           <div className="rounded-[18px] border border-violet-950/70 bg-[linear-gradient(165deg,#120c1e_0%,#0e0a18_45%,#090610_100%)] p-6" lang="en">
