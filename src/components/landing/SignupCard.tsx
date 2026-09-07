@@ -9,11 +9,22 @@ import {
   clearWizardSessionState,
   saveCampaignDraft,
 } from "@/lib/campaign/draft";
-import FuturisticScene3DLazy from "@/components/landing/FuturisticScene3DLazy";
-import LandingSignupCtaLabel, {
-  landingSignupButtonClassName,
-} from "@/components/landing/LandingSignupCtaLabel";
 import { trackCompleteRegistration, trackLead } from "@/lib/meta/pixel";
+
+const TRUST_ITEMS = [
+  "Instant access",
+  "No credit card",
+  "Secure checkout",
+  "Results begin within 48h",
+] as const;
+
+const AI_PLATFORMS = ["ChatGPT", "Gemini", "Claude", "Perplexity"] as const;
+
+const ONBOARDING_STEPS = [
+  { step: "01", label: "Create account" },
+  { step: "02", label: "Add your business" },
+  { step: "03", label: "Track AI visibility" },
+] as const;
 
 interface SignupCardProps {
   open: boolean;
@@ -150,12 +161,8 @@ export default function SignupCard({
         if (e.target === e.currentTarget && !loading) onClose();
       }}
     >
-      <div className="lf-animate-in relative w-full max-w-md overflow-hidden rounded-[20px] border border-white/10 bg-gradient-to-b from-[#121821] to-[#0a0f16] p-[1px] shadow-[0_24px_80px_rgba(0,0,0,0.55)]">
-        <div className="relative overflow-hidden rounded-[19px] bg-[#0b1118]/95 p-6 sm:p-8">
-          <div className="pointer-events-none absolute inset-0 opacity-40">
-            <FuturisticScene3DLazy compact />
-          </div>
-
+      <div className="lf-animate-in relative w-full max-w-lg overflow-hidden rounded-[20px] border border-violet-500/20 bg-gradient-to-b from-[#141024] to-[#0a0712] p-[1px] shadow-[0_24px_80px_rgba(88,28,135,0.35)]">
+        <div className="relative overflow-hidden rounded-[19px] bg-[#0b0d14]/98 p-6 sm:p-8">
           <button
             type="button"
             onClick={onClose}
@@ -167,52 +174,43 @@ export default function SignupCard({
           </button>
 
           <div className="relative z-10">
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-fuchsia-300">
-              Quick start
+            <p className="text-center text-[11px] font-bold uppercase tracking-[0.22em] text-violet-300">
+              ✦ AI Visibility Platform
             </p>
             <h2
               id={titleId}
-              className="lf-orbitron mt-2 text-2xl font-bold tracking-tight text-white sm:text-[1.7rem]"
+              className="lf-orbitron mt-3 text-center text-2xl font-bold tracking-tight text-white sm:text-[1.75rem]"
             >
-              Make Your Business AI-Visible
+              Create your account
             </h2>
-            <p className="mt-2 text-sm leading-relaxed text-[#94a3b8]">
-              Create your account and discover how your business appears across
-              leading AI search platforms.
+            <p className="mx-auto mt-2 max-w-sm text-center text-sm leading-relaxed text-[#94a3b8]">
+              Make your business more visible across the AI search ecosystem.
             </p>
 
-            <div className="mt-3 mb-4 grid grid-cols-1 gap-2 text-[12px] leading-snug text-[#9CA3AF] sm:grid-cols-2 sm:gap-x-3 sm:gap-y-2 sm:text-[13px]">
-              <span className="inline-flex items-center gap-1.5">
-                <span aria-hidden>⚡</span>
-                Instant access
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <span aria-hidden>🔒</span>
-                No card required to start
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <span aria-hidden>🛡️</span>
-                Stripe-style 3D Secure checkout
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <span aria-hidden>⏱️</span>
-                Results begin within 48 hours
-              </span>
+            <div className="mt-4 grid grid-cols-2 gap-x-3 gap-y-2 text-[12px] text-[#9ca3af] sm:text-[13px]">
+              {TRUST_ITEMS.map((item) => (
+                <span key={item} className="inline-flex items-center gap-1.5">
+                  <span className="text-emerald-400" aria-hidden>
+                    ✓
+                  </span>
+                  {item}
+                </span>
+              ))}
             </div>
 
-            {error && (
+            {error ? (
               <div
                 role="alert"
                 className="mt-5 rounded-xl border border-red-500/35 bg-red-500/10 p-3 text-sm text-red-200"
               >
                 {error}
               </div>
-            )}
+            ) : null}
 
             <form onSubmit={handleSubmit} className="mt-6 space-y-4">
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-[#94a3b8]">
-                  Your Business Name
+                  Business Name
                 </label>
                 <input
                   type="text"
@@ -222,13 +220,13 @@ export default function SignupCard({
                   minLength={2}
                   maxLength={120}
                   placeholder="Your Business Name"
-                  className="lf-input border-white/[0.12] bg-white/[0.04] transition focus:border-fuchsia-400/50 focus:bg-white/[0.05] focus:shadow-[0_0_0_3px_rgba(139,92,246,0.18),0_0_24px_rgba(236,72,153,0.16)]"
+                  className="lf-input border-white/[0.12] bg-white/[0.04] transition focus:border-violet-400/50 focus:bg-white/[0.05] focus:shadow-[0_0_0_3px_rgba(139,92,246,0.18)]"
                   autoComplete="organization"
                 />
               </div>
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-[#94a3b8]">
-                  Email address
+                  Email Address
                 </label>
                 <input
                   type="email"
@@ -236,7 +234,7 @@ export default function SignupCard({
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   placeholder="Your email"
-                  className="lf-input border-white/[0.12] bg-white/[0.04] transition focus:border-fuchsia-400/50 focus:bg-white/[0.05] focus:shadow-[0_0_0_3px_rgba(139,92,246,0.18),0_0_24px_rgba(236,72,153,0.16)]"
+                  className="lf-input border-white/[0.12] bg-white/[0.04] transition focus:border-violet-400/50 focus:bg-white/[0.05] focus:shadow-[0_0_0_3px_rgba(139,92,246,0.18)]"
                   autoComplete="email"
                 />
               </div>
@@ -244,21 +242,58 @@ export default function SignupCard({
               <button
                 type="submit"
                 disabled={loading}
-                className={`${landingSignupButtonClassName} overflow-hidden transition hover:-translate-y-0.5 disabled:opacity-60`}
+                className="lf-btn-primary inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-xl px-5 py-3.5 text-base font-bold text-white transition hover:-translate-y-0.5 disabled:opacity-60"
               >
                 {loading ? (
-                  <Loader2 className="relative z-10 h-4 w-4 shrink-0 animate-spin" />
+                  <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
-                  <LandingSignupCtaLabel />
+                  <>
+                    <span aria-hidden>🚀</span>
+                    Sign Up For Free
+                  </>
                 )}
               </button>
             </form>
 
-            <p className="mt-5 text-center text-sm text-[#94a3b8]">
+            <div className="mt-7 border-t border-white/10 pt-6 text-center">
+              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#64748b]">
+                AI Visibility Across
+              </p>
+              <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
+                {AI_PLATFORMS.map((platform) => (
+                  <span
+                    key={platform}
+                    className="rounded-full border border-violet-500/30 bg-violet-500/10 px-3 py-1 text-xs font-semibold text-violet-100"
+                  >
+                    {platform}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <ol className="mt-6 space-y-2 border-t border-white/10 pt-6">
+              {ONBOARDING_STEPS.map((item) => (
+                <li
+                  key={item.step}
+                  className="flex items-center gap-3 text-sm text-[#cbd5e1]"
+                >
+                  <span className="lf-orbitron text-xs font-bold text-violet-300">
+                    {item.step}
+                  </span>
+                  <span>{item.label}</span>
+                </li>
+              ))}
+            </ol>
+
+            <p className="mt-6 text-center text-sm text-[#94a3b8]">
+              🇦🇪 Built for UAE businesses
+            </p>
+
+            <p className="mt-3 text-center text-sm text-[#94a3b8]">
               Already have an account?{" "}
               <Link
                 href="/auth?mode=login&redirect=/dashboard/new"
-                className="font-semibold text-fuchsia-300 hover:underline"
+                className="font-semibold text-violet-300 hover:underline"
               >
                 Sign in
               </Link>
