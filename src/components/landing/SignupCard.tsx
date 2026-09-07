@@ -174,11 +174,11 @@ export default function SignupCard({
               id={titleId}
               className="lf-orbitron mt-2 text-2xl font-bold tracking-tight text-white sm:text-[1.7rem]"
             >
-              Create your account
+              Make Your Business AI-Visible
             </h2>
             <p className="mt-2 text-sm leading-relaxed text-[#94a3b8]">
-              No credit card required to explore. Set up your AI profile in
-              seconds.
+              Create your account and discover how your business appears across
+              leading AI search platforms.
             </p>
 
             <div className="mt-3 mb-4 grid grid-cols-1 gap-2 text-[12px] leading-snug text-[#9CA3AF] sm:grid-cols-2 sm:gap-x-3 sm:gap-y-2 sm:text-[13px]">
