@@ -656,8 +656,8 @@ export default function CampaignWizard({
               Choose your plan
             </h2>
             <p className="mt-2 text-sm text-[#94a3b8]">
-              Every plan indexes your business across ChatGPT, Gemini, and
-              Claude for local recommendation queries. Growth is pre-selected.
+              Get your business recommended by AI when customers search for
+              businesses like yours.
             </p>
             <div className="mt-5">
               <PricingPlanCards
