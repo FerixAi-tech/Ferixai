@@ -31,6 +31,7 @@ import {
   type StripeCheckoutSession,
 } from "@/lib/stripe/fetch-client-secret";
 import { captureCheckoutInitiated } from "@/lib/posthog/client";
+import CheckoutTrustBadges from "@/components/payment/CheckoutTrustBadges";
 import { getCheckoutPlanName } from "@/lib/constants/checkout-plans";
 import { CHECKOUT_CURRENCY } from "@/lib/constants/checkout";
 
@@ -237,8 +238,11 @@ function CheckoutPaymentForm({
     void (async () => {
       try {
         captureCheckoutInitiated(planName, { source: "stripe_express_pay" });
+
         if (onBeforePay) {
-          await onBeforePay();
+          void onBeforePay().catch((err) => {
+            console.error("Invoice save before express pay:", err);
+          });
         }
 
         const confirmResult = await checkout.confirm({
@@ -321,9 +325,7 @@ function CheckoutPaymentForm({
           {payLabel}
         </button>
 
-        <p className="text-center text-xs text-[#64748b]">
-          Card details are encrypted. Payments processed securely by Stripe.
-        </p>
+        <CheckoutTrustBadges />
       </form>
     </div>
   );
@@ -490,10 +492,6 @@ export default function CustomStripeCheckout({
           onBeforePay={handleBeforePay}
         />
       </CheckoutElementsProvider>
-      <p className="mt-3 text-center text-xs text-[#64748b]">
-        If payment options fail to load, wait 10 minutes before refreshing — too
-        many reloads can temporarily block Stripe security checks.
-      </p>
     </div>
   );
 }

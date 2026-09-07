@@ -39,8 +39,8 @@ export default function CheckoutInvoiceForm({
       <div>
         <h4 className="text-sm font-bold text-white">Invoice details</h4>
         <p className="mt-1 text-xs text-[#64748b]">
-          Required for your tax invoice. Pre-filled fields come from your
-          account and campaign setup.
+          Pre-filled fields come from your account and campaign setup. Street
+          address is optional.
         </p>
       </div>
 
@@ -83,7 +83,8 @@ export default function CheckoutInvoiceForm({
 
         <div>
           <label className="mb-1.5 block text-sm font-medium text-[#94a3b8]">
-            Street / Area Address <span className="text-red-400">*</span>
+            Street / Area Address{" "}
+            <span className="font-normal text-[#64748b]">(optional)</span>
           </label>
           <DarkSelect
             value={streetArea}

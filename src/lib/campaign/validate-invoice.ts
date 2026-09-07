@@ -47,10 +47,7 @@ export function validateInvoiceDetails(body: unknown): InvoiceDetailsInput {
   }
 
   const street = String(streetArea ?? "").trim();
-  if (!street) {
-    throw new Error("Please select a street or area address");
-  }
-  if (!isValidStreetArea(city, street)) {
+  if (street && !isValidStreetArea(city, street)) {
     throw new Error("Please select a valid street or area for your city");
   }
 

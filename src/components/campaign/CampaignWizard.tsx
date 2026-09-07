@@ -228,9 +228,6 @@ export default function CampaignWizard({
   );
 
   async function saveInvoiceForCheckout(sessionId: string): Promise<void> {
-    if (!streetArea.trim()) {
-      throw new Error("Please select a street or area address.");
-    }
     if (!accountEmail.trim()) {
       throw new Error("Account email is required for your invoice.");
     }
@@ -430,13 +427,6 @@ export default function CampaignWizard({
       setPendingAfterSignup("step3");
       setSignupOpen(true);
       setLoading(false);
-      return;
-    }
-
-    if (!streetArea.trim()) {
-      setError("Please select a street or area address for your invoice.");
-      setLoading(false);
-      launchLockRef.current = false;
       return;
     }
 
@@ -812,7 +802,7 @@ export default function CampaignWizard({
                 <button
                   type="button"
                   onClick={launchFreeCampaign}
-                  disabled={loading || !streetArea.trim()}
+                  disabled={loading}
                   className="lf-btn-primary inline-flex min-h-[48px] items-center gap-2 rounded-xl px-6 py-3 font-bold text-white disabled:opacity-60"
                 >
                   {loading && <Loader2 className="h-4 w-4 animate-spin" />}
