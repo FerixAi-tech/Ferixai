@@ -33,6 +33,7 @@ import { getPlanDetails } from "@/lib/constants/plan-details";
 import LandingSignupCtaLabel, {
   landingSignupButtonClassName,
 } from "@/components/landing/LandingSignupCtaLabel";
+import CheckoutTrustBadges from "@/components/payment/CheckoutTrustBadges";
 import { captureCheckoutInitiated } from "@/lib/posthog/client";
 
 export default function LandingPricingPlans({
@@ -201,6 +202,12 @@ export default function LandingPricingPlans({
           })}
         </div>
       )}
+
+      {audience === "business" ? (
+        <div className="mx-auto mt-6 max-w-2xl">
+          <CheckoutTrustBadges />
+        </div>
+      ) : null}
 
       <PaymentMethodLogos className="mt-10" />
 
