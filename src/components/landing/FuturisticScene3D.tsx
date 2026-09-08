@@ -7,24 +7,22 @@ import {
   getSceneCameraDistance,
   getSceneMobileScale,
 } from "@/lib/pointer-parallax";
+import { hideWebGLCanvas, isWebGLAvailable } from "@/lib/webgl/safe-init";
 
-export default function FuturisticScene3D({
-  compact = false,
-}: {
-  compact?: boolean;
-}) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+function initFuturisticScene(
+  canvas: HTMLCanvasElement,
+  compact: boolean,
+): (() => void) | null {
+  if (!isWebGLAvailable()) {
+    hideWebGLCanvas(canvas);
+    return null;
+  }
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  try {
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
     const isMobile = window.innerWidth < 768;
-    if (!compact && isMobile) {
-      canvas.style.display = "none";
-      return;
-    }
 
     const renderer = new THREE.WebGLRenderer({
       canvas,
@@ -124,12 +122,8 @@ export default function FuturisticScene3D({
 
     const applyLayout = () => {
       const parent = canvas.parentElement;
-      const w = compact
-        ? parent?.clientWidth || 360
-        : window.innerWidth;
-      const h = compact
-        ? parent?.clientHeight || 220
-        : window.innerHeight;
+      const w = compact ? parent?.clientWidth || 360 : window.innerWidth;
+      const h = compact ? parent?.clientHeight || 220 : window.innerHeight;
       camera.aspect = w / Math.max(h, 1);
       camera.position.z = getSceneCameraDistance(w);
       camera.updateProjectionMatrix();
@@ -168,6 +162,31 @@ export default function FuturisticScene3D({
       window.removeEventListener("resize", applyLayout);
       renderer.dispose();
     };
+  } catch {
+    hideWebGLCanvas(canvas);
+    return null;
+  }
+}
+
+export default function FuturisticScene3D({
+  compact = false,
+}: {
+  compact?: boolean;
+}) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const isMobile = window.innerWidth < 768;
+    if (!compact && isMobile) {
+      hideWebGLCanvas(canvas);
+      return;
+    }
+
+    const cleanup = initFuturisticScene(canvas, compact);
+    return cleanup ?? undefined;
   }, [compact]);
 
   return (

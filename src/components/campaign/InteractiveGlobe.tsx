@@ -6,6 +6,7 @@ import {
   GLOBE_MARKERS,
   MARKER_GLOW_COLOR,
 } from "@/lib/constants/globe-markers";
+import { hideWebGLCanvas, isWebGLAvailable } from "@/lib/webgl/safe-init";
 
 function pulsingMarkers(timeSec: number): Marker[] {
   return GLOBE_MARKERS.map((marker, index) => ({
@@ -49,9 +50,15 @@ export default function InteractiveGlobe() {
     const wrapper = wrapperRef.current;
     if (!canvas || !wrapper) return;
 
+    if (!isWebGLAvailable()) {
+      hideWebGLCanvas(canvas);
+      return;
+    }
+
     let globe: ReturnType<typeof createGlobe> | null = null;
     let frameId = 0;
     let destroyed = false;
+    let webglFailed = false;
 
     const syncDimensions = () => {
       const layoutWidth = Math.max(240, Math.round(wrapper.clientWidth));
@@ -65,54 +72,72 @@ export default function InteractiveGlobe() {
     };
 
     const createOrResizeGlobe = () => {
-      const pixelSize = syncDimensions();
-      const { dpr, mapSamples } = sizeRef.current;
+      if (webglFailed) return;
 
-      if (!globe) {
-        globe = createGlobe(canvas, {
-          devicePixelRatio: dpr,
+      try {
+        const pixelSize = syncDimensions();
+        const { dpr, mapSamples } = sizeRef.current;
+
+        if (!globe) {
+          globe = createGlobe(canvas, {
+            devicePixelRatio: dpr,
+            width: pixelSize,
+            height: pixelSize,
+            phi: phiRef.current,
+            theta: thetaRef.current,
+            dark: 1,
+            diffuse: 1.15,
+            mapSamples,
+            mapBrightness: 6.5,
+            mapBaseBrightness: 0.08,
+            baseColor: [0.08, 0.12, 0.16],
+            markerColor: MARKER_GLOW_COLOR,
+            glowColor: [0.12, 0.42, 0.32],
+            markerElevation: 0.06,
+            markers: pulsingMarkers(0),
+          });
+          return;
+        }
+
+        globe.update({
           width: pixelSize,
           height: pixelSize,
-          phi: phiRef.current,
-          theta: thetaRef.current,
-          dark: 1,
-          diffuse: 1.15,
           mapSamples,
-          mapBrightness: 6.5,
-          mapBaseBrightness: 0.08,
-          baseColor: [0.08, 0.12, 0.16],
-          markerColor: MARKER_GLOW_COLOR,
-          glowColor: [0.12, 0.42, 0.32],
-          markerElevation: 0.06,
-          markers: pulsingMarkers(0),
         });
-        return;
+      } catch {
+        webglFailed = true;
+        hideWebGLCanvas(canvas);
+        globe?.destroy();
+        globe = null;
       }
-
-      globe.update({
-        width: pixelSize,
-        height: pixelSize,
-        mapSamples,
-      });
     };
 
     createOrResizeGlobe();
+    if (webglFailed) return;
 
     const render = (time: number) => {
-      if (destroyed || !globe) return;
+      if (destroyed || !globe || webglFailed) return;
 
-      if (pointerInteracting.current === null) {
-        phiRef.current += 0.0035;
+      try {
+        if (pointerInteracting.current === null) {
+          phiRef.current += 0.0035;
+        }
+
+        const pixelSize = sizeRef.current.width * sizeRef.current.dpr;
+        globe.update({
+          width: pixelSize,
+          height: pixelSize,
+          phi: phiRef.current + pointerMovement.current,
+          theta: thetaRef.current,
+          markers: pulsingMarkers(time / 1000),
+        });
+      } catch {
+        webglFailed = true;
+        hideWebGLCanvas(canvas);
+        globe?.destroy();
+        globe = null;
+        return;
       }
-
-      const pixelSize = sizeRef.current.width * sizeRef.current.dpr;
-      globe.update({
-        width: pixelSize,
-        height: pixelSize,
-        phi: phiRef.current + pointerMovement.current,
-        theta: thetaRef.current,
-        markers: pulsingMarkers(time / 1000),
-      });
 
       frameId = requestAnimationFrame(render);
     };
