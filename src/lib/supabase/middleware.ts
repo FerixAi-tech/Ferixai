@@ -1,6 +1,9 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import { hasMarketingAttribution } from "@/lib/analytics/marketing-attribution";
+import {
+  copyMarketingParamsToUrl,
+  hasMarketingAttribution,
+} from "@/lib/analytics/marketing-attribution";
 import { getSafeInternalPath } from "@/lib/auth/safe-redirect";
 
 export async function updateSession(request: NextRequest) {
@@ -40,6 +43,7 @@ export async function updateSession(request: NextRequest) {
     const safeRedirect = getSafeInternalPath(rawRedirect, "");
     url.pathname = safeRedirect || "/dashboard";
     url.search = "";
+    copyMarketingParamsToUrl(request.nextUrl.searchParams, url);
     return NextResponse.redirect(url);
   }
 

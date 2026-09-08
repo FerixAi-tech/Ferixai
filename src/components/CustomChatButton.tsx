@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { hasMarketingAttribution } from "@/lib/analytics/marketing-attribution";
+import { hasMarketingAttributionClient } from "@/lib/analytics/marketing-attribution";
 
 type CrispCommand =
   | string
@@ -33,9 +33,7 @@ export default function CustomChatButton() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    setFromPaidTraffic(
-      hasMarketingAttribution(new URLSearchParams(window.location.search)),
-    );
+    setFromPaidTraffic(hasMarketingAttributionClient());
     setIsMobile(window.matchMedia("(max-width: 768px)").matches);
   }, []);
 

@@ -9,6 +9,7 @@ import {
   clearWizardSessionState,
   saveCampaignDraft,
 } from "@/lib/campaign/draft";
+import { appendMarketingParams } from "@/lib/analytics/marketing-attribution";
 import { trackCompleteRegistration, trackLead } from "@/lib/meta/pixel";
 
 const TRUST_ITEMS = [
@@ -47,6 +48,15 @@ export default function SignupCard({
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [signInHref, setSignInHref] = useState(
+    "/auth?mode=login&redirect=/dashboard/new",
+  );
+
+  useEffect(() => {
+    setSignInHref(
+      appendMarketingParams("/auth?mode=login&redirect=/dashboard/new"),
+    );
+  }, []);
 
   useEffect(() => {
     if (open) {
@@ -80,7 +90,9 @@ export default function SignupCard({
 
     const businessParam = encodeURIComponent(trimmedName);
     const separator = path.includes("?") ? "&" : "?";
-    window.location.assign(`${path}${separator}business=${businessParam}`);
+    window.location.assign(
+      appendMarketingParams(`${path}${separator}business=${businessParam}`),
+    );
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -293,7 +305,7 @@ export default function SignupCard({
             <p className="mt-3 text-center text-sm text-[#94a3b8]">
               Already have an account?{" "}
               <Link
-                href="/auth?mode=login&redirect=/dashboard/new"
+                href={signInHref}
                 className="font-semibold text-violet-300 hover:underline"
               >
                 Sign in
