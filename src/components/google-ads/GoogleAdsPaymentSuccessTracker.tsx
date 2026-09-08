@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { trackGoogleAdsPurchase } from "@/lib/google-ads/conversion";
 
 /**
@@ -20,11 +20,15 @@ export default function GoogleAdsPaymentSuccessTracker({
   /** Stripe PaymentIntent id preferred; session id or order id as fallback. */
   transactionId?: string;
 }) {
+  const firedRef = useRef(false);
+
   useEffect(() => {
     if (!active || typeof window === "undefined") return;
     if (!transactionId?.trim()) return;
     if (!(value > 0)) return;
+    if (firedRef.current) return;
 
+    firedRef.current = true;
     trackGoogleAdsPurchase({
       value,
       currency,

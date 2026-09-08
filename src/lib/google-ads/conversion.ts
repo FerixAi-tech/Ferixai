@@ -2,10 +2,9 @@
 export const GOOGLE_ADS_ID =
   process.env.NEXT_PUBLIC_GOOGLE_ADS_ID?.trim() || "AW-18437354526";
 
-/** Set when Purchase conversion action is ready in Google Ads. */
+/** Purchase conversion label from Google Ads → Goals → Conversions. */
 export const GOOGLE_ADS_PURCHASE_LABEL =
-  process.env.NEXT_PUBLIC_GOOGLE_ADS_PURCHASE_LABEL?.trim() ||
-  "CONVERSION_LABEL";
+  process.env.NEXT_PUBLIC_GOOGLE_ADS_PURCHASE_LABEL?.trim() || "";
 
 export function isGoogleAdsTagEnabled(): boolean {
   return GOOGLE_ADS_ID.startsWith("AW-") && GOOGLE_ADS_ID.length > 5;
@@ -15,14 +14,8 @@ export function getGoogleAdsPurchaseSendTo(): string {
   return `${GOOGLE_ADS_ID}/${GOOGLE_ADS_PURCHASE_LABEL}`;
 }
 
-/** Purchase conversion requires NEXT_PUBLIC_GOOGLE_ADS_PURCHASE_LABEL in env. */
 export function isGoogleAdsPurchaseConfigured(): boolean {
-  const label = GOOGLE_ADS_PURCHASE_LABEL;
-  return (
-    isGoogleAdsTagEnabled() &&
-    label.length > 0 &&
-    label !== "CONVERSION_LABEL"
-  );
+  return isGoogleAdsTagEnabled() && GOOGLE_ADS_PURCHASE_LABEL.length > 0;
 }
 
 declare global {
@@ -33,16 +26,26 @@ declare global {
   }
 }
 
-function rememberPurchase(transactionId: string): boolean {
+function hasRecordedPurchase(transactionId: string): boolean {
   if (typeof window === "undefined") return false;
 
-  const key = `ferixai_gads_purchase:${transactionId}`;
   try {
-    if (window.localStorage.getItem(key) === "1") return false;
-    window.localStorage.setItem(key, "1");
-    return true;
+    return (
+      window.localStorage.getItem(`ferixai_gads_purchase:${transactionId}`) ===
+      "1"
+    );
   } catch {
-    return true;
+    return false;
+  }
+}
+
+function recordPurchase(transactionId: string): void {
+  if (typeof window === "undefined") return;
+
+  try {
+    window.localStorage.setItem(`ferixai_gads_purchase:${transactionId}`, "1");
+  } catch {
+    // ignore quota / privacy mode
   }
 }
 
@@ -59,7 +62,7 @@ export function trackGoogleAdsPurchase(options: {
   if (!(options.value > 0)) return;
   if (!options.transactionId.trim()) return;
   if (!isGoogleAdsPurchaseConfigured()) return;
-  if (!rememberPurchase(options.transactionId)) return;
+  if (hasRecordedPurchase(options.transactionId)) return;
 
   const payload = {
     send_to: getGoogleAdsPurchaseSendTo(),
@@ -71,6 +74,7 @@ export function trackGoogleAdsPurchase(options: {
   const fire = () => {
     if (typeof window.gtag !== "function") return false;
     window.gtag("event", "conversion", payload);
+    recordPurchase(options.transactionId);
     return true;
   };
 
