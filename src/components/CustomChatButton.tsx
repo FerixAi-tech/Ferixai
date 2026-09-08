@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { hasMarketingAttribution } from "@/lib/analytics/marketing-attribution";
 
 type CrispCommand =
   | string
@@ -25,7 +26,18 @@ function openCrispChat() {
 export default function CustomChatButton() {
   const [tooltipVisible, setTooltipVisible] = useState(false);
   const [tooltipSuppressed, setTooltipSuppressed] = useState(false);
+  const [fromPaidTraffic, setFromPaidTraffic] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const suppressedRef = useRef(false);
+  const showTooltipCycle = !fromPaidTraffic && !isMobile;
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    setFromPaidTraffic(
+      hasMarketingAttribution(new URLSearchParams(window.location.search)),
+    );
+    setIsMobile(window.matchMedia("(max-width: 768px)").matches);
+  }, []);
 
   const suppressTooltip = useCallback(() => {
     suppressedRef.current = true;
@@ -68,7 +80,7 @@ export default function CustomChatButton() {
   }, [suppressTooltip]);
 
   useEffect(() => {
-    if (tooltipSuppressed) return;
+    if (!showTooltipCycle || tooltipSuppressed) return;
 
     let cancelled = false;
     const timeouts = new Set<ReturnType<typeof setTimeout>>();
@@ -102,11 +114,11 @@ export default function CustomChatButton() {
       timeouts.forEach(clearTimeout);
       timeouts.clear();
     };
-  }, [tooltipSuppressed]);
+  }, [showTooltipCycle, tooltipSuppressed]);
 
   return (
     <div className="fixed bottom-6 right-4 z-50 flex flex-col items-end gap-3">
-      {!tooltipSuppressed ? (
+      {!tooltipSuppressed && showTooltipCycle ? (
         <button
           type="button"
           onClick={handleOpenChat}

@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { hasMarketingAttribution } from "@/lib/analytics/marketing-attribution";
 import { getSafeInternalPath } from "@/lib/auth/safe-redirect";
 
 export async function updateSession(request: NextRequest) {
@@ -43,9 +44,11 @@ export async function updateSession(request: NextRequest) {
   }
 
   if (user && pathname === "/") {
-    const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
-    return NextResponse.redirect(url);
+    if (!hasMarketingAttribution(request.nextUrl.searchParams)) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/dashboard";
+      return NextResponse.redirect(url);
+    }
   }
 
   return supabaseResponse;
