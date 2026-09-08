@@ -14,6 +14,7 @@ import CampaignLaunchStatus from "@/components/dashboard/CampaignLaunchStatus";
 import PaymentSuccessModal from "@/components/dashboard/PaymentSuccessModal";
 import PaymentProcessingBanner from "@/components/dashboard/PaymentProcessingBanner";
 import MetaPaymentSuccessTracker from "@/components/meta/MetaPaymentSuccessTracker";
+import GoogleAdsPaymentSuccessTracker from "@/components/google-ads/GoogleAdsPaymentSuccessTracker";
 import AppNav from "@/components/layout/AppNav";
 import SupportContact from "@/components/layout/SupportContact";
 import DashboardAiPreviewCard from "@/components/dashboard/DashboardAiPreviewCard";
@@ -54,12 +55,17 @@ export default async function DashboardPage({
     id: string;
     amount_gbp: number;
     campaign_slug: string | null;
+    currency: string;
+    stripe_payment_intent_id: string | null;
+    stripe_session_id: string | null;
   } | null = null;
 
   if (paymentOkRequested && createdSlug && user) {
     const { data: paidOrder } = await supabase
       .from("payment_orders")
-      .select("id, amount_gbp, campaign_slug, status, currency")
+      .select(
+        "id, amount_gbp, campaign_slug, status, currency, stripe_payment_intent_id, stripe_session_id",
+      )
       .eq("user_id", user.id)
       .eq("status", "paid")
       .eq("campaign_slug", createdSlug)
@@ -74,6 +80,9 @@ export default async function DashboardPage({
         id: paidOrder.id,
         amount_gbp: amountGbp,
         campaign_slug: paidOrder.campaign_slug,
+        currency: paidOrder.currency || "AED",
+        stripe_payment_intent_id: paidOrder.stripe_payment_intent_id,
+        stripe_session_id: paidOrder.stripe_session_id,
       };
 
       // Backup server-side Purchase (Meta dedupes by event_id = order id).
@@ -99,6 +108,11 @@ export default async function DashboardPage({
   const paymentConfirmed = Boolean(
     paymentOkRequested && verifiedPaidOrder && verifiedPaidOrder.amount_gbp > 0,
   );
+
+  const googleAdsTransactionId =
+    verifiedPaidOrder?.stripe_payment_intent_id?.trim() ||
+    verifiedPaidOrder?.stripe_session_id?.trim() ||
+    verifiedPaidOrder?.id;
 
   const { data: publishedRow } =
     createdCampaign?.content_slug && user
@@ -137,6 +151,14 @@ export default async function DashboardPage({
             : undefined
         }
         payableGbp={verifiedPaidOrder?.amount_gbp ?? 0}
+      />
+      <GoogleAdsPaymentSuccessTracker
+        active={paymentConfirmed}
+        value={verifiedPaidOrder?.amount_gbp ?? 0}
+        currency={verifiedPaidOrder?.currency ?? "AED"}
+        transactionId={
+          paymentConfirmed ? googleAdsTransactionId : undefined
+        }
       />
       {paymentConfirmed ? (
         <PaymentSuccessModal

@@ -15,12 +15,13 @@ export function getGoogleAdsPurchaseSendTo(): string {
   return `${GOOGLE_ADS_ID}/${GOOGLE_ADS_PURCHASE_LABEL}`;
 }
 
-/** Purchase conversion requires a real conversion label (future use). */
+/** Purchase conversion requires NEXT_PUBLIC_GOOGLE_ADS_PURCHASE_LABEL in env. */
 export function isGoogleAdsPurchaseConfigured(): boolean {
+  const label = GOOGLE_ADS_PURCHASE_LABEL;
   return (
     isGoogleAdsTagEnabled() &&
-    GOOGLE_ADS_PURCHASE_LABEL !== "CONVERSION_LABEL" &&
-    GOOGLE_ADS_PURCHASE_LABEL.length > 0
+    label.length > 0 &&
+    label !== "CONVERSION_LABEL"
   );
 }
 
@@ -46,8 +47,8 @@ function rememberPurchase(transactionId: string): boolean {
 }
 
 /**
- * Browser-side Google Ads Purchase conversion (not wired yet).
- * Call only after backend-verified Stripe payment + real conversion label.
+ * Browser-side Google Ads Purchase conversion.
+ * Requires verified Stripe payment data from the server (see dashboard page).
  */
 export function trackGoogleAdsPurchase(options: {
   value: number;
