@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import Script from "next/script";
 import { APP_URL } from "@/lib/constants/urls";
 import MetaPixel from "@/components/meta/MetaPixel";
+import GoogleAdsTag from "@/components/google-ads/GoogleAdsTag";
 import CrispChat from "@/components/layout/CrispChat";
 import CustomChatButton from "@/components/CustomChatButton";
 import { Providers } from "@/app/providers";
@@ -95,6 +96,7 @@ export default function RootLayout({
           })(window, document, "clarity", "script", "xs1ar2kzjh");`}
         </Script>
         <MetaPixel />
+        <GoogleAdsTag />
         <CrispChat />
         <CustomChatButton />
         <Providers>{children}</Providers>
