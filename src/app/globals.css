@@ -56,19 +56,6 @@ input[type="range"]::-moz-range-thumb {
   }
 }
 
-/* Crisp başlatıcı butonunu daima gizle — sohbet penceresi etkilenmez */
-#crisp-chatbox-button,
-.crisp-client div[data-selector="chatbox-button"],
-.crisp-client div[data-selector="chatbox-button-container"],
-.crisp-client .cc-159j4,
-.crisp-client .cc-unoo,
-div[class*="crisp-client"] button[data-selector="chatbox-button"] {
-  display: none !important;
-  pointer-events: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-}
-
 /* Cobe globe — country labels anchored to marker dots */
 .globe-marker-label {
   position: absolute;
