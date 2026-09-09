@@ -1,9 +1,8 @@
-import Script from "next/script";
 import { GOOGLE_ADS_ID, isGoogleAdsTagEnabled } from "@/lib/google-ads/conversion";
 
 /**
- * Google Ads global site tag (gtag.js). Loaded once in root layout on all pages.
- * Purchase conversions are handled separately when Stripe payment is verified.
+ * Google Ads global site tag in the document head so Ads diagnostics can
+ * detect AW-… on first HTML parse (not after client hydration).
  */
 export default function GoogleAdsTag() {
   if (!isGoogleAdsTagEnabled()) {
@@ -12,22 +11,27 @@ export default function GoogleAdsTag() {
 
   return (
     <>
-      <Script
+      <script
+        async
         src={`https://www.googletagmanager.com/gtag/js?id=${GOOGLE_ADS_ID}`}
-        strategy="lazyOnload"
       />
-      <Script id="google-ads-gtag" strategy="lazyOnload">
-        {`
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `
 window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 window.gtag = window.gtag || gtag;
 if (!window.__ferixGoogleAdsConfigured) {
   gtag('js', new Date());
-  gtag('config', '${GOOGLE_ADS_ID}');
+  gtag('config', '${GOOGLE_ADS_ID}', {
+    conversion_linker: true,
+    allow_enhanced_conversions: true
+  });
   window.__ferixGoogleAdsConfigured = true;
 }
-        `}
-      </Script>
+          `,
+        }}
+      />
     </>
   );
 }

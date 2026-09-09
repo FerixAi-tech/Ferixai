@@ -6,7 +6,12 @@ import { useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { getSafeInternalPath } from "@/lib/auth/safe-redirect";
+import { appendMarketingParams } from "@/lib/analytics/marketing-attribution";
 import BrandLogo from "@/components/layout/BrandLogo";
+import {
+  trackGoogleAdsSignup,
+  withGoogleAdsSignupQuery,
+} from "@/lib/google-ads/conversion";
 import { trackCompleteRegistration } from "@/lib/meta/pixel";
 
 export default function AuthForm() {
@@ -74,15 +79,24 @@ export default function AuthForm() {
         );
       }
 
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: normalizedEmail,
-        password,
-      });
+      const { data: signInData, error: signInError } =
+        await supabase.auth.signInWithPassword({
+          email: normalizedEmail,
+          password,
+        });
 
       if (signInError) throw signInError;
 
       trackCompleteRegistration();
-      window.location.assign(redirect);
+      if (signInData.session?.user.id) {
+        await trackGoogleAdsSignup({
+          userId: signInData.session.user.id,
+          email: normalizedEmail,
+        });
+      }
+      window.location.assign(
+        appendMarketingParams(withGoogleAdsSignupQuery(redirect)),
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Authentication failed");
       setLoading(false);

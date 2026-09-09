@@ -83,6 +83,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en-GB" className="dark" translate="no">
+      <head>
+        <GoogleAdsTag />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} min-h-screen font-sans`}
       >
@@ -94,7 +97,6 @@ export default function RootLayout({
           })(window, document, "clarity", "script", "xs1ar2kzjh");`}
         </Script>
         <MetaPixel />
-        <GoogleAdsTag />
         <Providers>{children}</Providers>
       </body>
     </html>

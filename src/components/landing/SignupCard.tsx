@@ -10,6 +10,10 @@ import {
   saveCampaignDraft,
 } from "@/lib/campaign/draft";
 import { appendMarketingParams } from "@/lib/analytics/marketing-attribution";
+import {
+  trackGoogleAdsSignup,
+  withGoogleAdsSignupQuery,
+} from "@/lib/google-ads/conversion";
 import { trackCompleteRegistration, trackLead } from "@/lib/meta/pixel";
 
 const TRUST_ITEMS = [
@@ -91,7 +95,11 @@ export default function SignupCard({
     const businessParam = encodeURIComponent(trimmedName);
     const separator = path.includes("?") ? "&" : "?";
     window.location.assign(
-      appendMarketingParams(`${path}${separator}business=${businessParam}`),
+      appendMarketingParams(
+        withGoogleAdsSignupQuery(
+          `${path}${separator}business=${businessParam}`,
+        ),
+      ),
     );
   }
 
@@ -156,6 +164,10 @@ export default function SignupCard({
       });
 
       trackCompleteRegistration();
+      await trackGoogleAdsSignup({
+        userId: signInData.session.user.id,
+        email: signInEmail,
+      });
       finishSuccess(trimmedName, trimmedEmail, nextPath);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not create account");

@@ -159,6 +159,7 @@ export default async function DashboardPage({
         transactionId={
           paymentConfirmed ? googleAdsTransactionId : undefined
         }
+        email={paymentConfirmed ? user?.email ?? undefined : undefined}
       />
       {paymentConfirmed ? (
         <PaymentSuccessModal

@@ -12,6 +12,7 @@ export default function GoogleAdsPaymentSuccessTracker({
   value,
   currency = "AED",
   transactionId,
+  email,
 }: {
   active: boolean;
   /** Charged amount from payment_orders (Stripe-backed). */
@@ -19,6 +20,7 @@ export default function GoogleAdsPaymentSuccessTracker({
   currency?: string;
   /** Stripe PaymentIntent id preferred; session id or order id as fallback. */
   transactionId?: string;
+  email?: string;
 }) {
   const firedRef = useRef(false);
 
@@ -33,8 +35,9 @@ export default function GoogleAdsPaymentSuccessTracker({
       value,
       currency,
       transactionId,
+      email,
     });
-  }, [active, value, currency, transactionId]);
+  }, [active, value, currency, transactionId, email]);
 
   return null;
 }
