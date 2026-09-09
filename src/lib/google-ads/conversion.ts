@@ -15,7 +15,8 @@ export const GOOGLE_ADS_PURCHASE_LABEL =
  * Required for Leads campaigns (Maximize Conversions). Never invent this value.
  */
 export const GOOGLE_ADS_SIGNUP_LABEL =
-  process.env.NEXT_PUBLIC_GOOGLE_ADS_SIGNUP_LABEL?.trim() || "";
+  process.env.NEXT_PUBLIC_GOOGLE_ADS_SIGNUP_LABEL?.trim() ||
+  "HedICJua7_EcEJ7oztdE";
 
 /** Query flag so Ads can also use a page-load conversion after registration. */
 export const GOOGLE_ADS_SIGNUP_QUERY_KEY = "registered";
